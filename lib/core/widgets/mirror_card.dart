@@ -56,17 +56,17 @@ class MirrorCard extends StatelessWidget {
         boxShadow: [
           // Outer glow — green brand colour
           BoxShadow(
-            color: const Color(0xE0FFF3F3).withValues(alpha: 0.20),
+            color: const Color(0xFF818080).withValues(alpha: 0.15),
             blurRadius: 6,
             spreadRadius: 0,
-            offset: const Offset(2, 0),
+            offset: const Offset(5, 0),
           ),
           // Mid shadow
           BoxShadow(
-            color: const Color(0xFF818080).withValues(alpha: 0.10),
-            blurRadius: 10,
+            color: const Color(0xFF818080).withValues(alpha: 0.15),
+            blurRadius: 6,
             spreadRadius: 0,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 5),
           ),
           // Top white lift — simulates light source above
           BoxShadow(

@@ -40,7 +40,6 @@ class _Base extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     switch (variant) {
-
       // Crisp emerald → teal for splash / onboarding
       case AppBackgroundVariant.brand:
         return Container(
@@ -172,17 +171,18 @@ class _TexturePainter extends CustomPainter {
   void _paintDarkGlow(Canvas canvas, Size size) {
     // One large, very soft green radial glow — like a terminal backlight
     final glowPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          const Color(0xFF00D084).withValues(alpha: 0.10),
-          const Color(0xFF00D084).withValues(alpha: 0.0),
-        ],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(size.width * 0.5, size.height * 0.0),
-          radius: size.width * 0.9,
-        ),
-      );
+      ..shader =
+          RadialGradient(
+            colors: [
+              const Color(0xFF00D084).withValues(alpha: 0.10),
+              const Color(0xFF00D084).withValues(alpha: 0.0),
+            ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width * 0.5, size.height * 0.0),
+              radius: size.width * 0.9,
+            ),
+          );
 
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), glowPaint);
 

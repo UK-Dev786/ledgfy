@@ -17,7 +17,7 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     // Show splash for 3 seconds then navigate to login
-    Future.delayed(const Duration(minutes: 3), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         context.go('/login');
       }
