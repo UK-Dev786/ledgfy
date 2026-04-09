@@ -1,0 +1,10 @@
+{
+  "appTitle": "Ledgify",
+  "appDescription": "Complete Business Management Solution",
+  "@appTitle": {
+    "description": "Application title"
+  },
+  "@appDescription": {
+    "description": "Application description"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "appTitle": "لیجرفائی",
+  "appDescription": "مکمل کاروباری انتظام کا حل",
+  "@appTitle": {
+    "description": "ایپلیکیشن کا عنوان"
+  },
+  "@appDescription": {
+    "description": "ایپلیکیشن کی تفصیل"
+  }
+}
