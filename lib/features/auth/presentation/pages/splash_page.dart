@@ -17,7 +17,7 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     // Show splash for 3 seconds then navigate to login
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(minutes: 3), () {
       if (mounted) {
         context.go('/login');
       }
@@ -29,7 +29,6 @@ class _SplashPageState extends State<SplashPage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AppBackground(
-        variant: AppBackgroundVariant.brand,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -38,7 +37,7 @@ class _SplashPageState extends State<SplashPage> {
               Text(
                 'Ledgify',
                 style: AppTextStyles.displayLarge.copyWith(
-                  color: AppColors.white,
+                  color: AppColors.black,
                   letterSpacing: -1,
                 ),
               ),
@@ -46,13 +45,13 @@ class _SplashPageState extends State<SplashPage> {
               Text(
                 'Ledger Simplify',
                 style: AppTextStyles.titleMedium.copyWith(
-                  color: AppColors.white,
+                  color: AppColors.black,
                   fontWeight: FontWeight.w400,
                 ),
               ),
               const SizedBox(height: 56),
               const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(AppColors.white),
+                valueColor: AlwaysStoppedAnimation(AppColors.primary),
                 strokeWidth: 2,
               ),
             ],
