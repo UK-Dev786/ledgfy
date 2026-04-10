@@ -2,10 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// Variants:
-///   light — default for all data/ledger/POS screens (clean, near-white, dot-grid)
-///   dark  — POS night mode / checkout (deep navy, faint green glow)
-///   brand — splash & onboarding (emerald gradient, crisp rule lines)
 enum AppBackgroundVariant { light, dark, brand }
 
 class AppBackgroundGradients {
@@ -41,8 +37,6 @@ class AppBackground extends StatelessWidget {
   }
 }
 
-// ─── Base gradient ────────────────────────────────────────────────────────────
-
 class _Base extends StatelessWidget {
   final AppBackgroundVariant variant;
   const _Base({required this.variant});
@@ -50,59 +44,43 @@ class _Base extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     switch (variant) {
-      // Crisp emerald → teal for splash / onboarding
       case AppBackgroundVariant.brand:
         return Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF00B871), // deep emerald
-                Color(0xFF00A368), // mid green
-                Color(0xFF008F60), // dark green
-              ],
+              colors: [Color(0xFF00B871), Color(0xFF00A368), Color(0xFF008F60)],
               stops: [0.0, 0.52, 1.0],
             ),
           ),
         );
 
-      // Deep navy for POS / dark mode
       case AppBackgroundVariant.dark:
         return Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF0B1829), // near-black navy
-                Color(0xFF0F2035), // dark navy
-                Color(0xFF0B1829), // near-black navy
-              ],
+              colors: [Color(0xFF0B1829), Color(0xFF0F2035), Color(0xFF0B1829)],
               stops: [0.0, 0.5, 1.0],
             ),
           ),
         );
 
-      // Clean off-white for ledger / data screens
       case AppBackgroundVariant.light:
         return Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFF8F9FB), // top: very slightly cool white
-                Color(0xFFF3F5F8), // bottom: soft blue-grey
-              ],
+              colors: [Color(0xFFF8F9FB), Color(0xFFF3F5F8)],
             ),
           ),
         );
     }
   }
 }
-
-// ─── Texture layer (CustomPaint) ──────────────────────────────────────────────
 
 class _Texture extends StatelessWidget {
   final AppBackgroundVariant variant;
@@ -130,7 +108,6 @@ class _TexturePainter extends CustomPainter {
     }
   }
 
-  // ── Light: very faint dot-grid (accounting-paper feel) ───────────────────
   void _paintDotGrid(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = const Color(0xFF00D084).withValues(alpha: 0.10)
@@ -148,7 +125,6 @@ class _TexturePainter extends CustomPainter {
       }
     }
 
-    // Faint horizontal rule lines — evokes a ledger / notebook
     final linePaint = Paint()
       ..color = const Color(0xFF8AA0B4).withValues(alpha: 0.07)
       ..strokeWidth = 0.6;
@@ -160,7 +136,6 @@ class _TexturePainter extends CustomPainter {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
     }
 
-    // Subtle top-right corner arc — brand accent
     final arcPaint = Paint()
       ..color = const Color(0xFF00D084).withValues(alpha: 0.07)
       ..strokeWidth = 1.0
@@ -177,9 +152,7 @@ class _TexturePainter extends CustomPainter {
     }
   }
 
-  // ── Dark: single soft green glow in the top area ──────────────────────────
   void _paintDarkGlow(Canvas canvas, Size size) {
-    // One large, very soft green radial glow — like a terminal backlight
     final glowPaint = Paint()
       ..shader =
           RadialGradient(
@@ -196,7 +169,6 @@ class _TexturePainter extends CustomPainter {
 
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), glowPaint);
 
-    // Fine horizontal scan lines — very dark, subtle
     final scanPaint = Paint()
       ..color = const Color(0xFF000000).withValues(alpha: 0.06)
       ..strokeWidth = 0.8;
@@ -209,7 +181,6 @@ class _TexturePainter extends CustomPainter {
     }
   }
 
-  // ── Brand: crisp diagonal rule lines on the gradient ─────────────────────
   void _paintBrandLines(Canvas canvas, Size size) {
     final linePaint = Paint()
       ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.06)
@@ -220,7 +191,7 @@ class _TexturePainter extends CustomPainter {
 
     for (int i = -2; i < count; i++) {
       final x = i * spacing;
-      // 45° lines top-left → bottom-right
+
       canvas.drawLine(
         Offset(x, 0),
         Offset(x + size.height, size.height),
@@ -228,7 +199,6 @@ class _TexturePainter extends CustomPainter {
       );
     }
 
-    // Bottom-left decorative arcs
     final arcPaint = Paint()
       ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.08)
       ..strokeWidth = 1.0

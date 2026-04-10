@@ -16,7 +16,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    // Show splash for 3 seconds then navigate to login
+
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         context.go('/login');
@@ -36,7 +36,6 @@ class _SplashPageState extends State<SplashPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // TODO: Add your app logo/icon here
               Text(
                 'Ledgify',
                 style: AppTextStyles.displayLarge.copyWith(

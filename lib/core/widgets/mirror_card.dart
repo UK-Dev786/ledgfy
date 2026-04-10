@@ -2,15 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-/// A frosted-glass "mirror" card sized exactly to its child.
-///
-/// Usage:
-///   MirrorCard(child: YourWidget())
-///   MirrorCard(tint: MirrorCardTint.dark, child: YourWidget())
-///
-/// [tint]   — auto (follows theme) | light | dark
-/// [blur]   — backdrop blur sigma (default 20)
-/// [border] — gradient glass-highlight border (default true)
 enum MirrorCardTint { auto, light, dark }
 
 class MirrorCard extends StatelessWidget {
@@ -35,33 +26,26 @@ class MirrorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(borderRadius);
 
-    // Card fill matches the app background exactly but with a teal tint layer
-    // on top so it reads as a distinct surface — same family, clearly elevated.
     final Color sheen = const Color(0xFF0A1820).withValues(alpha: 1.0);
     final Color glassBase = const Color(0xFF0A1820).withValues(alpha: 1.0);
     final Color dim = const Color(0xFF0A1820).withValues(alpha: 0.06);
 
-    // Border: bright teal top-left → near-transparent bottom-right
     final Color borderTopLeft = const Color(0xFF112A37).withValues(alpha: 0.90);
     final Color borderBottomRight = const Color(
       0xFF0D1F29,
     ).withValues(alpha: 0.80);
 
-    // The card is sized by its child. BackdropFilter sits inside a ClipRRect
-    // that is constrained to the card's own size via IntrinsicHeight/Width,
-    // so it never expands beyond the content.
     return Container(
       decoration: BoxDecoration(
         borderRadius: radius,
         boxShadow: [
-          // Deep shadow beneath card — lifts it off the background
           BoxShadow(
             color: const Color(0xFF000000).withValues(alpha: 0.50),
             blurRadius: 10,
             spreadRadius: 0,
             offset: const Offset(0, 6),
           ),
-          // Teal outer glow — makes the card pop on dark background
+
           BoxShadow(
             color: const Color(0xFF00132B).withValues(alpha: 0.12),
             blurRadius: 5,
@@ -70,14 +54,12 @@ class MirrorCard extends StatelessWidget {
           ),
         ],
       ),
-      // ClipRRect constrains the blur to the card shape & size
+
       child: ClipRRect(
         borderRadius: radius,
         child: Stack(
-          fit:
-              StackFit.passthrough, // ← sizes Stack to its non-positioned child
+          fit: StackFit.passthrough,
           children: [
-            // ── Blur layer (must be first so it blurs what's behind) ──────
             Positioned.fill(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
@@ -85,7 +67,6 @@ class MirrorCard extends StatelessWidget {
               ),
             ),
 
-            // ── Glass fill + content (drives the card's size) ─────────────
             Container(
               decoration: BoxDecoration(
                 borderRadius: radius,
@@ -100,7 +81,6 @@ class MirrorCard extends StatelessWidget {
               child: child,
             ),
 
-            // ── Gradient border on top ─────────────────────────────────────
             if (border)
               Positioned.fill(
                 child: CustomPaint(
@@ -117,8 +97,6 @@ class MirrorCard extends StatelessWidget {
     );
   }
 }
-
-// ─── Gradient border painter ──────────────────────────────────────────────────
 
 class _GradientBorderPainter extends CustomPainter {
   final BorderRadius radius;
