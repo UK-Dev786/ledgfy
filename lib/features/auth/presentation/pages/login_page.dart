@@ -77,11 +77,15 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: AppColors.textHint.withValues(alpha: 0.4)),
+                        borderSide: BorderSide(
+                          color: AppColors.textHint.withValues(alpha: 0.4),
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: AppColors.textHint.withValues(alpha: 0.4)),
+                        borderSide: BorderSide(
+                          color: AppColors.textHint.withValues(alpha: 0.4),
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
