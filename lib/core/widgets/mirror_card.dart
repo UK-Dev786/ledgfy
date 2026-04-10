@@ -61,9 +61,11 @@ class MirrorCard extends StatelessWidget {
           fit: StackFit.passthrough,
           children: [
             Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-                child: const SizedBox.expand(),
+              child: IgnorePointer(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                  child: const SizedBox.expand(),
+                ),
               ),
             ),
 
@@ -83,11 +85,13 @@ class MirrorCard extends StatelessWidget {
 
             if (border)
               Positioned.fill(
-                child: CustomPaint(
-                  painter: _GradientBorderPainter(
-                    radius: radius,
-                    topLeft: borderTopLeft,
-                    bottomRight: borderBottomRight,
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    painter: _GradientBorderPainter(
+                      radius: radius,
+                      topLeft: borderTopLeft,
+                      bottomRight: borderBottomRight,
+                    ),
                   ),
                 ),
               ),

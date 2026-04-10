@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:ledgify/core/widgets/app_background.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_text_styles.dart';
-import '../../../../core/widgets/app_background.dart';
+import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/widgets/themed_gradient_bg.dart';
 import '../../../../core/widgets/mirror_card.dart';
+import '../../../../core/widgets/my_button.dart';
+import '../../../../core/widgets/my_text.dart';
+import '../../../../core/widgets/my_text_field.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -23,148 +29,103 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0B1017),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppBackgroundGradients.splashGradient,
-        ),
-        child: Center(
+    return ThemedGradientBackground(
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-            child: MirrorCard(
-              tint: MirrorCardTint.dark,
-              borderRadius: 25,
-              blur: 30,
-              padding: const EdgeInsets.fromLTRB(20, 25, 25, 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.business,
-                    size: 64,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Welcome to Ledgify',
-                    style: AppTextStyles.headlineSmall.copyWith(
-                      color: AppColors.white,
+            padding: EdgeInsets.symmetric(
+              horizontal: context.w * 6,
+              vertical: context.h * 6,
+            ),
+            child: Center(
+              child: MirrorCard(
+                tint: MirrorCardTint.dark,
+                borderRadius: AppSizes.radiusLg,
+                blur: 30,
+                padding: EdgeInsets.fromLTRB(
+                  context.w * 5,
+                  context.h * 3,
+                  context.w * 5,
+                  context.h * 3,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.business,
+                      size: AppSizes.iconXl,
+                      color: AppColors.primary,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Sign in to your account',
-                    style: AppTextStyles.bodyMedium.copyWith(
+                    SizedBox(height: context.h * 4),
+                    MyText(
+                      'Welcome to Ledgify',
+                      font: AppFont.inter,
+                      size: AppSizes.header3,
+                      color: AppColors.white,
+                      weight: FontWeight.bold,
+                    ),
+                    SizedBox(height: context.h * 1),
+                    MyText(
+                      'Sign in to your account',
+                      font: AppFont.sourceSans,
+                      size: AppSizes.subtitle,
                       color: AppColors.textHint,
                     ),
-                  ),
-                  const SizedBox(height: 48),
-                  TextField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    style: const TextStyle(color: AppColors.white),
-                    decoration: InputDecoration(
-                      labelText: 'Phone Number',
-                      labelStyle: const TextStyle(color: AppColors.textHint),
+                    SizedBox(height: context.h * 6),
+                    MyTextField(
                       hintText: '+92 300 1234567',
-                      hintStyle: const TextStyle(color: AppColors.textHint),
-                      filled: true,
-                      fillColor: const Color(0xFF0A181C),
+                      labelText: 'Phone Number',
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
                       prefixIcon: const Icon(
                         Icons.phone,
                         color: AppColors.primary,
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: AppColors.textHint.withValues(alpha: 0.4),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: AppColors.textHint.withValues(alpha: 0.4),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      // TODO: Implement login logic
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      'Send OTP',
-                      style: AppTextStyles.labelLarge.copyWith(
-                        color: AppColors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Divider(color: AppColors.textHint, thickness: 1),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          'or',
-                          style: AppTextStyles.labelSmall.copyWith(
+                    SizedBox(height: context.h * 3),
+                    MyButton(text: 'Send OTP', onTap: () {}),
+                    SizedBox(height: context.h * 2),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                            color: AppColors.textHint.withValues(alpha: 0.4),
+                            thickness: 1,
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.w * 4,
+                          ),
+                          child: MyText(
+                            'or',
+                            font: AppFont.sourceSans,
+                            size: AppSizes.subtitle,
                             color: AppColors.textHint,
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: Divider(color: AppColors.textHint, thickness: 1),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  OutlinedButton(
-                    onPressed: () {
-                      // TODO: Implement biometric login
-                    },
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 56),
-                      side: const BorderSide(
-                        color: AppColors.primary,
-                        width: 2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.fingerprint, color: AppColors.primary),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Use Biometric',
-                          style: AppTextStyles.labelLarge.copyWith(
-                            color: AppColors.primary,
+                        Expanded(
+                          child: Divider(
+                            color: AppColors.textHint.withValues(alpha: 0.4),
+                            thickness: 1,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                    SizedBox(height: context.h * 2),
+                    MyButton(
+                      text: 'Use Biometric',
+                      onTap: () {},
+                      variant: MyButtonVariant.outlined,
+                      icon: const Icon(
+                        Icons.fingerprint,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

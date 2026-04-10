@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/widgets/app_background.dart';
+import '../../../../core/widgets/my_text.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
@@ -16,11 +18,8 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        context.go('/login');
-      }
+      if (mounted) context.go('/login');
     });
   }
 
@@ -36,22 +35,23 @@ class _SplashPageState extends State<SplashPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              MyText(
                 'Ledgify',
-                style: AppTextStyles.displayLarge.copyWith(
-                  color: AppColors.white,
-                  letterSpacing: -1,
-                ),
+                font: AppFont.inter,
+                size: AppSizes.header1,
+                color: AppColors.white,
+                weight: FontWeight.bold,
+                letterSpacing: -1,
               ),
-              const SizedBox(height: 8),
-              Text(
+              SizedBox(height: context.h * 1),
+              MyText(
                 'Ledger Simplify',
-                style: AppTextStyles.titleMedium.copyWith(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.w400,
-                ),
+                font: AppFont.sourceSans,
+                size: AppSizes.subtitle,
+                color: AppColors.textHint,
+                weight: FontWeight.w400,
               ),
-              const SizedBox(height: 56),
+              SizedBox(height: context.h * 7),
               const CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(AppColors.primary),
                 strokeWidth: 2,
