@@ -27,8 +27,11 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: AppBackground(
+      backgroundColor: const Color(0xFF0B1017),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppBackgroundGradients.splashGradient,
+        ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -37,7 +40,7 @@ class _SplashPageState extends State<SplashPage> {
               Text(
                 'Ledgify',
                 style: AppTextStyles.displayLarge.copyWith(
-                  color: AppColors.black,
+                  color: AppColors.white,
                   letterSpacing: -1,
                 ),
               ),
@@ -45,7 +48,7 @@ class _SplashPageState extends State<SplashPage> {
               Text(
                 'Ledger Simplify',
                 style: AppTextStyles.titleMedium.copyWith(
-                  color: AppColors.black,
+                  color: AppColors.white,
                   fontWeight: FontWeight.w400,
                 ),
               ),

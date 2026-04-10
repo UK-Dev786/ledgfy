@@ -35,17 +35,15 @@ class MirrorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(borderRadius);
 
-    // Mirror glass — bright, reflective, with a green shimmer.
-    // Looks like frosted glass over an emerald surface.
+    // Card fill matches the app background exactly but with a teal tint layer
+    // on top so it reads as a distinct surface — same family, clearly elevated.
+    final Color sheen = const Color(0xFF0D2028).withValues(alpha: 1.0);
+    final Color glassBase = const Color(0xFF0A1820).withValues(alpha: 1.0);
+    final Color dim = const Color(0xFF36CFE6).withValues(alpha: 0.06);
 
-    // Fill gradient: pure white sheen → translucent white → mint tint
-    final Color sheen = const Color(0xFFFFFFFF).withValues(alpha: 0.92);
-    final Color glassBase = const Color(0xFFFFFFFF).withValues(alpha: 0.88);
-    final Color dim = const Color(0xFFBFF3E0).withValues(alpha: 0.12);
-
-    // Border: crisp white highlight top-left, green accent bottom-right
-    const Color borderTopLeft = Color(0xFFD6F6EB);
-    final Color borderBottomRight = const Color(0xFFD6F6EB);
+    // Border: bright teal top-left → near-transparent bottom-right
+    final Color borderTopLeft = const Color(0xFF36CFE6).withValues(alpha: 0.70);
+    final Color borderBottomRight = const Color(0xFF36CFE6).withValues(alpha: 0.10);
 
     // The card is sized by its child. BackdropFilter sits inside a ClipRRect
     // that is constrained to the card's own size via IntrinsicHeight/Width,
@@ -54,26 +52,19 @@ class MirrorCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: radius,
         boxShadow: [
-          // Outer glow — green brand colour
+          // Deep shadow beneath card — lifts it off the background
           BoxShadow(
-            color: const Color(0xFF818080).withValues(alpha: 0.15),
-            blurRadius: 6,
-            spreadRadius: 0,
-            offset: const Offset(5, 0),
+            color: const Color(0xFF000000).withValues(alpha: 0.50),
+            blurRadius: 24,
+            spreadRadius: 2,
+            offset: const Offset(0, 8),
           ),
-          // Mid shadow
+          // Teal outer glow — makes the card pop on dark background
           BoxShadow(
-            color: const Color(0xFF818080).withValues(alpha: 0.15),
-            blurRadius: 6,
+            color: const Color(0xFF36CFE6).withValues(alpha: 0.12),
+            blurRadius: 32,
             spreadRadius: 0,
-            offset: const Offset(0, 5),
-          ),
-          // Top white lift — simulates light source above
-          BoxShadow(
-            color: const Color(0xFFC2F8E9).withValues(alpha: 0.30),
-            blurRadius: 3,
-            spreadRadius: 0,
-            offset: const Offset(0, -1),
+            offset: const Offset(0, 0),
           ),
         ],
       ),
@@ -100,7 +91,7 @@ class MirrorCard extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [sheen, glassBase, dim],
-                  stops: const [0.0, 0.35, 1.5],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
               padding: padding,

@@ -24,13 +24,16 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: AppBackground(
+      backgroundColor: const Color(0xFF0B1017),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppBackgroundGradients.splashGradient,
+        ),
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
             child: MirrorCard(
-              tint: MirrorCardTint.light,
+              tint: MirrorCardTint.dark,
               borderRadius: 25,
               blur: 30,
               padding: const EdgeInsets.fromLTRB(20, 25, 25, 20),
@@ -46,30 +49,39 @@ class _LoginPageState extends State<LoginPage> {
                   Text(
                     'Welcome to Ledgify',
                     style: AppTextStyles.headlineSmall.copyWith(
-                      color: AppColors.textPrimary,
+                      color: AppColors.white,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Sign in to your account',
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: AppColors.textHint,
                     ),
                   ),
                   const SizedBox(height: 48),
                   TextField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
+                    style: const TextStyle(color: AppColors.white),
                     decoration: InputDecoration(
                       labelText: 'Phone Number',
+                      labelStyle: const TextStyle(color: AppColors.textHint),
                       hintText: '+92 300 1234567',
+                      hintStyle: const TextStyle(color: AppColors.textHint),
+                      filled: true,
+                      fillColor: const Color(0xFF0A181C),
                       prefixIcon: const Icon(
                         Icons.phone,
                         color: AppColors.primary,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: AppColors.divider),
+                        borderSide: BorderSide(color: AppColors.textHint.withValues(alpha: 0.4)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: AppColors.textHint.withValues(alpha: 0.4)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -103,19 +115,19 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     children: [
                       Expanded(
-                        child: Divider(color: AppColors.divider, thickness: 1),
+                        child: Divider(color: AppColors.textHint, thickness: 1),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Text(
                           'or',
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.textTertiary,
+                            color: AppColors.textHint,
                           ),
                         ),
                       ),
                       Expanded(
-                        child: Divider(color: AppColors.divider, thickness: 1),
+                        child: Divider(color: AppColors.textHint, thickness: 1),
                       ),
                     ],
                   ),

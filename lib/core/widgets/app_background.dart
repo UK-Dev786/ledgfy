@@ -8,6 +8,16 @@ import 'package:flutter/material.dart';
 ///   brand — splash & onboarding (emerald gradient, crisp rule lines)
 enum AppBackgroundVariant { light, dark, brand }
 
+class AppBackgroundGradients {
+  AppBackgroundGradients._();
+
+  static const LinearGradient splashGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF0A181C), Color(0xFF0B1017)],
+  );
+}
+
 class AppBackground extends StatelessWidget {
   final Widget child;
   final AppBackgroundVariant variant;
