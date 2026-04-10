@@ -2,23 +2,23 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-enum MirrorCardTint { auto, light, dark }
+enum MyCardTint { auto, light, dark }
 
-class MirrorCard extends StatelessWidget {
+class MyCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final double borderRadius;
   final double blur;
-  final MirrorCardTint tint;
+  final MyCardTint tint;
   final bool border;
 
-  const MirrorCard({
+  const MyCard({
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(24),
     this.borderRadius = 20,
     this.blur = 20,
-    this.tint = MirrorCardTint.auto,
+    this.tint = MyCardTint.auto,
     this.border = true,
   });
 
@@ -30,27 +30,42 @@ class MirrorCard extends StatelessWidget {
     final Color glassBase = const Color(0xFF0A1820).withValues(alpha: 1.0);
     final Color dim = const Color(0xFF0A1820).withValues(alpha: 0.06);
 
-    final Color borderTopLeft = const Color(0xFF112A37).withValues(alpha: 0.90);
+    final Color borderTopLeft = const Color(0xFF36CFE6).withValues(alpha: 0.30);
     final Color borderBottomRight = const Color(
-      0xFF0D1F29,
-    ).withValues(alpha: 0.80);
+      0xFF36CFE6,
+    ).withValues(alpha: 0.15);
 
     return Container(
       decoration: BoxDecoration(
         borderRadius: radius,
         boxShadow: [
+          // Deep drop shadow — lifts card off background
           BoxShadow(
-            color: const Color(0xFF000000).withValues(alpha: 0.50),
-            blurRadius: 10,
+            color: const Color(0xFF000000).withValues(alpha: 0.55),
+            blurRadius: 24,
             spreadRadius: 0,
-            offset: const Offset(0, 6),
+            offset: const Offset(0, 10),
           ),
-
+          // Wide ambient teal glow
           BoxShadow(
-            color: const Color(0xFF00132B).withValues(alpha: 0.12),
-            blurRadius: 5,
-            spreadRadius: 0,
+            color: const Color(0xFF36CFE6).withValues(alpha: 0.18),
+            blurRadius: 48,
+            spreadRadius: -4,
             offset: const Offset(0, 0),
+          ),
+          // Tight border glow — top
+          BoxShadow(
+            color: const Color(0xFF36CFE6).withValues(alpha: 0.10),
+            blurRadius: 12,
+            spreadRadius: -2,
+            offset: const Offset(0, -2),
+          ),
+          // Tight border glow — bottom
+          BoxShadow(
+            color: const Color(0xFF36CFE6).withValues(alpha: 0.05),
+            blurRadius: 12,
+            spreadRadius: -2,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -119,7 +134,7 @@ class _GradientBorderPainter extends CustomPainter {
     final rrect = radius.toRRect(rect);
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
+      ..strokeWidth = 1.5
       ..shader = LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,

@@ -6,7 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/widgets/themed_gradient_bg.dart';
-import '../../../../core/widgets/mirror_card.dart';
+import '../../../../core/widgets/my_card.dart';
 import '../../../../core/widgets/my_button.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/my_text_field.dart';
@@ -40,8 +40,8 @@ class _LoginPageState extends State<LoginPage> {
               vertical: context.h * 6,
             ),
             child: Center(
-              child: MirrorCard(
-                tint: MirrorCardTint.dark,
+              child: MyCard(
+                tint: MyCardTint.dark,
                 borderRadius: AppSizes.radiusLg,
                 blur: 30,
                 padding: EdgeInsets.fromLTRB(
