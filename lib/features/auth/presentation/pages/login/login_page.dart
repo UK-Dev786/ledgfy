@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_sizes.dart';
 import '../../../../../core/extensions/context_extensions.dart';
-import '../../../../../core/widgets/my_button.dart';
 import '../../../../../core/widgets/my_card.dart';
 import '../../../../../core/widgets/my_text.dart';
-import '../../../../../core/widgets/my_text_field.dart';
 import '../../../../../core/widgets/themed_gradient_bg.dart';
 import '../shared_widgets/tab_item.dart';
 import 'sub_widgets/email_form.dart';
@@ -20,7 +18,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _pageController = PageController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -29,7 +26,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _pageController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -38,11 +34,6 @@ class _LoginPageState extends State<LoginPage> {
 
   void _switchTab(int index) {
     setState(() => _currentTab = index);
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeInOut,
-    );
   }
 
   @override
@@ -107,64 +98,37 @@ class _LoginPageState extends State<LoginPage> {
                         SizedBox(height: context.h * 3),
 
                         // ── Swipeable form pages ─────────────────────────────
-                        SizedBox(
-                          height: context.h * 30,
-                          child: PageView(
-                            controller: _pageController,
-                            onPageChanged: (i) =>
-                                setState(() => _currentTab = i),
-                            children: [
-                              PhoneForm(controller: _phoneController),
-                              EmailForm(
-                                emailController: _emailController,
-                                passwordController: _passwordController,
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 320),
+                          switchInCurve: Curves.easeInOut,
+                          switchOutCurve: Curves.easeInOut,
+                          transitionBuilder: (child, animation) {
+                            final isPhone = child.key == const ValueKey(0);
+                            final offset = isPhone
+                                ? const Offset(-1, 0)
+                                : const Offset(1, 0);
+                            return SlideTransition(
+                              position: Tween(
+                                begin: offset,
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: child,
                               ),
-                            ],
-                          ),
+                            );
+                          },
+                          child: _currentTab == 0
+                              ? PhoneForm(
+                                  key: const ValueKey(0),
+                                  controller: _phoneController,
+                                )
+                              : EmailForm(
+                                  key: const ValueKey(1),
+                                  emailController: _emailController,
+                                  passwordController: _passwordController,
+                                ),
                         ),
-
-                        // SizedBox(height: context.h * 2),
-
-                        // ── Divider ──────────────────────────────────────────
-                        // Row(
-                        //   children: [
-                        //     Expanded(
-                        //       child: Divider(
-                        //         color: AppColors.textHint.withValues(alpha: 0.3),
-                        //         thickness: 1,
-                        //       ),
-                        //     ),
-                        //     Padding(
-                        //       padding: EdgeInsets.symmetric(
-                        //         horizontal: context.w * 3,
-                        //       ),
-                        //       child: MyText(
-                        //         'or continue with',
-                        //         font: AppFont.sourceSans,
-                        //         size: AppSizes.caption,
-                        //         color: AppColors.textHint,
-                        //       ),
-                        //     ),
-                        //     Expanded(
-                        //       child: Divider(
-                        //         color: AppColors.textHint.withValues(alpha: 0.3),
-                        //         thickness: 1,
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
-                        // SizedBox(height: context.h * 2),
-
-                        // ── Biometric ─────────────────────────────────────────
-                        // MyButton(
-                        //   text: 'Use Biometric',
-                        //   onTap: () {},
-                        //   variant: MyButtonVariant.outlined,
-                        //   icon: const Icon(
-                        //     Icons.fingerprint,
-                        //     color: AppColors.primary,
-                        //   ),
-                        // ),
                       ],
                     ),
                   ), // MyCard
