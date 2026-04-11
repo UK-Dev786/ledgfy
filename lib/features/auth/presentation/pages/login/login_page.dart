@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_sizes.dart';
+import '../../../../../core/constants/app_text.dart';
 import '../../../../../core/extensions/context_extensions.dart';
 import '../../../../../core/widgets/my_card.dart';
 import '../../../../../core/widgets/my_text.dart';
@@ -73,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         SizedBox(height: context.h * 2),
                         MyText(
-                          'Welcome to Ledgify',
+                          AppText.loginWelcome,
                           font: AppFont.inter,
                           size: AppSizes.header3,
                           color: AppColors.white,
@@ -81,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         SizedBox(height: context.h * 0.6),
                         MyText(
-                          'Sign in to your account',
+                          AppText.loginSubtitle,
                           font: AppFont.sourceSans,
                           size: AppSizes.subtitle,
                           color: AppColors.textHint,
@@ -128,6 +129,51 @@ class _LoginPageState extends State<LoginPage> {
                                   emailController: _emailController,
                                   passwordController: _passwordController,
                                 ),
+                        ),
+
+                        SizedBox(height: context.h * 3),
+
+                        // ── Divider ──────────────────────────────────────────
+                        Divider(
+                          color: AppColors.textHint.withValues(alpha: 0.3),
+                          thickness: 1,
+                        ),
+
+                        SizedBox(height: context.h * 2),
+
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: MyText(
+                                    "${AppText.doNotHaveAccount} ",
+                                    font: AppFont.sourceSans,
+                                    size: AppSizes.caption,
+                                    color: AppColors.white,
+                                    weight: FontWeight.w500,
+                                  ),
+                                ),
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // Navigation to Sign up
+                                    },
+                                    child: MyText(
+                                      AppText.signupHere,
+                                      font: AppFont.sourceSans,
+                                      size: AppSizes.caption,
+                                      color: AppColors.primary,
+                                      weight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),

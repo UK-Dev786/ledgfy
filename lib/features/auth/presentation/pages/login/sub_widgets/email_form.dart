@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ledgify/core/extensions/context_extensions.dart';
 
 import '../../../../../../core/constants/app_colors.dart';
+import '../../../../../../core/constants/app_text.dart';
 import '../../../../../../core/widgets/my_button.dart';
 import '../../../../../../core/widgets/my_text_field.dart';
 
@@ -24,22 +25,22 @@ class _EmailFormState extends State<EmailForm> {
 
   String? _validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Email address is required';
+      return AppText.emailRequired;
     }
     if (!RegExp(
       r'^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$',
     ).hasMatch(value.trim())) {
-      return 'Enter a valid email address';
+      return AppText.emailInvalid;
     }
     return null;
   }
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return AppText.passwordRequired;
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return AppText.passwordTooShort;
     }
     return null;
   }
@@ -52,8 +53,8 @@ class _EmailFormState extends State<EmailForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           MyTextField(
-            title: 'Email Address',
-            hintText: 'Enter your email address',
+            title: AppText.emailLabel,
+            hintText: AppText.emailHint,
             controller: widget.emailController,
             keyboardType: TextInputType.emailAddress,
             prefixIcon: const Icon(
@@ -64,8 +65,8 @@ class _EmailFormState extends State<EmailForm> {
           ),
           SizedBox(height: context.h * 1.5),
           MyTextField(
-            title: 'Password',
-            hintText: 'Enter your password',
+            title: AppText.passwordLabel,
+            hintText: AppText.passwordHint,
             controller: widget.passwordController,
             obscure: true,
             prefixIcon: const Icon(
@@ -76,7 +77,7 @@ class _EmailFormState extends State<EmailForm> {
           ),
           SizedBox(height: context.h * 2.5),
           MyButton(
-            text: 'Sign In',
+            text: AppText.signIn,
             onTap: () {
               if (_formKey.currentState!.validate()) {}
             },

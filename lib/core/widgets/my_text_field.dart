@@ -54,7 +54,7 @@ class _MyTextFieldState extends State<MyTextField> {
             style: const TextStyle(
               color: AppColors.white,
               fontFamily: 'Inter',
-              fontSize: AppSizes.subtitle,
+              fontSize: AppSizes.body,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -84,7 +84,7 @@ class _MyTextFieldState extends State<MyTextField> {
         labelText: widget.labelText,
         labelStyle: const TextStyle(color: AppColors.textHint),
         filled: true,
-        fillColor: const Color(0xFF0A181C),
+        fillColor: Colors.transparent,
         prefixIcon: widget.prefixIcon,
         suffixIcon: widget.obscure
             ? IconButton(
@@ -105,7 +105,7 @@ class _MyTextFieldState extends State<MyTextField> {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radiusSm),
           borderSide: BorderSide(
-            color: AppColors.textHint.withValues(alpha: 0.4),
+            color: AppColors.infoDim.withValues(alpha: 0.4),
           ),
         ),
         focusedBorder: OutlineInputBorder(

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_sizes.dart';
+import '../../../../../core/constants/app_text.dart';
 import '../../../../../core/widgets/my_card.dart';
 import '../../../../../core/widgets/my_text.dart';
+
 
 class TabItem extends StatelessWidget {
   final String label;
@@ -85,13 +87,13 @@ class TabSwitcher extends StatelessWidget {
       child: Row(
         children: [
           TabItem(
-            label: 'Phone',
+            label: AppText.tabPhone,
             icon: Icons.phone_outlined,
             selected: currentTab == 0,
             onTap: () => onSwitch(0),
           ),
           TabItem(
-            label: 'Email',
+            label: AppText.tabEmail,
             icon: Icons.email_outlined,
             selected: currentTab == 1,
             onTap: () => onSwitch(1),

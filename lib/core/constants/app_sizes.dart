@@ -7,6 +7,7 @@ class AppSizes {
   static const double header3 = 22.0;
   static const double title = 18.0;
   static const double subtitle = 14.0;
+  static const double subtitle2 = 13.5;
   static const double body = 13.0;
   static const double caption = 11.0;
 

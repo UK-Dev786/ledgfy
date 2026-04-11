@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/constants/app_text.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/widgets/app_background.dart';
 import '../../../../core/widgets/my_text.dart';
@@ -36,7 +37,7 @@ class _SplashPageState extends State<SplashPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               MyText(
-                'Ledgify',
+                AppText.appName,
                 font: AppFont.inter,
                 size: AppSizes.header1,
                 color: AppColors.white,
@@ -45,7 +46,7 @@ class _SplashPageState extends State<SplashPage> {
               ),
               SizedBox(height: context.h * 1),
               MyText(
-                'Ledger Simplify',
+                AppText.appTagline,
                 font: AppFont.sourceSans,
                 size: AppSizes.subtitle,
                 color: AppColors.textHint,
