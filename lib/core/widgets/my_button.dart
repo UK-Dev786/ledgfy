@@ -1,3 +1,4 @@
+import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
@@ -39,29 +40,35 @@ class MyButton extends StatelessWidget {
     final btnHeight = height ?? AppSizes.buttonHeight;
 
     if (variant == MyButtonVariant.outlined) {
-      return OutlinedButton(
+      return Bounce(
+        onTap: loading ? null : onTap,
+        child: OutlinedButton(
+          onPressed: loading ? null : onTap,
+          style: OutlinedButton.styleFrom(
+            minimumSize: Size(width ?? double.infinity, btnHeight),
+            side: BorderSide(color: borderColor ?? bgColor, width: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+            ),
+          ),
+          child: _child(fgColor == AppColors.white ? bgColor : fgColor),
+        ),
+      );
+    }
+
+    return Bounce(
+      onTap: loading ? null : onTap,
+      child: ElevatedButton(
         onPressed: loading ? null : onTap,
-        style: OutlinedButton.styleFrom(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: bgColor,
           minimumSize: Size(width ?? double.infinity, btnHeight),
-          side: BorderSide(color: borderColor ?? bgColor, width: 2),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.radiusSm),
           ),
         ),
-        child: _child(fgColor == AppColors.white ? bgColor : fgColor),
-      );
-    }
-
-    return ElevatedButton(
-      onPressed: loading ? null : onTap,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: bgColor,
-        minimumSize: Size(width ?? double.infinity, btnHeight),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-        ),
+        child: _child(fgColor),
       ),
-      child: _child(fgColor),
     );
   }
 

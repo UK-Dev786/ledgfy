@@ -1,3 +1,4 @@
+import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/app_colors.dart';
@@ -158,9 +159,9 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 WidgetSpan(
                                   alignment: PlaceholderAlignment.middle,
-                                  child: GestureDetector(
+                                  child: Bounce(
                                     onTap: () {
-                                      // Navigation to Sign up
+                                      // Navigator.pop(context);
                                     },
                                     child: MyText(
                                       AppText.signupHere,

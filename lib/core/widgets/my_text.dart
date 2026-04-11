@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bounce/bounce.dart';
 
 enum AppFont { inter, sourceSans, urdu }
 
@@ -14,6 +15,9 @@ class MyText extends StatelessWidget {
   final double? letterSpacing;
   final double? height;
 
+  final bool isOnTap;
+  final VoidCallback? onTap;
+
   const MyText(
     this.text, {
     super.key,
@@ -26,6 +30,8 @@ class MyText extends StatelessWidget {
     this.overflow,
     this.letterSpacing,
     this.height,
+    this.isOnTap = false,
+    this.onTap,
   });
 
   String get _fontFamily {
@@ -41,12 +47,14 @@ class MyText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
+    Widget textWidget = Text(
       text,
       textAlign: align,
       maxLines: maxLines,
       overflow: overflow,
-      textDirection: font == AppFont.urdu ? TextDirection.rtl : TextDirection.ltr,
+      textDirection: font == AppFont.urdu
+          ? TextDirection.rtl
+          : TextDirection.ltr,
       style: TextStyle(
         fontFamily: _fontFamily,
         fontSize: size,
@@ -56,5 +64,15 @@ class MyText extends StatelessWidget {
         height: height,
       ),
     );
+
+    if (isOnTap) {
+      return Bounce(
+        duration: const Duration(milliseconds: 110),
+        onTap: onTap ?? () {},
+        child: textWidget,
+      );
+    }
+
+    return textWidget;
   }
 }

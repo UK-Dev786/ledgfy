@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:ledgify/core/extensions/context_extensions.dart';
 
 import '../../../../../../core/constants/app_colors.dart';
+import '../../../../../../core/constants/app_sizes.dart';
 import '../../../../../../core/constants/app_text.dart';
 import '../../../../../../core/widgets/my_button.dart';
+import '../../../../../../core/widgets/my_text.dart';
 import '../../../../../../core/widgets/my_text_field.dart';
 
 class EmailForm extends StatefulWidget {
@@ -74,6 +76,19 @@ class _EmailFormState extends State<EmailForm> {
               color: AppColors.primary,
             ),
             validator: _validatePassword,
+          ),
+          SizedBox(height: context.h * 1.5),
+          Align(
+            alignment: AlignmentGeometry.centerRight,
+            child: MyText(
+              isOnTap: true,
+              onTap: () {},
+              AppText.forgotPassword,
+              font: AppFont.sourceSans,
+              size: AppSizes.body,
+              color: AppColors.primary,
+              weight: FontWeight.w600,
+            ),
           ),
           SizedBox(height: context.h * 2.5),
           MyButton(

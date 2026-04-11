@@ -33,6 +33,7 @@ abstract class AppText {
   static const passwordLabel = 'Password';
   static const passwordHint = 'Enter your password';
   static const signIn = 'Sign In';
+  static const forgotPassword = 'Forgot Password';
 
   // ── Auth — Email / password validators ──────────────────────────────────
   static const emailRequired = 'Email address is required';
