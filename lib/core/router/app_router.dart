@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/login/login_page.dart';
+import '../../features/auth/presentation/pages/signup/signup_page.dart';
 
 /// Central route configuration for Ledgify
 class AppRouter {
@@ -18,6 +19,11 @@ class AppRouter {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/signup',
+        name: 'signup',
+        builder: (context, state) => const SignupPage(),
       ),
       // TODO: Add remaining routes
       // - OTP verification

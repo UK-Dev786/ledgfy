@@ -1,26 +1,25 @@
 import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:ledgify/core/extensions/context_extensions.dart';
+import 'package:ledgify/features/auth/presentation/pages/signup/sub_widgets/signup_email_form.dart';
+import 'package:ledgify/features/auth/presentation/pages/signup/sub_widgets/signup_phone_form.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_sizes.dart';
 import '../../../../../core/constants/app_text.dart';
-import '../../../../../core/extensions/context_extensions.dart';
 import '../../../../../core/widgets/my_card.dart';
 import '../../../../../core/widgets/my_text.dart';
 import '../../../../../core/widgets/themed_gradient_bg.dart';
 import '../shared_widgets/tab_item.dart';
-import 'sub_widgets/email_form.dart';
-import 'sub_widgets/phone_form.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignupPageState extends State<SignupPage> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -122,11 +121,11 @@ class _LoginPageState extends State<LoginPage> {
                             );
                           },
                           child: _currentTab == 0
-                              ? PhoneForm(
+                              ? SignupPhoneForm(
                                   key: const ValueKey(0),
                                   controller: _phoneController,
                                 )
-                              : EmailForm(
+                              : SignupEmailForm(
                                   key: const ValueKey(1),
                                   emailController: _emailController,
                                   passwordController: _passwordController,
@@ -161,7 +160,9 @@ class _LoginPageState extends State<LoginPage> {
                                 WidgetSpan(
                                   alignment: PlaceholderAlignment.middle,
                                   child: Bounce(
-                                    onTap: () => context.go('/signup'),
+                                    onTap: () {
+                                      // Navigator.pop(context);
+                                    },
                                     child: MyText(
                                       AppText.signupHere,
                                       font: AppFont.sourceSans,
