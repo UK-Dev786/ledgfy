@@ -11,6 +11,7 @@ class MyTextField extends StatefulWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final String? labelText;
+  final String? title;
   final ValueChanged<String>? onChanged;
   final String? Function(String?)? validator;
 
@@ -23,6 +24,7 @@ class MyTextField extends StatefulWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.labelText,
+    this.title,
     this.onChanged,
     this.validator,
   });
@@ -42,6 +44,29 @@ class _MyTextFieldState extends State<MyTextField> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.title != null) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.title!,
+            style: const TextStyle(
+              color: AppColors.white,
+              fontFamily: 'Inter',
+              fontSize: AppSizes.subtitle,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          _buildField(),
+        ],
+      );
+    }
+    return _buildField();
+  }
+
+  Widget _buildField() {
     return TextFormField(
       controller: widget.controller,
       keyboardType: widget.keyboardType,

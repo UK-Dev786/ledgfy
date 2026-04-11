@@ -53,118 +53,127 @@ class _LoginPageState extends State<LoginPage> {
         backgroundColor: Colors.transparent,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: context.w * 6,
-              vertical: context.h * 5,
-            ),
-            child: Center(
-              child: MyCard(
-                tint: MyCardTint.dark,
-                borderRadius: AppSizes.radiusLg,
-                blur: 30,
-                padding: EdgeInsets.fromLTRB(
-                  context.w * 5,
-                  context.h * 3,
-                  context.w * 5,
-                  context.h * 3,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: context.screenHeight),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.w * 6,
+                  vertical: context.h * 5,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // ── Logo ────────────────────────────────────────────
-                    Icon(
-                      Icons.business,
-                      size: AppSizes.iconXl,
-                      color: AppColors.primary,
+                child: Center(
+                  child: MyCard(
+                    tint: MyCardTint.dark,
+                    borderRadius: AppSizes.radiusLg,
+                    blur: 30,
+                    padding: EdgeInsets.fromLTRB(
+                      context.w * 5,
+                      context.h * 3,
+                      context.w * 5,
+                      context.h * 3,
                     ),
-                    SizedBox(height: context.h * 2),
-                    MyText(
-                      'Welcome to Ledgify',
-                      font: AppFont.inter,
-                      size: AppSizes.header3,
-                      color: AppColors.white,
-                      weight: FontWeight.bold,
-                    ),
-                    SizedBox(height: context.h * 0.6),
-                    MyText(
-                      'Sign in to your account',
-                      font: AppFont.sourceSans,
-                      size: AppSizes.subtitle,
-                      color: AppColors.textHint,
-                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // ── Logo ────────────────────────────────────────────
+                        Icon(
+                          Icons.business,
+                          size: AppSizes.iconXl,
+                          color: AppColors.primary,
+                        ),
+                        SizedBox(height: context.h * 2),
+                        MyText(
+                          'Welcome to Ledgify',
+                          font: AppFont.inter,
+                          size: AppSizes.header3,
+                          color: AppColors.white,
+                          weight: FontWeight.bold,
+                        ),
+                        SizedBox(height: context.h * 0.6),
+                        MyText(
+                          'Sign in to your account',
+                          font: AppFont.sourceSans,
+                          size: AppSizes.subtitle,
+                          color: AppColors.textHint,
+                        ),
 
-                    SizedBox(height: context.h * 3),
+                        SizedBox(height: context.h * 3),
 
-                    // ── Tab switcher ─────────────────────────────────────
-                    TabSwitcher(currentTab: _currentTab, onSwitch: _switchTab),
+                        // ── Tab switcher ─────────────────────────────────────
+                        TabSwitcher(
+                          currentTab: _currentTab,
+                          onSwitch: _switchTab,
+                        ),
 
-                    SizedBox(height: context.h * 3),
+                        SizedBox(height: context.h * 3),
 
-                    // ── Swipeable form pages ─────────────────────────────
-                    SizedBox(
-                      height: context.h * 26,
-                      child: PageView(
-                        controller: _pageController,
-                        onPageChanged: (i) => setState(() => _currentTab = i),
-                        children: [
-                          PhoneForm(controller: _phoneController),
-                          EmailForm(
-                            emailController: _emailController,
-                            passwordController: _passwordController,
+                        // ── Swipeable form pages ─────────────────────────────
+                        SizedBox(
+                          height: context.h * 30,
+                          child: PageView(
+                            controller: _pageController,
+                            onPageChanged: (i) =>
+                                setState(() => _currentTab = i),
+                            children: [
+                              PhoneForm(controller: _phoneController),
+                              EmailForm(
+                                emailController: _emailController,
+                                passwordController: _passwordController,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+
+                        // SizedBox(height: context.h * 2),
+
+                        // ── Divider ──────────────────────────────────────────
+                        // Row(
+                        //   children: [
+                        //     Expanded(
+                        //       child: Divider(
+                        //         color: AppColors.textHint.withValues(alpha: 0.3),
+                        //         thickness: 1,
+                        //       ),
+                        //     ),
+                        //     Padding(
+                        //       padding: EdgeInsets.symmetric(
+                        //         horizontal: context.w * 3,
+                        //       ),
+                        //       child: MyText(
+                        //         'or continue with',
+                        //         font: AppFont.sourceSans,
+                        //         size: AppSizes.caption,
+                        //         color: AppColors.textHint,
+                        //       ),
+                        //     ),
+                        //     Expanded(
+                        //       child: Divider(
+                        //         color: AppColors.textHint.withValues(alpha: 0.3),
+                        //         thickness: 1,
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                        // SizedBox(height: context.h * 2),
+
+                        // ── Biometric ─────────────────────────────────────────
+                        // MyButton(
+                        //   text: 'Use Biometric',
+                        //   onTap: () {},
+                        //   variant: MyButtonVariant.outlined,
+                        //   icon: const Icon(
+                        //     Icons.fingerprint,
+                        //     color: AppColors.primary,
+                        //   ),
+                        // ),
+                      ],
                     ),
-
-                    // SizedBox(height: context.h * 2),
-
-                    // ── Divider ──────────────────────────────────────────
-                    // Row(
-                    //   children: [
-                    //     Expanded(
-                    //       child: Divider(
-                    //         color: AppColors.textHint.withValues(alpha: 0.3),
-                    //         thickness: 1,
-                    //       ),
-                    //     ),
-                    //     Padding(
-                    //       padding: EdgeInsets.symmetric(
-                    //         horizontal: context.w * 3,
-                    //       ),
-                    //       child: MyText(
-                    //         'or continue with',
-                    //         font: AppFont.sourceSans,
-                    //         size: AppSizes.caption,
-                    //         color: AppColors.textHint,
-                    //       ),
-                    //     ),
-                    //     Expanded(
-                    //       child: Divider(
-                    //         color: AppColors.textHint.withValues(alpha: 0.3),
-                    //         thickness: 1,
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
-                    // SizedBox(height: context.h * 2),
-
-                    // ── Biometric ─────────────────────────────────────────
-                    // MyButton(
-                    //   text: 'Use Biometric',
-                    //   onTap: () {},
-                    //   variant: MyButtonVariant.outlined,
-                    //   icon: const Icon(
-                    //     Icons.fingerprint,
-                    //     color: AppColors.primary,
-                    //   ),
-                    // ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+                  ), // MyCard
+                ), // Center
+              ), // Padding
+            ), // ConstrainedBox
+          ), // SingleChildScrollView
+        ), // SafeArea
+      ), // Scaffold
+    ); // ThemedGradientBackground
   }
 }

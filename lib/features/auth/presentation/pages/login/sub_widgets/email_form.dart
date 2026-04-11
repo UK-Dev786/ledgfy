@@ -10,6 +10,7 @@ class EmailForm extends StatelessWidget {
   final TextEditingController passwordController;
 
   const EmailForm({
+    super.key,
     required this.emailController,
     required this.passwordController,
   });
@@ -20,8 +21,8 @@ class EmailForm extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         MyTextField(
-          hintText: 'you@example.com',
-          labelText: 'Email Address',
+          title: 'Email Address',
+          hintText: 'Enter your email address',
           controller: emailController,
           keyboardType: TextInputType.emailAddress,
           prefixIcon: const Icon(
@@ -31,8 +32,8 @@ class EmailForm extends StatelessWidget {
         ),
         SizedBox(height: context.h * 1.5),
         MyTextField(
-          hintText: '••••••••',
-          labelText: 'Password',
+          title: 'Password',
+          hintText: 'Enter your password',
           controller: passwordController,
           obscure: true,
           prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),

@@ -81,7 +81,7 @@ class TabSwitcher extends StatelessWidget {
       borderRadius: AppSizes.radiusMd,
       blur: 30,
       height: 45,
-      padding: EdgeInsetsGeometry.zero,
+      padding: EdgeInsets.zero,
       child: Row(
         children: [
           TabItem(

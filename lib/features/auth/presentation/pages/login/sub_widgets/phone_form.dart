@@ -7,7 +7,7 @@ import '../../../../../../core/widgets/my_text_field.dart';
 
 class PhoneForm extends StatelessWidget {
   final TextEditingController controller;
-  const PhoneForm({required this.controller});
+  const PhoneForm({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +15,8 @@ class PhoneForm extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         MyTextField(
-          hintText: '+92 300 1234567',
-          labelText: 'Phone Number',
+          title: 'Phone Number',
+          hintText: 'Enter your phone number',
           controller: controller,
           keyboardType: TextInputType.phone,
           prefixIcon: const Icon(
