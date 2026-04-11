@@ -11,6 +11,7 @@ class MyCard extends StatelessWidget {
   final double blur;
   final MyCardTint tint;
   final bool border;
+  final double? height;
 
   const MyCard({
     super.key,
@@ -20,6 +21,7 @@ class MyCard extends StatelessWidget {
     this.blur = 20,
     this.tint = MyCardTint.auto,
     this.border = true,
+    this.height,
   });
 
   @override
@@ -36,6 +38,7 @@ class MyCard extends StatelessWidget {
     ).withValues(alpha: 0.15);
 
     return Container(
+      height: height,
       decoration: BoxDecoration(
         borderRadius: radius,
         boxShadow: [
