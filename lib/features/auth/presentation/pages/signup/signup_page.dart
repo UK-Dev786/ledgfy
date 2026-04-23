@@ -1,5 +1,6 @@
 import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ledgify/core/extensions/context_extensions.dart';
 import 'package:ledgify/features/auth/presentation/pages/signup/sub_widgets/signup_email_form.dart';
 import 'package:ledgify/features/auth/presentation/pages/signup/sub_widgets/signup_phone_form.dart';
@@ -20,6 +21,7 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -28,6 +30,7 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -75,7 +78,7 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                         SizedBox(height: context.h * 2),
                         MyText(
-                          AppText.loginWelcome,
+                          AppText.signupWelcome,
                           font: AppFont.inter,
                           size: AppSizes.header3,
                           color: AppColors.white,
@@ -83,7 +86,7 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                         SizedBox(height: context.h * 0.6),
                         MyText(
-                          AppText.loginSubtitle,
+                          AppText.signupSubtitle,
                           font: AppFont.sourceSans,
                           size: AppSizes.subtitle,
                           color: AppColors.textHint,
@@ -123,7 +126,8 @@ class _SignupPageState extends State<SignupPage> {
                           child: _currentTab == 0
                               ? SignupPhoneForm(
                                   key: const ValueKey(0),
-                                  controller: _phoneController,
+                                  nameController: _nameController,
+                                  phoneController: _phoneController,
                                 )
                               : SignupEmailForm(
                                   key: const ValueKey(1),
@@ -150,7 +154,7 @@ class _SignupPageState extends State<SignupPage> {
                                 WidgetSpan(
                                   alignment: PlaceholderAlignment.middle,
                                   child: MyText(
-                                    "${AppText.doNotHaveAccount} ",
+                                    "${AppText.alreadyHaveAccount} ",
                                     font: AppFont.sourceSans,
                                     size: AppSizes.caption,
                                     color: AppColors.white,
@@ -160,11 +164,9 @@ class _SignupPageState extends State<SignupPage> {
                                 WidgetSpan(
                                   alignment: PlaceholderAlignment.middle,
                                   child: Bounce(
-                                    onTap: () {
-                                      // Navigator.pop(context);
-                                    },
+                                    onTap: () => context.go('/login'),
                                     child: MyText(
-                                      AppText.signupHere,
+                                      AppText.loginHere,
                                       font: AppFont.sourceSans,
                                       size: AppSizes.caption,
                                       color: AppColors.primary,

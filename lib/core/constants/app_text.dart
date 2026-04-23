@@ -13,6 +13,18 @@ abstract class AppText {
   static const doNotHaveAccount = "Don't have an account?";
   static const signupHere = "Sign up here";
 
+  // ── Auth — Signup page ────────────────────────────────────────────────────
+  static const signupWelcome = 'Create an Account';
+  static const signupSubtitle = 'Sign up to get started';
+  static const signUp = 'Sign Up';
+  static const alreadyHaveAccount = "Already have an account?";
+  static const loginHere = "Login here";
+
+  // ── Auth — name form ────────────────────────────────────────────────────
+  static const enterFullName = "Full Name";
+  static const nameHint = "Enter your full name";
+  static const nameError = "Full name is required";
+
   // ── Auth — Tab switcher ──────────────────────────────────────────────────
   static const tabPhone = 'Phone';
   static const tabEmail = 'Email';
@@ -34,6 +46,19 @@ abstract class AppText {
   static const passwordHint = 'Enter your password';
   static const signIn = 'Sign In';
   static const forgotPassword = 'Forgot Password';
+
+  // ── Auth — Account type ──────────────────────────────────────────────────
+  static const accountTypeLabel = 'Account Type';
+  static const accountTypeHint = 'Select account type';
+  static const accountTypeRequired = 'Please select an account type';
+  static const accountTypeIndividual = 'Individual';
+  static const accountTypeOrganization = 'Organization';
+
+  // ── Auth — Confirm password ──────────────────────────────────────────────
+  static const confirmPasswordLabel = 'Confirm Password';
+  static const confirmPasswordHint = 'Re-enter your password';
+  static const confirmPasswordRequired = 'Please confirm your password';
+  static const confirmPasswordMismatch = 'Passwords do not match';
 
   // ── Auth — Email / password validators ──────────────────────────────────
   static const emailRequired = 'Email address is required';

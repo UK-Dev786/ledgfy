@@ -3,12 +3,19 @@ import 'package:ledgify/core/extensions/context_extensions.dart';
 
 import '../../../../../../core/constants/app_colors.dart';
 import '../../../../../../core/constants/app_text.dart';
+import '../../../../../../core/utils/app_validators.dart';
 import '../../../../../../core/widgets/my_button.dart';
 import '../../../../../../core/widgets/my_text_field.dart';
 
 class SignupPhoneForm extends StatefulWidget {
-  final TextEditingController controller;
-  const SignupPhoneForm({super.key, required this.controller});
+  final TextEditingController nameController;
+  final TextEditingController phoneController;
+
+  const SignupPhoneForm({
+    super.key,
+    required this.nameController,
+    required this.phoneController,
+  });
 
   @override
   State<SignupPhoneForm> createState() => _SignupPhoneFormState();
@@ -16,20 +23,6 @@ class SignupPhoneForm extends StatefulWidget {
 
 class _SignupPhoneFormState extends State<SignupPhoneForm> {
   final _formKey = GlobalKey<FormState>();
-
-  String? _validatePhone(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return AppText.phoneRequired;
-    }
-    final digits = value.replaceAll(RegExp(r'[\s\-\+]'), '');
-    if (digits.length < 10) {
-      return AppText.phoneInvalid;
-    }
-    if (!RegExp(r'^[\d\s\+\-]+$').hasMatch(value)) {
-      return AppText.phoneCharsInvalid;
-    }
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,15 +32,21 @@ class _SignupPhoneFormState extends State<SignupPhoneForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           MyTextField(
+            title: AppText.enterFullName,
+            hintText: AppText.nameHint,
+            controller: widget.nameController,
+            keyboardType: TextInputType.name,
+            prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
+            validator: AppValidators.name,
+          ),
+          SizedBox(height: context.h * 1.5),
+          MyTextField(
             title: AppText.phoneLabel,
             hintText: AppText.phoneHint,
-            controller: widget.controller,
+            controller: widget.phoneController,
             keyboardType: TextInputType.phone,
-            prefixIcon: const Icon(
-              Icons.phone_outlined,
-              color: AppColors.primary,
-            ),
-            validator: _validatePhone,
+            prefixIcon: const Icon(Icons.phone_outlined, color: AppColors.primary),
+            validator: AppValidators.phone,
           ),
           SizedBox(height: context.h * 2.5),
           MyButton(
