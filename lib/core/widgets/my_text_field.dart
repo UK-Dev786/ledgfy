@@ -196,9 +196,6 @@ class _CustomDropdownState extends State<_CustomDropdown> {
     final box = context.findRenderObject() as RenderBox;
     final size = box.size;
     final popupHeight = widget.items.length * 52.0;
-    // Center popup over the trigger field only (not the title label above it).
-    // The layerLink is on the full Column (title + field), so we compensate
-    // for the title label height (~28px) to align with the field itself.
     const titleHeight = 28.0;
     final fieldTop = titleHeight;
     final fieldCenter = fieldTop + 56.0 / 2;
@@ -213,7 +210,6 @@ class _CustomDropdownState extends State<_CustomDropdown> {
             CompositedTransformFollower(
               link: _layerLink,
               showWhenUnlinked: false,
-              // Negative offset: move popup above the field.
               offset: Offset(0, verticalOffset),
               child: Material(
                 color: Colors.transparent,

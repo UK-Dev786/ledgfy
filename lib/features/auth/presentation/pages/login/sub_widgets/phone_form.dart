@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ledgify/core/extensions/context_extensions.dart';
 
 import '../../../../../../core/constants/app_colors.dart';
@@ -42,7 +43,7 @@ class _PhoneFormState extends State<PhoneForm> {
             text: AppText.phoneSendOtp,
             onTap: () {
               if (_formKey.currentState!.validate()) {
-                // TODO: Implement phone OTP logic
+                context.go('/otp/${widget.controller.text.trim()}');
               }
             },
           ),

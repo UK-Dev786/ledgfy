@@ -47,6 +47,13 @@ abstract class AppText {
   static const signIn = 'Sign In';
   static const forgotPassword = 'Forgot Password';
 
+  // ── Auth — OTP page ──────────────────────────────────────────────────────
+  static const otpTitle = 'Verify Your Number';
+  static const otpSubtitle = 'Enter the 6-digit code sent to';
+  static const otpResend = 'Resend OTP';
+  static const otpVerify = 'Verify';
+  static const otpRequired = 'Please enter the complete OTP';
+
   // ── Auth — Account type ──────────────────────────────────────────────────
   static const accountTypeLabel = 'Account Type';
   static const accountTypeHint = 'Select account type';
