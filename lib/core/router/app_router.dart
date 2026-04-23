@@ -5,6 +5,7 @@ import '../../features/auth/presentation/pages/shared_widgets/otp/otp_page.dart'
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/login/login_page.dart';
 import '../../features/auth/presentation/pages/signup/signup_page.dart';
+import '../../features/home/presentation/pages/home_page.dart';
 
 /// Central route configuration for Ledgify
 class AppRouter {
@@ -31,6 +32,11 @@ class AppRouter {
         name: 'otp',
         builder: (context, state) =>
             OtpPage(phoneNumber: state.pathParameters['phone'] ?? ''),
+      ),
+      GoRoute(
+        path: '/home',
+        name: 'home',
+        builder: (context, state) => const HomePage(),
       ),
     ],
     errorBuilder: (context, state) {

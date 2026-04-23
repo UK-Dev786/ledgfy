@@ -1,5 +1,6 @@
 import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ledgify/core/extensions/context_extensions.dart';
 import 'package:pinput/pinput.dart';
 
@@ -33,7 +34,7 @@ class _OtpPageState extends State<OtpPage> {
 
   void _verify() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Implement OTP verification
+      context.go('/home');
     }
   }
 
@@ -184,7 +185,7 @@ class _OtpPageState extends State<OtpPage> {
 
                         // ── Resend ────────────────────────────────────────────
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             MyText(
                               "Didn't receive the code? ",
