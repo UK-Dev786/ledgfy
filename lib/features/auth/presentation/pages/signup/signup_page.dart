@@ -25,6 +25,7 @@ class _SignupPageState extends State<SignupPage> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   int _currentTab = 0;
 
@@ -34,6 +35,7 @@ class _SignupPageState extends State<SignupPage> {
     _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -131,8 +133,10 @@ class _SignupPageState extends State<SignupPage> {
                                 )
                               : SignupEmailForm(
                                   key: const ValueKey(1),
+                                  nameController: _nameController,
                                   emailController: _emailController,
                                   passwordController: _passwordController,
+                                  confirmPasswordController: _confirmPasswordController,
                                 ),
                         ),
 

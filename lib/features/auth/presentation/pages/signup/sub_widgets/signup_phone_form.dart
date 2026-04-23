@@ -23,6 +23,7 @@ class SignupPhoneForm extends StatefulWidget {
 
 class _SignupPhoneFormState extends State<SignupPhoneForm> {
   final _formKey = GlobalKey<FormState>();
+  String? _accountType;
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +37,27 @@ class _SignupPhoneFormState extends State<SignupPhoneForm> {
             hintText: AppText.nameHint,
             controller: widget.nameController,
             keyboardType: TextInputType.name,
-            prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
+            prefixIcon: const Icon(
+              Icons.person_outline,
+              color: AppColors.primary,
+            ),
             validator: AppValidators.name,
+          ),
+          SizedBox(height: context.h * 1.5),
+          MyTextField(
+            title: AppText.accountTypeLabel,
+            hintText: AppText.accountTypeHint,
+            prefixIcon: const Icon(
+              Icons.business_center_outlined,
+              color: AppColors.primary,
+            ),
+            dropdownItems: const [
+              AppText.accountTypeIndividual,
+              AppText.accountTypeOrganization,
+            ],
+            dropdownValue: _accountType,
+            onDropdownChanged: (val) => setState(() => _accountType = val),
+            validator: AppValidators.accountType,
           ),
           SizedBox(height: context.h * 1.5),
           MyTextField(
@@ -45,7 +65,10 @@ class _SignupPhoneFormState extends State<SignupPhoneForm> {
             hintText: AppText.phoneHint,
             controller: widget.phoneController,
             keyboardType: TextInputType.phone,
-            prefixIcon: const Icon(Icons.phone_outlined, color: AppColors.primary),
+            prefixIcon: const Icon(
+              Icons.phone_outlined,
+              color: AppColors.primary,
+            ),
             validator: AppValidators.phone,
           ),
           SizedBox(height: context.h * 2.5),
