@@ -6,8 +6,8 @@ import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/auth/presentation/pages/login/login_page.dart';
 import '../../features/auth/presentation/pages/signup/signup_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import 'app_transitions.dart';
 
-/// Central route configuration for Ledgify
 class AppRouter {
   static final router = GoRouter(
     initialLocation: '/',
@@ -15,28 +15,42 @@ class AppRouter {
       GoRoute(
         path: '/',
         name: 'splash',
-        builder: (context, state) => const SplashPage(),
+        pageBuilder: (context, state) => AppTransitions.fade(
+          key: state.pageKey,
+          child: const SplashPage(),
+        ),
       ),
       GoRoute(
         path: '/login',
         name: 'login',
-        builder: (context, state) => const LoginPage(),
+        pageBuilder: (context, state) => AppTransitions.fade(
+          key: state.pageKey,
+          child: const LoginPage(),
+        ),
       ),
       GoRoute(
         path: '/signup',
         name: 'signup',
-        builder: (context, state) => const SignupPage(),
+        pageBuilder: (context, state) => AppTransitions.fade(
+          key: state.pageKey,
+          child: const SignupPage(),
+        ),
       ),
       GoRoute(
         path: '/otp/:phone',
         name: 'otp',
-        builder: (context, state) =>
-            OtpPage(phoneNumber: state.pathParameters['phone'] ?? ''),
+        pageBuilder: (context, state) => AppTransitions.fade(
+          key: state.pageKey,
+          child: OtpPage(phoneNumber: state.pathParameters['phone'] ?? ''),
+        ),
       ),
       GoRoute(
         path: '/home',
         name: 'home',
-        builder: (context, state) => const HomePage(),
+        pageBuilder: (context, state) => AppTransitions.fade(
+          key: state.pageKey,
+          child: const HomePage(),
+        ),
       ),
     ],
     errorBuilder: (context, state) {
