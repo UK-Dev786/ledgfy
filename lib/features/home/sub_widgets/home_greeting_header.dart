@@ -63,9 +63,9 @@ class _HomeGreetingHeaderState extends State<HomeGreetingHeader>
       bottom: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
-          AppSizes.lg,
           AppSizes.md,
-          AppSizes.lg,
+          AppSizes.md,
+          AppSizes.md,
           AppSizes.sm,
         ),
         child: FadeTransition(
