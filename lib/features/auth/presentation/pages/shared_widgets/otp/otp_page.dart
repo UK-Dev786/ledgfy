@@ -188,7 +188,7 @@ class _OtpPageState extends State<OtpPage> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             MyText(
-                              "Didn't receive the code? ",
+                              AppText.dontReceiveCode + " ",
                               font: AppFont.sourceSans,
                               size: AppSizes.caption,
                               color: AppColors.textHint,

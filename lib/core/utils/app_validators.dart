@@ -8,6 +8,11 @@ abstract class AppValidators {
     return null;
   }
 
+  static String? username(String? value) {
+    if (value == null || value.trim().isEmpty) return AppText.usernameRequired;
+    return null;
+  }
+
   static String? phone(String? value) {
     if (value == null || value.trim().isEmpty) return AppText.phoneRequired;
     final digits = value.replaceAll(RegExp(r'[\s\-\+]'), '');

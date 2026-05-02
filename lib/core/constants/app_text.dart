@@ -24,6 +24,9 @@ abstract class AppText {
   static const enterFullName = "Full Name";
   static const nameHint = "Enter your full name";
   static const nameError = "Full name is required";
+  static const usernameLabel = 'Username';
+  static const usernameHint = 'Enter your username';
+  static const usernameRequired = 'Username is required';
 
   // ── Auth — Tab switcher ──────────────────────────────────────────────────
   static const tabPhone = 'Phone';
@@ -72,4 +75,5 @@ abstract class AppText {
   static const emailInvalid = 'Enter a valid email address';
   static const passwordRequired = 'Password is required';
   static const passwordTooShort = 'Password must be at least 6 characters';
+  static const dontReceiveCode = "Didn't receive the code?";
 }

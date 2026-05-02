@@ -22,6 +22,7 @@ class SignupPage extends StatefulWidget {
 
 class _SignupPageState extends State<SignupPage> {
   final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -32,6 +33,7 @@ class _SignupPageState extends State<SignupPage> {
   @override
   void dispose() {
     _nameController.dispose();
+    _usernameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -55,7 +57,7 @@ class _SignupPageState extends State<SignupPage> {
               constraints: BoxConstraints(minHeight: context.screenHeight),
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: context.w * 6,
+                  horizontal: context.w * 5,
                   vertical: context.h * 5,
                 ),
                 child: Center(
@@ -129,14 +131,17 @@ class _SignupPageState extends State<SignupPage> {
                               ? SignupPhoneForm(
                                   key: const ValueKey(0),
                                   nameController: _nameController,
+                                  usernameController: _usernameController,
                                   phoneController: _phoneController,
                                 )
                               : SignupEmailForm(
                                   key: const ValueKey(1),
                                   nameController: _nameController,
+                                  usernameController: _usernameController,
                                   emailController: _emailController,
                                   passwordController: _passwordController,
-                                  confirmPasswordController: _confirmPasswordController,
+                                  confirmPasswordController:
+                                      _confirmPasswordController,
                                 ),
                         ),
 

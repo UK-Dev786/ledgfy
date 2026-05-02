@@ -10,11 +10,13 @@ import '../../../../../../core/widgets/my_text_field.dart';
 
 class SignupPhoneForm extends StatefulWidget {
   final TextEditingController nameController;
+  final TextEditingController usernameController;
   final TextEditingController phoneController;
 
   const SignupPhoneForm({
     super.key,
     required this.nameController,
+    required this.usernameController,
     required this.phoneController,
   });
 
@@ -43,6 +45,18 @@ class _SignupPhoneFormState extends State<SignupPhoneForm> {
               color: AppColors.primary,
             ),
             validator: AppValidators.name,
+          ),
+          SizedBox(height: context.h * 1.5),
+          MyTextField(
+            title: AppText.usernameLabel,
+            hintText: AppText.usernameHint,
+            controller: widget.usernameController,
+            keyboardType: TextInputType.text,
+            prefixIcon: const Icon(
+              Icons.alternate_email,
+              color: AppColors.primary,
+            ),
+            validator: AppValidators.username,
           ),
           SizedBox(height: context.h * 1.5),
           MyTextField(

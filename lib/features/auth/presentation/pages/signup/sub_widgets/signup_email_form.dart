@@ -9,6 +9,7 @@ import '../../../../../../core/widgets/my_text_field.dart';
 
 class SignupEmailForm extends StatefulWidget {
   final TextEditingController nameController;
+  final TextEditingController usernameController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
@@ -16,6 +17,7 @@ class SignupEmailForm extends StatefulWidget {
   const SignupEmailForm({
     super.key,
     required this.nameController,
+    required this.usernameController,
     required this.emailController,
     required this.passwordController,
     required this.confirmPasswordController,
@@ -43,6 +45,15 @@ class _SignupEmailFormState extends State<SignupEmailForm> {
             keyboardType: TextInputType.name,
             prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
             validator: AppValidators.name,
+          ),
+          SizedBox(height: context.h * 1.5),
+          MyTextField(
+            title: AppText.usernameLabel,
+            hintText: AppText.usernameHint,
+            controller: widget.usernameController,
+            keyboardType: TextInputType.text,
+            prefixIcon: const Icon(Icons.alternate_email, color: AppColors.primary),
+            validator: AppValidators.username,
           ),
           SizedBox(height: context.h * 1.5),
           MyTextField(
