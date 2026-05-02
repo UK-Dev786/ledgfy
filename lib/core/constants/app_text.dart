@@ -51,7 +51,8 @@ abstract class AppText {
   static const signIn = 'Sign In';
   static const forgotPassword = 'Forgot Password';
   static const verifyEmailTitle = 'One More Step';
-  static const verifyEmailSubtitle = 'Your account is almost ready. We sent a verification link to';
+  static const verifyEmailSubtitle =
+      'Your account is almost ready. We sent a verification link to';
   static const verifyEmailDescription =
       'Please check your inbox and tap the link to verify your email. Once that is done, come back and log in to start using Ledgify.';
   static const verifyEmailHint =
@@ -85,4 +86,64 @@ abstract class AppText {
   static const passwordRequired = 'Password is required';
   static const passwordTooShort = 'Password must be at least 6 characters';
   static const dontReceiveCode = "Didn't receive the code?";
+
+  // Home — Greeting
+  static const homeGreetingMorning = 'Good morning';
+  static const homeGreetingAfternoon = 'Good afternoon';
+  static const homeGreetingEvening = 'Good evening';
+
+  // Home — Hero card
+  static const homeOverviewSuffix = 'Overview';
+  static const homeIncome = 'Income';
+  static const homeExpense = 'Expense';
+  static const homeNetBalance = 'Net';
+
+  // Home — Quick actions
+  static const homeAddRecord = '+ Add Record';
+  static const homeThisMonth = 'This Month';
+
+  // Home — Recent records
+  static const homeRecentRecords = 'Recent Records';
+  static const homeSeeAll = 'See All';
+
+  // Home — Summary
+  static const homeMonthlySummary = 'Monthly Summary';
+  static const homeTopLedgers = 'Top Ledgers';
+  static const homeNoIncome = 'No income recorded this month.';
+  static const homeTransaction = 'transaction';
+  static const homeTransactions = 'transactions';
+
+  // Home — Chart
+  static const homeChartDayLabels = [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
+  ];
+  static const homeChartIncomeLegend = 'Income';
+  static const homeChartExpenseLegend = 'Expense';
+
+  // Home — Empty state / shell
+  static const homeNoRecordsTitle = 'No records yet';
+  static const homeNoRecordsSubtitle = 'Tap + Add Record to get started.';
+  static const homeAddFirstRecord = '+ Add Your First Record';
+  static const homeLedgersTab = 'Ledgers';
+  static const homeAnalyticsTab = 'Analytics';
+  static const homeProfileTab = 'Profile';
+  static const homeComingSoon = 'Coming soon';
+
+  // Home — Errors
+  static const homeErrorGeneric = 'Something went wrong.';
+  static const homeRetry = 'Retry';
+
+  static const homeMonthlyOverview = 'Monthly Overview';
+  static const homeStatusPositive = 'POSITIVE';
+  static const homeStatusNegative = 'NEGATIVE';
+  static const homeStatusNeutral = 'NEUTRAL';
+  static const homeNetPositiveHint = 'Income exceeds expenses this month';
+  static const homeNetNegativeHint = 'Expenses exceed income this month';
+  static const homeNetNeutralHint = 'Income and expenses are balanced';
 }
