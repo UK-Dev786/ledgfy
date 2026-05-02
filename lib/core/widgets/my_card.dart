@@ -1,6 +1,6 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+
+import '../constants/app_colors.dart';
 
 enum MyCardTint { auto, light, dark }
 
@@ -18,7 +18,7 @@ class MyCard extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(24),
     this.borderRadius = 20,
-    this.blur = 20,
+    this.blur = 0,
     this.tint = MyCardTint.auto,
     this.border = true,
     this.height,
@@ -27,128 +27,99 @@ class MyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(borderRadius);
+    final isDark = switch (tint) {
+      MyCardTint.dark => true,
+      MyCardTint.light => false,
+      MyCardTint.auto => true,
+    };
 
-    final Color sheen = const Color(0xFF0A1820).withValues(alpha: 1.0);
-    final Color glassBase = const Color(0xFF0A1820).withValues(alpha: 1.0);
-    final Color dim = const Color(0xFF0A1820).withValues(alpha: 0.06);
-
-    final Color borderTopLeft = const Color(0xFF36CFE6).withValues(alpha: 0.30);
-    final Color borderBottomRight = const Color(
-      0xFF36CFE6,
-    ).withValues(alpha: 0.15);
+    final surfaceColor = isDark
+        ? const Color(0xFF0D1A22)
+        : AppColors.surface;
+    final borderColor = isDark
+        ? AppColors.primary.withValues(alpha: 0.10)
+        : AppColors.black.withValues(alpha: 0.06);
+    final topStroke = isDark
+        ? AppColors.white.withValues(alpha: 0.05)
+        : AppColors.white.withValues(alpha: 0.55);
+    final bottomShade = isDark
+        ? AppColors.black.withValues(alpha: 0.16)
+        : AppColors.black.withValues(alpha: 0.04);
+    final deepShadow = AppColors.black.withValues(alpha: isDark ? 0.42 : 0.14);
+    final softShadow = AppColors.black.withValues(alpha: isDark ? 0.18 : 0.08);
 
     return Container(
       height: height,
       decoration: BoxDecoration(
         borderRadius: radius,
         boxShadow: [
-          // Deep drop shadow — lifts card off background
           BoxShadow(
-            color: const Color(0xFF000000).withValues(alpha: 0.55),
-            blurRadius: 24,
-            spreadRadius: 0,
-            offset: const Offset(0, 10),
+            color: deepShadow,
+            blurRadius: 32,
+            spreadRadius: -10,
+            offset: const Offset(0, 18),
           ),
-          // Wide ambient teal glow
           BoxShadow(
-            color: const Color(0xFF36CFE6).withValues(alpha: 0.18),
-            blurRadius: 48,
-            spreadRadius: -4,
-            offset: const Offset(0, 0),
-          ),
-          // Tight border glow — top
-          BoxShadow(
-            color: const Color(0xFF36CFE6).withValues(alpha: 0.10),
+            color: softShadow,
             blurRadius: 12,
-            spreadRadius: -2,
-            offset: const Offset(0, -2),
-          ),
-          // Tight border glow — bottom
-          BoxShadow(
-            color: const Color(0xFF36CFE6).withValues(alpha: 0.05),
-            blurRadius: 12,
-            spreadRadius: -2,
-            offset: const Offset(0, 4),
+            spreadRadius: -6,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
-
-      child: ClipRRect(
-        borderRadius: radius,
-        child: Stack(
-          fit: StackFit.passthrough,
-          children: [
-            Positioned.fill(
-              child: IgnorePointer(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-                  child: const SizedBox.expand(),
-                ),
-              ),
-            ),
-
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: radius,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [sheen, glassBase, dim],
-                  stops: const [0.0, 0.5, 1.0],
-                ),
-              ),
-              padding: padding,
-              child: child,
-            ),
-
-            if (border)
-              Positioned.fill(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: surfaceColor,
+          borderRadius: radius,
+          border: border ? Border.all(color: borderColor) : null,
+        ),
+        child: ClipRRect(
+          borderRadius: radius,
+          child: Stack(
+            fit: StackFit.passthrough,
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: borderRadius * 0.5,
                 child: IgnorePointer(
-                  child: CustomPaint(
-                    painter: _GradientBorderPainter(
-                      radius: radius,
-                      topLeft: borderTopLeft,
-                      bottomRight: borderBottomRight,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [topStroke, Colors.transparent],
+                      ),
                     ),
                   ),
                 ),
               ),
-          ],
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: borderRadius * 0.8,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, bottomShade],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: padding,
+                child: child,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-}
-
-class _GradientBorderPainter extends CustomPainter {
-  final BorderRadius radius;
-  final Color topLeft;
-  final Color bottomRight;
-
-  const _GradientBorderPainter({
-    required this.radius,
-    required this.topLeft,
-    required this.bottomRight,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final rrect = radius.toRRect(rect);
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [topLeft, bottomRight],
-      ).createShader(rect);
-    canvas.drawRRect(rrect, paint);
-  }
-
-  @override
-  bool shouldRepaint(_GradientBorderPainter old) =>
-      old.topLeft != topLeft ||
-      old.bottomRight != bottomRight ||
-      old.radius != radius;
 }
