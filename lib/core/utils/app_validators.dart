@@ -35,10 +35,10 @@ abstract class AppValidators {
     return null;
   }
 
-  static String? Function(String?) confirmPassword(String? password) {
+  static String? Function(String?) confirmPassword(String Function() password) {
     return (String? value) {
       if (value == null || value.isEmpty) return AppText.confirmPasswordRequired;
-      if (value != password) return AppText.confirmPasswordMismatch;
+      if (value != password()) return AppText.confirmPasswordMismatch;
       return null;
     };
   }

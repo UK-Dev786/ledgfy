@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ledgify/core/extensions/context_extensions.dart';
 
 import '../../../../../../core/constants/app_colors.dart';
@@ -74,7 +75,9 @@ class _EmailFormState extends State<EmailForm> {
           MyButton(
             text: AppText.signIn,
             onTap: () {
-              if (_formKey.currentState!.validate()) {}
+              if (_formKey.currentState!.validate()) {
+                context.go('/home');
+              }
             },
           ),
         ],

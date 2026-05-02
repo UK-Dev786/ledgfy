@@ -6,6 +6,8 @@ import '../../../../../../core/constants/app_text.dart';
 import '../../../../../../core/utils/app_validators.dart';
 import '../../../../../../core/widgets/my_button.dart';
 import '../../../../../../core/widgets/my_text_field.dart';
+import '../../../../../../core/widgets/shared_bottom_sheet.dart';
+import '../../shared_widgets/email_verification_sheet.dart';
 
 class SignupEmailForm extends StatefulWidget {
   final TextEditingController nameController;
@@ -30,6 +32,25 @@ class SignupEmailForm extends StatefulWidget {
 class _SignupEmailFormState extends State<SignupEmailForm> {
   final _formKey = GlobalKey<FormState>();
   String? _accountType;
+
+  void _showVerificationSheet() {
+    final email = widget.emailController.text.trim();
+    if (email.isEmpty) return;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SharedBottomSheet(
+        child: EmailVerificationSheet(
+          email: email,
+          onResend: () {
+            // TODO: resend verification email
+          },
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,14 +114,16 @@ class _SignupEmailFormState extends State<SignupEmailForm> {
             controller: widget.confirmPasswordController,
             obscure: true,
             prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
-            validator: AppValidators.confirmPassword(widget.passwordController.text),
+            validator: AppValidators.confirmPassword(
+              () => widget.passwordController.text,
+            ),
           ),
           SizedBox(height: context.h * 2.5),
           MyButton(
             text: AppText.signUp,
             onTap: () {
               if (_formKey.currentState!.validate()) {
-                // TODO: Implement email signup logic
+                _showVerificationSheet();
               }
             },
           ),

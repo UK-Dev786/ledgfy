@@ -19,6 +19,7 @@ abstract class AppText {
   static const signUp = 'Sign Up';
   static const alreadyHaveAccount = "Already have an account?";
   static const loginHere = "Login here";
+  static const goToLogin = 'Login Now';
 
   // ── Auth — name form ────────────────────────────────────────────────────
   static const enterFullName = "Full Name";
@@ -49,6 +50,14 @@ abstract class AppText {
   static const passwordHint = 'Enter your password';
   static const signIn = 'Sign In';
   static const forgotPassword = 'Forgot Password';
+  static const verifyEmailTitle = 'One More Step';
+  static const verifyEmailSubtitle = 'Your account is almost ready. We sent a verification link to';
+  static const verifyEmailDescription =
+      'Please check your inbox and tap the link to verify your email. Once that is done, come back and log in to start using Ledgify.';
+  static const verifyEmailHint =
+      'If you cannot find it, check your spam or promotions folder too.';
+  static const verificationEmailMissing = "Didn't get the email?";
+  static const resendVerification = 'Resend';
 
   // ── Auth — OTP page ──────────────────────────────────────────────────────
   static const otpTitle = 'Verify Your Number';

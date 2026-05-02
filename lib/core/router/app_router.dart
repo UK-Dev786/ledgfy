@@ -15,26 +15,20 @@ class AppRouter {
       GoRoute(
         path: '/',
         name: 'splash',
-        pageBuilder: (context, state) => AppTransitions.fade(
-          key: state.pageKey,
-          child: const SplashPage(),
-        ),
+        pageBuilder: (context, state) =>
+            AppTransitions.fade(key: state.pageKey, child: const SplashPage()),
       ),
       GoRoute(
         path: '/login',
         name: 'login',
-        pageBuilder: (context, state) => AppTransitions.fade(
-          key: state.pageKey,
-          child: const LoginPage(),
-        ),
+        pageBuilder: (context, state) =>
+            AppTransitions.fade(key: state.pageKey, child: const LoginPage()),
       ),
       GoRoute(
         path: '/signup',
         name: 'signup',
-        pageBuilder: (context, state) => AppTransitions.fade(
-          key: state.pageKey,
-          child: const SignupPage(),
-        ),
+        pageBuilder: (context, state) =>
+            AppTransitions.fade(key: state.pageKey, child: const SignupPage()),
       ),
       GoRoute(
         path: '/otp/:phone',
@@ -47,10 +41,8 @@ class AppRouter {
       GoRoute(
         path: '/home',
         name: 'home',
-        pageBuilder: (context, state) => AppTransitions.fade(
-          key: state.pageKey,
-          child: const HomePage(),
-        ),
+        pageBuilder: (context, state) =>
+            AppTransitions.fade(key: state.pageKey, child: const HomePage()),
       ),
     ],
     errorBuilder: (context, state) {
