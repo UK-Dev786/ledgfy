@@ -21,16 +21,11 @@ class HomeTopLedgers extends StatefulWidget {
 
 class _HomeTopLedgersState extends State<HomeTopLedgers>
     with TickerProviderStateMixin {
-  late final AnimationController _entranceController;
   late final AnimationController _progressController;
 
   @override
   void initState() {
     super.initState();
-    _entranceController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 350),
-    );
     _progressController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
@@ -39,15 +34,13 @@ class _HomeTopLedgersState extends State<HomeTopLedgers>
   }
 
   Future<void> _startAnimations() async {
-    await Future<void>.delayed(const Duration(milliseconds: 680));
+    await Future<void>.delayed(const Duration(milliseconds: 1030));
     if (!mounted) return;
-    await _entranceController.forward();
-    if (mounted) _progressController.forward();
+    _progressController.forward();
   }
 
   @override
   void dispose() {
-    _entranceController.dispose();
     _progressController.dispose();
     super.dispose();
   }
@@ -57,118 +50,104 @@ class _HomeTopLedgersState extends State<HomeTopLedgers>
     final sorted = [...widget.ledgerGroups]
       ..sort((a, b) => b.totalIncome.compareTo(a.totalIncome));
     final visible = sorted.length <= 3 ? sorted : sorted.take(5).toList();
-    final entranceCurve = CurvedAnimation(
-      parent: _entranceController,
-      curve: Curves.easeOut,
-    );
-
-    return FadeTransition(
-      opacity: Tween<double>(begin: 0, end: 1).animate(entranceCurve),
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.08),
-          end: Offset.zero,
-        ).animate(entranceCurve),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            MyText(
-              AppText.homeTopLedgers,
-              font: AppFont.inter,
-              size: AppSizes.title,
-              color: AppColors.white,
-              weight: FontWeight.w700,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MyText(
+          AppText.homeTopLedgers,
+          font: AppFont.inter,
+          size: AppSizes.title,
+          color: AppColors.white,
+          weight: FontWeight.w700,
+        ),
+        const SizedBox(height: AppSizes.md),
+        if (visible.isEmpty)
+          MyCard(
+            borderRadius: AppSizes.radiusMd,
+            child: Center(
+              child: MyText(
+                AppText.homeNoIncome,
+                font: AppFont.sourceSans,
+                size: AppSizes.subtitle,
+                color: AppColors.textHint,
+              ),
             ),
-            const SizedBox(height: AppSizes.md),
-            if (visible.isEmpty)
-              MyCard(
-                borderRadius: AppSizes.radiusMd,
-                child: Center(
-                  child: MyText(
-                    AppText.homeNoIncome,
-                    font: AppFont.sourceSans,
-                    size: AppSizes.subtitle,
-                    color: AppColors.textHint,
-                  ),
-                ),
-              )
-            else
-              ...visible.map((group) {
-                final topValue = visible.first.totalIncome == 0
-                    ? 1.0
-                    : visible.first.totalIncome;
-                final progress = group.totalIncome / topValue;
-                final countLabel = group.transactionCount == 1
-                    ? '${group.transactionCount} ${AppText.homeTransaction}'
-                    : '${group.transactionCount} ${AppText.homeTransactions}';
+          )
+        else
+          ...visible.map((group) {
+            final topValue = visible.first.totalIncome == 0
+                ? 1.0
+                : visible.first.totalIncome;
+            final progress = group.totalIncome / topValue;
+            final countLabel = group.transactionCount == 1
+                ? '${group.transactionCount} ${AppText.homeTransaction}'
+                : '${group.transactionCount} ${AppText.homeTransactions}';
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: AppSizes.md),
-                  child: MyCard(
-                    borderRadius: AppSizes.radiusMd,
-                    padding: EdgeInsets.all(AppSizes.radiusMd),
-                    child: Column(
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSizes.md),
+              child: MyCard(
+                borderRadius: AppSizes.radiusMd,
+                padding: EdgeInsets.all(AppSizes.radiusMd),
+                child: Column(
+                  children: [
+                    Row(
                       children: [
-                        Row(
+                        Icon(
+                          group.icon,
+                          color: AppColors.primary,
+                          size: AppSizes.iconMd,
+                        ),
+                        const SizedBox(width: AppSizes.sm),
+                        Expanded(
+                          child: MyText(
+                            group.ledgerName,
+                            font: AppFont.inter,
+                            size: AppSizes.subtitle,
+                            color: AppColors.white,
+                            weight: FontWeight.w600,
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Icon(
-                              group.icon,
-                              color: AppColors.primary,
-                              size: AppSizes.iconMd,
+                            MyText(
+                              CurrencyFormatter.format(group.totalIncome),
+                              font: AppFont.inter,
+                              size: AppSizes.subtitle,
+                              color: AppColors.success,
+                              weight: FontWeight.w700,
                             ),
-                            const SizedBox(width: AppSizes.sm),
-                            Expanded(
-                              child: MyText(
-                                group.ledgerName,
-                                font: AppFont.inter,
-                                size: AppSizes.subtitle,
-                                color: AppColors.white,
-                                weight: FontWeight.w600,
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                MyText(
-                                  CurrencyFormatter.format(group.totalIncome),
-                                  font: AppFont.inter,
-                                  size: AppSizes.subtitle,
-                                  color: AppColors.success,
-                                  weight: FontWeight.w700,
-                                ),
-                                MyText(
-                                  countLabel,
-                                  font: AppFont.sourceSans,
-                                  size: AppSizes.caption,
-                                  color: AppColors.textHint,
-                                ),
-                              ],
+                            MyText(
+                              countLabel,
+                              font: AppFont.sourceSans,
+                              size: AppSizes.caption,
+                              color: AppColors.textHint,
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppSizes.md),
-                        AnimatedBuilder(
-                          animation: _progressController,
-                          builder: (context, _) => LinearProgressIndicator(
-                            value: progress * _progressController.value,
-                            minHeight: AppSizes.xs,
-                            color: AppColors.primary,
-                            backgroundColor: AppColors.primaryTint.withValues(
-                              alpha: 0.2,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              AppSizes.radiusSm,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
-                  ),
-                );
-              }),
-          ],
-        ),
-      ),
+                    const SizedBox(height: AppSizes.md),
+                    AnimatedBuilder(
+                      animation: _progressController,
+                      builder: (context, _) => LinearProgressIndicator(
+                        value: progress * _progressController.value,
+                        minHeight: AppSizes.xs,
+                        color: AppColors.primary,
+                        backgroundColor: AppColors.primaryTint.withValues(
+                          alpha: 0.2,
+                        ),
+                        borderRadius: BorderRadius.circular(
+                          AppSizes.radiusSm,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+      ],
     );
   }
 }
