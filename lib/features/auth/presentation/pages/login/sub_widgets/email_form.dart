@@ -63,7 +63,7 @@ class _EmailFormState extends State<EmailForm> {
             alignment: AlignmentGeometry.centerRight,
             child: MyText(
               isOnTap: true,
-              onTap: () {},
+              onTap: () => context.push('/forgot-password'),
               AppText.forgotPassword,
               font: AppFont.sourceSans,
               size: AppSizes.body,

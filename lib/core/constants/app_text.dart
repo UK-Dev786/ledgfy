@@ -51,6 +51,24 @@ abstract class AppText {
   static const signIn = 'Sign In';
   static const orContinueWith = 'or continue with';
   static const forgotPassword = 'Forgot Password';
+  static const forgotPasswordTitle = 'Forgot Password';
+  static const forgotPasswordSubtitle =
+      'Enter your email address and we will send you a link to reset your password.';
+  static const sendResetLink = 'Send Reset Link';
+  static const backToLogin = 'Back to Login';
+  static const passwordResetSentTitle = 'Email Sent';
+  static const passwordResetSentMessage =
+      'Check your inbox for the password reset link.';
+  static const signUpVerifyPopupTitle = 'Check Your Email';
+  static const signUpVerifyPopupMessage =
+      'We sent a verification email to you. Open the link to verify your account, then sign in.';
+  static const verificationNotReceived =
+      "Don't received a verification email?";
+  static const resendHere = 'Resend here';
+  static const verificationResent =
+      'Verification email sent again. Check your inbox.';
+  static const dialogOk = 'OK';
+  static const dialogSuccessTitle = 'Success';
   static const verifyEmailTitle = 'One More Step';
   static const verifyEmailSubtitle =
       'Your account is almost ready. We sent a verification link to';

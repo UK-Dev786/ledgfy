@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/shared_widgets/otp/otp_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
+import '../../features/auth/presentation/pages/forgot_password/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login/login_page.dart';
 import '../../features/auth/presentation/pages/signup/signup_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
@@ -29,6 +30,14 @@ class AppRouter {
         name: 'signup',
         pageBuilder: (context, state) =>
             AppTransitions.fade(key: state.pageKey, child: const SignupPage()),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        name: 'forgot-password',
+        pageBuilder: (context, state) => AppTransitions.fade(
+          key: state.pageKey,
+          child: const ForgotPasswordPage(),
+        ),
       ),
       GoRoute(
         path: '/otp/:phone',
