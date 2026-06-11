@@ -49,6 +49,7 @@ abstract class AppText {
   static const passwordLabel = 'Password';
   static const passwordHint = 'Enter your password';
   static const signIn = 'Sign In';
+  static const orContinueWith = 'or continue with';
   static const forgotPassword = 'Forgot Password';
   static const verifyEmailTitle = 'One More Step';
   static const verifyEmailSubtitle =
