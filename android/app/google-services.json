@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "417119237800",
+    "project_id": "ledgify-ukdev",
+    "storage_bucket": "ledgify-ukdev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:417119237800:android:65928d6e406eb13001749d",
+        "android_client_info": {
+          "package_name": "com.ukdev.ledgify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "417119237800-sv5ntd77bfhqgg9oapi8mifp22mqqd29.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ukdev.ledgify",
+            "certificate_hash": "f7b96e596069afdb927c149a28bc745322f49608"
+          }
+        },
+        {
+          "client_id": "417119237800-rvd6cr88lckf9o0iifbgkf3jdlritf2c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARUXX_k74WEz-ESdkyUKIxAI95a4KB7Js"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "417119237800-rvd6cr88lckf9o0iifbgkf3jdlritf2c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "417119237800-20uic9j14grubop7k042v4qckiou5f4q.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ukdev.ledgify"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
