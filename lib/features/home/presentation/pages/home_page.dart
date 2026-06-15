@@ -7,6 +7,7 @@ import '../../../../core/widgets/my_card.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/themed_gradient_bg.dart';
 import '../../home_screen.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -34,10 +35,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icons.insert_chart_outlined_rounded,
             label: AppText.homeAnalyticsTab,
           ),
-          const _PlaceholderTab(
-            icon: Icons.person_rounded,
-            label: AppText.homeProfileTab,
-          ),
+          const ProfilePage(),
         ],
       ),
       bottomNavigationBar: SafeArea(

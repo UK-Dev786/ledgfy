@@ -106,6 +106,25 @@ abstract class AppText {
   static const passwordTooShort = 'Password must be at least 6 characters';
   static const dontReceiveCode = "Didn't receive the code?";
 
+  // ── Auth — Firebase errors ───────────────────────────────────────────────
+  static const authErrorGeneric = 'Something went wrong. Please try again.';
+  static const authInvalidCredentials = 'Invalid email or password.';
+  static const authEmailInUse = 'An account with this email already exists.';
+  static const authAccountDisabled = 'This account has been disabled.';
+  static const authTooManyRequests =
+      'Too many attempts. Please wait and try again.';
+  static const authNetworkError =
+      'Network error. Check your connection and try again.';
+  static const authProviderDisabled =
+      'This sign-in method is not enabled. Please contact support.';
+  static const authGoogleCancelled = 'Google sign-in was cancelled.';
+  static const authEmailNotVerified =
+      'Please verify your email before signing in. Check your inbox for the verification link.';
+  static const authFirestorePermissionDenied =
+      'Could not save your profile. Please check Firestore rules and try again.';
+  static const authSdkError =
+      'Authentication SDK error. Run flutter clean, then try again.';
+
   // Home — Greeting
   static const homeGreetingMorning = 'Good morning';
   static const homeGreetingAfternoon = 'Good afternoon';
@@ -153,6 +172,12 @@ abstract class AppText {
   static const homeAnalyticsTab = 'Analytics';
   static const homeProfileTab = 'Profile';
   static const homeComingSoon = 'Coming soon';
+
+  // Profile
+  static const profileTitle = 'Profile';
+  static const profileSignOut = 'Sign Out';
+  static const profileVerified = 'Verified';
+  static const profileNotVerified = 'Not verified';
 
   // Home — Errors
   static const homeErrorGeneric = 'Something went wrong.';

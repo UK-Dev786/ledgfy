@@ -1,11 +1,13 @@
 import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ledgify/core/extensions/context_extensions.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_sizes.dart';
 import '../../../../../core/constants/app_text.dart';
+import '../../../../../core/errors/auth_exception_mapper.dart';
 import '../../../../../core/extensions/popup_extensions.dart';
 import '../../../../../core/utils/app_validators.dart';
 import '../../../../../core/widgets/my_button.dart';
@@ -13,18 +15,18 @@ import '../../../../../core/widgets/my_card.dart';
 import '../../../../../core/widgets/my_text.dart';
 import '../../../../../core/widgets/my_text_field.dart';
 import '../../../../../core/widgets/themed_gradient_bg.dart';
+import '../../viewmodels/forgot_password_viewmodel.dart';
 
-class ForgotPasswordPage extends StatefulWidget {
+class ForgotPasswordPage extends ConsumerStatefulWidget {
   const ForgotPasswordPage({super.key});
 
   @override
-  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+  ConsumerState<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
-class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -34,22 +36,36 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   Future<void> _sendResetLink() async {
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-    // TODO: wire Firebase password reset
-    await Future<void>.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    await context.popSuccess(
-      AppText.passwordResetSentMessage,
-      title: AppText.passwordResetSentTitle,
-      onOk: () => context.go('/login'),
-    );
+    await ref
+        .read(forgotPasswordViewModelProvider.notifier)
+        .sendResetLink(_emailController.text);
   }
 
   @override
   Widget build(BuildContext context) {
+    final forgotPasswordState = ref.watch(forgotPasswordViewModelProvider);
+    final isLoading = forgotPasswordState.isLoading;
+
+    ref.listen(forgotPasswordViewModelProvider, (previous, next) async {
+      if (next.hasError) {
+        context.popMsg(
+          AuthExceptionMapper.message(next.error!),
+          icon: Icons.error_outline_rounded,
+          color: AppColors.primary,
+        );
+        ref.read(forgotPasswordViewModelProvider.notifier).reset();
+      } else if (!next.isLoading &&
+          next.hasValue &&
+          previous?.isLoading == true) {
+        await context.popSuccess(
+          AppText.passwordResetSentMessage,
+          title: AppText.passwordResetSentTitle,
+          onOk: () => context.go('/login'),
+        );
+        ref.read(forgotPasswordViewModelProvider.notifier).reset();
+      }
+    });
+
     return ThemedGradientBackground(
       child: Scaffold(
         resizeToAvoidBottomInset: true,
@@ -116,7 +132,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           SizedBox(height: context.h * 2.5),
                           MyButton(
                             text: AppText.sendResetLink,
-                            loading: _isLoading,
+                            loading: isLoading,
                             onTap: _sendResetLink,
                           ),
                           SizedBox(height: context.h * 2.5),

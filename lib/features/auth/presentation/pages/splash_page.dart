@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -7,25 +8,52 @@ import '../../../../core/constants/app_text.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/widgets/app_background.dart';
 import '../../../../core/widgets/my_text.dart';
+import '../../../../di/auth_providers.dart';
 
-class SplashPage extends StatefulWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> {
+class _SplashPageState extends ConsumerState<SplashPage> {
+  bool _minDelayComplete = false;
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) context.go('/login');
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _minDelayComplete = true);
     });
+  }
+
+  void _navigateIfReady(AsyncValue<dynamic> authState) {
+    if (!_minDelayComplete) return;
+    if (!authState.hasValue) return;
+
+    final user = authState.value;
+    if (user != null) {
+      context.go('/home');
+    } else {
+      context.go('/login');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authStateChangesProvider);
+
+    ref.listen(authStateChangesProvider, (previous, next) {
+      _navigateIfReady(next);
+    });
+
+    if (_minDelayComplete) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateIfReady(authState);
+      });
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF0B1017),
       body: Container(

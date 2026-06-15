@@ -1,1 +1,5 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"ledgify-ukdev","appId":"1:417119237800:android:65928d6e406eb13001749d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"ledgify-ukdev","configurations":{"android":"1:417119237800:android:65928d6e406eb13001749d","ios":"1:417119237800:ios:d11286bc1211a91001749d"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

@@ -1,5 +1,6 @@
 import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ledgify/core/extensions/context_extensions.dart';
 import 'package:ledgify/features/auth/presentation/pages/signup/sub_widgets/signup_email_form.dart';
@@ -7,47 +8,106 @@ import 'package:ledgify/features/auth/presentation/pages/signup/sub_widgets/sign
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/constants/app_sizes.dart';
 import '../../../../../core/constants/app_text.dart';
+import '../../../../../core/errors/auth_exception_mapper.dart';
+import '../../../../../core/extensions/popup_extensions.dart';
 import '../../../../../core/widgets/my_card.dart';
 import '../../../../../core/widgets/my_text.dart';
 import '../../../../../core/widgets/themed_gradient_bg.dart';
+import '../../../../../di/auth_providers.dart';
+import '../../viewmodels/login_viewmodel.dart';
+import '../../viewmodels/signup_viewmodel.dart';
 import '../shared_widgets/auth_social_section.dart';
-// import '../shared_widgets/tab_item.dart';
-// import 'sub_widgets/signup_phone_form.dart';
 
-class SignupPage extends StatefulWidget {
+class SignupPage extends ConsumerStatefulWidget {
   const SignupPage({super.key});
 
   @override
-  State<SignupPage> createState() => _SignupPageState();
+  ConsumerState<SignupPage> createState() => _SignupPageState();
 }
 
-class _SignupPageState extends State<SignupPage> {
+class _SignupPageState extends ConsumerState<SignupPage> {
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
-  // final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-
-  // int _currentTab = 0;
 
   @override
   void dispose() {
     _nameController.dispose();
     _usernameController.dispose();
-    // _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  // void _switchTab(int index) {
-  //   setState(() => _currentTab = index);
-  // }
+  Future<void> _signInWithGoogle() async {
+    await ref.read(loginViewModelProvider.notifier).signInWithGoogle();
+  }
+
+  Future<void> _showVerificationDialog() async {
+    if (!mounted) return;
+    await context.popSignUpVerification(
+      onLogin: () => context.go('/login'),
+      onResend: () async {
+        try {
+          await ref.read(authRepositoryProvider).resendVerificationEmail(
+            _emailController.text.trim(),
+            _passwordController.text,
+          );
+          if (!mounted) return;
+          await context.popSuccess(AppText.verificationResent);
+        } catch (error) {
+          if (!mounted) return;
+          await context.popMsg(
+            AuthExceptionMapper.message(error),
+            icon: Icons.error_outline_rounded,
+            color: AppColors.primary,
+          );
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final signupState = ref.watch(signupViewModelProvider);
+    final loginState = ref.watch(loginViewModelProvider);
+    final isLoading = signupState.isLoading || loginState.isLoading;
+
+    ref.listen(signupViewModelProvider, (previous, next) async {
+      if (next.hasError) {
+        context.popMsg(
+          AuthExceptionMapper.message(next.error!),
+          icon: Icons.error_outline_rounded,
+          color: AppColors.primary,
+        );
+        ref.read(signupViewModelProvider.notifier).reset();
+      } else if (!next.isLoading &&
+          next.hasValue &&
+          previous?.isLoading == true) {
+        await _showVerificationDialog();
+        ref.read(signupViewModelProvider.notifier).reset();
+      }
+    });
+
+    ref.listen(loginViewModelProvider, (previous, next) {
+      if (next.hasError) {
+        context.popMsg(
+          AuthExceptionMapper.message(next.error!),
+          icon: Icons.error_outline_rounded,
+          color: AppColors.primary,
+        );
+        ref.read(loginViewModelProvider.notifier).reset();
+      } else if (!next.isLoading &&
+          next.hasValue &&
+          previous?.isLoading == true) {
+        context.go('/home');
+        ref.read(loginViewModelProvider.notifier).reset();
+      }
+    });
+
     return ThemedGradientBackground(
       child: Scaffold(
         resizeToAvoidBottomInset: true,
@@ -95,74 +155,27 @@ class _SignupPageState extends State<SignupPage> {
                           size: AppSizes.subtitle,
                           color: AppColors.textHint,
                         ),
-
                         SizedBox(height: context.h * 3),
-
-                        // Phone register disabled until billing is enabled.
-                        // TabSwitcher(
-                        //   currentTab: _currentTab,
-                        //   onSwitch: _switchTab,
-                        // ),
-                        // SizedBox(height: context.h * 3),
-                        // AnimatedSwitcher(
-                        //   duration: const Duration(milliseconds: 320),
-                        //   switchInCurve: Curves.easeInOut,
-                        //   switchOutCurve: Curves.easeInOut,
-                        //   transitionBuilder: (child, animation) {
-                        //     final isPhone = child.key == const ValueKey(0);
-                        //     final offset = isPhone
-                        //         ? const Offset(-1, 0)
-                        //         : const Offset(1, 0);
-                        //     return SlideTransition(
-                        //       position: Tween(
-                        //         begin: offset,
-                        //         end: Offset.zero,
-                        //       ).animate(animation),
-                        //       child: FadeTransition(
-                        //         opacity: animation,
-                        //         child: child,
-                        //       ),
-                        //     );
-                        //   },
-                        //   child: _currentTab == 0
-                        //       ? SignupPhoneForm(
-                        //           key: const ValueKey(0),
-                        //           nameController: _nameController,
-                        //           usernameController: _usernameController,
-                        //           phoneController: _phoneController,
-                        //         )
-                        //       : SignupEmailForm(
-                        //           key: const ValueKey(1),
-                        //           nameController: _nameController,
-                        //           usernameController: _usernameController,
-                        //           emailController: _emailController,
-                        //           passwordController: _passwordController,
-                        //           confirmPasswordController:
-                        //               _confirmPasswordController,
-                        //         ),
-                        // ),
                         SignupEmailForm(
                           nameController: _nameController,
                           usernameController: _usernameController,
                           emailController: _emailController,
                           passwordController: _passwordController,
                           confirmPasswordController: _confirmPasswordController,
+                          loading: isLoading,
+                          onSignUp: (params) => ref
+                              .read(signupViewModelProvider.notifier)
+                              .signUp(params),
                         ),
-
-                        const AuthSocialSection(
-                          // TODO: wire Google sign-in
-                          onGoogleTap: null,
+                        AuthSocialSection(
+                          onGoogleTap: isLoading ? null : _signInWithGoogle,
                         ),
-
                         SizedBox(height: context.h * 2),
-
                         Divider(
                           color: AppColors.textHint.withValues(alpha: 0.3),
                           thickness: 1,
                         ),
-
                         SizedBox(height: context.h * 2),
-
                         Align(
                           alignment: Alignment.centerRight,
                           child: Text.rich(
