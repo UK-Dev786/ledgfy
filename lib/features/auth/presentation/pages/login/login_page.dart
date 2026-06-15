@@ -63,11 +63,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final loginState = ref.watch(loginViewModelProvider);
-    final isLoading = loginState.isLoading;
 
     ref.listen(loginViewModelProvider, (previous, next) async {
-      if (next.hasError) {
-        final error = next.error!;
+      if (next.status.hasError) {
+        final error = next.status.error!;
         if (error is ValidationException &&
             error.message == AppText.authEmailNotVerified) {
           await context.popEmailVerificationRequired(
@@ -83,9 +82,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           );
         }
         ref.read(loginViewModelProvider.notifier).reset();
-      } else if (!next.isLoading &&
-          next.hasValue &&
-          previous?.isLoading == true) {
+      } else if (!next.status.isLoading &&
+          next.status.hasValue &&
+          previous?.status.isLoading == true) {
         context.go('/home');
         ref.read(loginViewModelProvider.notifier).reset();
       }
@@ -142,13 +141,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         EmailForm(
                           emailController: _emailController,
                           passwordController: _passwordController,
-                          loading: isLoading,
+                          loading: loginState.isEmailLoading,
                           onSignIn: (email, password) => ref
                               .read(loginViewModelProvider.notifier)
                               .login(email, password),
                         ),
                         AuthSocialSection(
-                          onGoogleTap: isLoading ? null : _signInWithGoogle,
+                          googleLoading: loginState.isGoogleLoading,
+                          onGoogleTap: loginState.isLoading
+                              ? null
+                              : _signInWithGoogle,
                         ),
                         SizedBox(height: context.h * 2),
                         Divider(

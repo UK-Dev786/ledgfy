@@ -74,35 +74,34 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   Widget build(BuildContext context) {
     final signupState = ref.watch(signupViewModelProvider);
     final loginState = ref.watch(loginViewModelProvider);
-    final isLoading = signupState.isLoading || loginState.isLoading;
 
     ref.listen(signupViewModelProvider, (previous, next) async {
-      if (next.hasError) {
+      if (next.status.hasError) {
         context.popMsg(
-          AuthExceptionMapper.message(next.error!),
+          AuthExceptionMapper.message(next.status.error!),
           icon: Icons.error_outline_rounded,
           color: AppColors.primary,
         );
         ref.read(signupViewModelProvider.notifier).reset();
-      } else if (!next.isLoading &&
-          next.hasValue &&
-          previous?.isLoading == true) {
+      } else if (!next.status.isLoading &&
+          next.status.hasValue &&
+          previous?.status.isLoading == true) {
         await _showVerificationDialog();
         ref.read(signupViewModelProvider.notifier).reset();
       }
     });
 
     ref.listen(loginViewModelProvider, (previous, next) {
-      if (next.hasError) {
+      if (next.status.hasError) {
         context.popMsg(
-          AuthExceptionMapper.message(next.error!),
+          AuthExceptionMapper.message(next.status.error!),
           icon: Icons.error_outline_rounded,
           color: AppColors.primary,
         );
         ref.read(loginViewModelProvider.notifier).reset();
-      } else if (!next.isLoading &&
-          next.hasValue &&
-          previous?.isLoading == true) {
+      } else if (!next.status.isLoading &&
+          next.status.hasValue &&
+          previous?.status.isLoading == true) {
         context.go('/home');
         ref.read(loginViewModelProvider.notifier).reset();
       }
@@ -162,13 +161,17 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                           emailController: _emailController,
                           passwordController: _passwordController,
                           confirmPasswordController: _confirmPasswordController,
-                          loading: isLoading,
+                          loading: signupState.isEmailLoading,
                           onSignUp: (params) => ref
                               .read(signupViewModelProvider.notifier)
                               .signUp(params),
                         ),
                         AuthSocialSection(
-                          onGoogleTap: isLoading ? null : _signInWithGoogle,
+                          googleLoading: loginState.isGoogleLoading,
+                          onGoogleTap: signupState.isLoading ||
+                                  loginState.isLoading
+                              ? null
+                              : _signInWithGoogle,
                         ),
                         SizedBox(height: context.h * 2),
                         Divider(

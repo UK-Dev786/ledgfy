@@ -10,8 +10,13 @@ import 'google_sign_in_card.dart';
 /// "Or continue with" + Google logo card — UI only.
 class AuthSocialSection extends StatelessWidget {
   final VoidCallback? onGoogleTap;
+  final bool googleLoading;
 
-  const AuthSocialSection({super.key, this.onGoogleTap});
+  const AuthSocialSection({
+    super.key,
+    this.onGoogleTap,
+    this.googleLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +50,12 @@ class AuthSocialSection extends StatelessWidget {
           ],
         ),
         SizedBox(height: context.h * 1.1),
-        Center(child: GoogleSignInCard(onTap: onGoogleTap)),
+        Center(
+          child: GoogleSignInCard(
+            onTap: onGoogleTap,
+            loading: googleLoading,
+          ),
+        ),
       ],
     );
   }
