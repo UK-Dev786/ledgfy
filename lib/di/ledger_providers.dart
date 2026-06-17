@@ -25,7 +25,20 @@ final currentUserIdProvider = Provider<String?>((ref) {
 });
 
 final ledgersStreamProvider = StreamProvider<List<LedgerItem>>((ref) {
-  final userId = ref.watch(currentUserIdProvider);
+  final authAsync = ref.watch(authStateChangesProvider);
+
+  if (authAsync.isLoading) {
+    return const Stream<List<LedgerItem>>.empty();
+  }
+
+  if (authAsync.hasError) {
+    return Stream<List<LedgerItem>>.error(
+      authAsync.error!,
+      authAsync.stackTrace,
+    );
+  }
+
+  final userId = authAsync.valueOrNull?.id;
   if (userId == null) {
     return Stream.value(const []);
   }

@@ -131,11 +131,11 @@ abstract class AppText {
   static const homeGreetingEvening = 'Good evening';
   static const homeGuestName = 'there';
 
-  // Home — Hero card
+  // Home — Hero card (neutral labels across udhar, cash, expense & project)
   static const homeOverviewSuffix = 'Overview';
-  static const homeIncome = 'Income';
-  static const homeExpense = 'Expense';
-  static const homeNetBalance = 'Net';
+  static const homeIncome = 'Money In';
+  static const homeExpense = 'Money Out';
+  static const homeNetBalance = 'Net Flow';
 
   // Home — Quick actions
   static const homeAddRecord = '+ Add Record';
@@ -148,7 +148,7 @@ abstract class AppText {
   // Home — Summary
   static const homeMonthlySummary = 'Monthly Summary';
   static const homeTopLedgers = 'Top Ledgers';
-  static const homeNoIncome = 'No income recorded this month.';
+  static const homeNoIncome = 'No transactions recorded this month.';
   static const homeTransaction = 'transaction';
   static const homeTransactions = 'transactions';
 
@@ -162,8 +162,8 @@ abstract class AppText {
     'Sat',
     'Sun',
   ];
-  static const homeChartIncomeLegend = 'Income';
-  static const homeChartExpenseLegend = 'Expense';
+  static const homeChartIncomeLegend = 'Money In';
+  static const homeChartExpenseLegend = 'Money Out';
 
   // Home — Empty state / shell
   static const homeNoRecordsTitle = 'No records yet';
@@ -186,12 +186,12 @@ abstract class AppText {
   static const homeRetry = 'Retry';
 
   static const homeMonthlyOverview = 'Monthly Overview';
-  static const homeStatusPositive = 'POSITIVE';
-  static const homeStatusNegative = 'NEGATIVE';
-  static const homeStatusNeutral = 'NEUTRAL';
-  static const homeNetPositiveHint = 'Income exceeds expenses this month';
-  static const homeNetNegativeHint = 'Expenses exceed income this month';
-  static const homeNetNeutralHint = 'Income and expenses are balanced';
+  static const homeStatusPositive = 'SURPLUS';
+  static const homeStatusNegative = 'DEFICIT';
+  static const homeStatusNeutral = 'BALANCED';
+  static const homeNetPositiveHint = 'More money in than out this month';
+  static const homeNetNegativeHint = 'More money out than in this month';
+  static const homeNetNeutralHint = 'Money in and out are balanced this month';
 
   // Ledgers
   static const ledgersTitle = 'Ledgers';

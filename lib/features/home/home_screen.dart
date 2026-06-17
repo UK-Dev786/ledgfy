@@ -26,37 +26,24 @@ class HomeScreen extends ConsumerWidget {
     this.onLedgerTap,
   });
 
+  String _userName(WidgetRef ref) {
+    final user = ref.watch(authStateChangesProvider).valueOrNull;
+    if (user?.displayName?.trim().isNotEmpty == true) {
+      return user!.displayName!.trim();
+    }
+    return user?.email.split('@').first ?? AppText.homeGuestName;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ledgersAsync = ref.watch(ledgersStreamProvider);
-    final ledgers = ref.watch(ledgersProvider);
-    final dashboard = HomeDashboardAnalytics.build(ledgers: ledgers);
-    final user = ref.watch(authStateChangesProvider).valueOrNull;
-    final userName = user?.displayName?.trim().isNotEmpty == true
-        ? user!.displayName!.trim()
-        : (user?.email.split('@').first ?? AppText.homeGuestName);
+    final userName = _userName(ref);
 
     return ThemedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: ledgersAsync.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(AppColors.primary),
-              strokeWidth: 2,
-            ),
-          ),
-          error: (error, _) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSizes.lg),
-              child: Text(
-                error.toString(),
-                style: const TextStyle(color: AppColors.error),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-          data: (_) => SingleChildScrollView(
+          loading: () => SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
               AppSizes.lg,
               AppSizes.md,
@@ -70,34 +57,74 @@ class HomeScreen extends ConsumerWidget {
                   onProfileTap: onProfileTap ?? () {},
                 ),
                 const SizedBox(height: AppSizes.lg),
-                HomeHeroCard(
-                  totalIncome: dashboard.totalIncome,
-                  totalExpense: dashboard.totalExpense,
-                  currencyCode: CurrencyFormatter.getActiveCurrencyCode(),
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSizes.xxl * 2),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                      strokeWidth: 2,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: AppSizes.lg),
-                if (dashboard.hasRecords)
-                  HomeRecentRecords(
-                    entries: dashboard.recentEntries,
-                    onSeeAll: onLedgerTap,
-                    onEntryTap: (entry) {
-                      Navigator.of(context).push<void>(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              LedgerDetailPage(ledgerId: entry.ledgerId),
-                        ),
-                      );
-                    },
-                  )
-                else
-                  HomeEmptyState(onAddTap: onLedgerTap),
-                if (dashboard.hasRecords) ...[
-                  const SizedBox(height: AppSizes.xs),
-                  HomeTopLedgers(ledgerGroups: dashboard.topLedgers),
-                ],
               ],
             ),
           ),
+          error: (error, _) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSizes.lg),
+              child: Text(
+                error.toString(),
+                style: const TextStyle(color: AppColors.error),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          data: (ledgers) {
+            final dashboard = HomeDashboardAnalytics.build(ledgers: ledgers);
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.lg,
+                AppSizes.md,
+                AppSizes.lg,
+                AppSizes.xxl,
+              ),
+              child: Column(
+                children: [
+                  HomeGreetingHeader(
+                    userName: userName,
+                    onProfileTap: onProfileTap ?? () {},
+                  ),
+                  const SizedBox(height: AppSizes.lg),
+                  HomeHeroCard(
+                    totalIncome: dashboard.totalIncome,
+                    totalExpense: dashboard.totalExpense,
+                    currencyCode: CurrencyFormatter.getActiveCurrencyCode(),
+                  ),
+                  const SizedBox(height: AppSizes.lg),
+                  if (dashboard.hasRecords)
+                    HomeRecentRecords(
+                      entries: dashboard.recentEntries,
+                      onSeeAll: onLedgerTap,
+                      onEntryTap: (entry) {
+                        Navigator.of(context).push<void>(
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                LedgerDetailPage(ledgerId: entry.ledgerId),
+                          ),
+                        );
+                      },
+                    )
+                  else
+                    HomeEmptyState(onAddTap: onLedgerTap),
+                  if (dashboard.hasRecords) ...[
+                    const SizedBox(height: AppSizes.xs),
+                    HomeTopLedgers(ledgerGroups: dashboard.topLedgers),
+                  ],
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

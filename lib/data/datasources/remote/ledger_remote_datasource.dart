@@ -34,6 +34,7 @@ class LedgerRemoteDataSource {
     final entrySubscriptions =
         <String, StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>{};
     final entryLists = <String, List<LedgerEntry>>{};
+    final entryReady = <String, bool>{};
     var latestDocs = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
 
     final controller = StreamController<List<LedgerItem>>.broadcast();
@@ -54,20 +55,41 @@ class LedgerRemoteDataSource {
       controller.add(buildItems());
     }
 
+    void emitWhenEntriesReady() {
+      if (controller.isClosed) return;
+      if (latestDocs.isEmpty) {
+        controller.add(const []);
+        return;
+      }
+
+      final allReady = latestDocs.every((doc) => entryReady[doc.id] == true);
+      if (allReady) {
+        emitItems();
+      }
+    }
+
     void syncEntryListeners() {
       final activeIds = latestDocs.map((doc) => doc.id).toSet();
+      var removedLedger = false;
 
       for (final ledgerId in entrySubscriptions.keys.toList()) {
         if (!activeIds.contains(ledgerId)) {
           entrySubscriptions.remove(ledgerId)?.cancel();
           entryLists.remove(ledgerId);
+          entryReady.remove(ledgerId);
+          removedLedger = true;
         }
+      }
+
+      if (removedLedger) {
+        emitWhenEntriesReady();
       }
 
       for (final doc in latestDocs) {
         final ledgerId = doc.id;
         if (entrySubscriptions.containsKey(ledgerId)) continue;
 
+        entryReady[ledgerId] = false;
         entrySubscriptions[ledgerId] = doc.reference
             .collection('entries')
             .orderBy('createdAt', descending: true)
@@ -75,9 +97,20 @@ class LedgerRemoteDataSource {
             .listen(
           (entrySnapshot) {
             entryLists[ledgerId] = entrySnapshot.docs
-                .map((entryDoc) => LedgerEntryModel.fromFirestore(entryDoc).toEntity())
+                .map(
+                  (entryDoc) =>
+                      LedgerEntryModel.fromFirestore(entryDoc).toEntity(),
+                )
                 .toList();
-            emitItems();
+
+            final wasReady = entryReady[ledgerId] == true;
+            entryReady[ledgerId] = true;
+
+            if (!wasReady) {
+              emitWhenEntriesReady();
+            } else {
+              emitItems();
+            }
           },
           onError: controller.addError,
         );
@@ -91,7 +124,15 @@ class LedgerRemoteDataSource {
       (ledgerSnapshot) {
         latestDocs = ledgerSnapshot.docs;
         syncEntryListeners();
-        emitItems();
+
+        if (latestDocs.isEmpty) {
+          controller.add(const []);
+          return;
+        }
+
+        if (latestDocs.every((doc) => entryReady[doc.id] == true)) {
+          emitItems();
+        }
       },
       onError: controller.addError,
     );
@@ -103,6 +144,7 @@ class LedgerRemoteDataSource {
       }
       entrySubscriptions.clear();
       entryLists.clear();
+      entryReady.clear();
     };
 
     return controller.stream;
