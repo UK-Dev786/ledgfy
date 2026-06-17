@@ -16,6 +16,7 @@ class LedgerHistoryList extends StatelessWidget {
   final bool showFullAmounts;
   final bool preferDescriptionAsTitle;
   final bool showHeader;
+  final bool animate;
 
   const LedgerHistoryList({
     super.key,
@@ -24,6 +25,7 @@ class LedgerHistoryList extends StatelessWidget {
     required this.showFullAmounts,
     this.preferDescriptionAsTitle = false,
     this.showHeader = true,
+    this.animate = false,
   });
 
   @override
@@ -32,7 +34,7 @@ class LedgerHistoryList extends StatelessWidget {
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     final emptyMessage = preferDescriptionAsTitle
-        ? AppText.ledgerHistoryPartyEmpty
+        ? config.subLedgerHistoryEmpty
         : config.emptyHistoryMessage;
 
     return Column(
@@ -49,8 +51,7 @@ class LedgerHistoryList extends StatelessWidget {
           const SizedBox(height: AppSizes.md),
         ],
         if (sorted.isEmpty)
-          SharedEntranceAnimation(
-            delay: const Duration(milliseconds: 80),
+          _maybeAnimate(
             child: MyCard(
               borderRadius: AppSizes.radiusMd,
               child: MyText(
@@ -70,7 +71,7 @@ class LedgerHistoryList extends StatelessWidget {
             itemCount: sorted.length,
             separatorBuilder: (_, __) => const SizedBox(height: AppSizes.sm),
             itemBuilder: (context, index) {
-              return SharedEntranceAnimation(
+              return _maybeAnimate(
                 delay: Duration(milliseconds: 60 * index.clamp(0, 4)),
                 child: LedgerHistoryTile(
                   entry: sorted[index],
@@ -83,5 +84,10 @@ class LedgerHistoryList extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  Widget _maybeAnimate({required Widget child, Duration delay = Duration.zero}) {
+    if (!animate) return child;
+    return SharedEntranceAnimation(delay: delay, child: child);
   }
 }

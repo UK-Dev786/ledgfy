@@ -1,4 +1,3 @@
-import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -6,7 +5,6 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/constants/app_text.dart';
 import '../../../../core/widgets/my_card.dart';
 import '../../../../core/widgets/my_text.dart';
-import '../../../../core/widgets/shared_entrance_animation.dart';
 import '../../models/ledger_type_config.dart';
 import '../../models/party_balance.dart';
 import '../../shared/sub_widgets/ledger_simple_amount.dart';
@@ -58,18 +56,19 @@ class _LedgerPartySectionState extends State<LedgerPartySection> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.config.supportsPartyLedger) return const SizedBox.shrink();
+    if (!widget.config.supportsSubLedgers) return const SizedBox.shrink();
 
     final filtered = _filteredParties;
+    final config = widget.config;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Expanded(
+            Expanded(
               child: MyText(
-                AppText.ledgerPartiesTitle,
+                config.subLedgerSectionTitle,
                 font: AppFont.inter,
                 size: AppSizes.title,
                 color: AppColors.white,
@@ -130,7 +129,7 @@ class _LedgerPartySectionState extends State<LedgerPartySection> {
           const SizedBox(height: AppSizes.sm),
         ],
         MyText(
-          AppText.ledgerPartiesSubtitle,
+          config.subLedgerSectionSubtitle,
           font: AppFont.sourceSans,
           size: AppSizes.caption,
           color: AppColors.textHint,
@@ -142,7 +141,7 @@ class _LedgerPartySectionState extends State<LedgerPartySection> {
             borderRadius: AppSizes.radiusMd,
             child: MyText(
               _searchController.text.trim().isEmpty
-                  ? AppText.ledgerPartiesEmpty
+                  ? config.subLedgerEmptyMessage
                   : AppText.ledgerPartiesSearchEmpty,
               font: AppFont.sourceSans,
               size: AppSizes.subtitle,
@@ -159,14 +158,12 @@ class _LedgerPartySectionState extends State<LedgerPartySection> {
             separatorBuilder: (_, __) => const SizedBox(height: AppSizes.sm),
             itemBuilder: (context, index) {
               final party = filtered[index];
-              return SharedEntranceAnimation(
-                delay: Duration(milliseconds: 50 * index.clamp(0, 4)),
-                child: _PartyTile(
-                  party: party,
-                  config: widget.config,
-                  showFullAmounts: widget.showFullAmounts,
-                  onTap: () => widget.onPartyTap(party.name),
-                ),
+              return _PartyTile(
+                key: ValueKey(party.name),
+                party: party,
+                config: widget.config,
+                showFullAmounts: widget.showFullAmounts,
+                onTap: () => widget.onPartyTap(party.name),
               );
             },
           ),
@@ -182,6 +179,7 @@ class _PartyTile extends StatelessWidget {
   final VoidCallback onTap;
 
   const _PartyTile({
+    super.key,
     required this.party,
     required this.config,
     required this.showFullAmounts,
@@ -196,16 +194,18 @@ class _PartyTile extends StatelessWidget {
         ? AppColors.error
         : AppColors.textTertiary;
 
-    return Bounce(
-      duration: const Duration(milliseconds: 100),
-      onTap: onTap,
-      child: MyCard(
-        borderRadius: AppSizes.radiusMd,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md,
-          vertical: AppSizes.sm + 2,
-        ),
-        child: Row(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+        child: MyCard(
+          borderRadius: AppSizes.radiusMd,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md,
+            vertical: AppSizes.sm + 2,
+          ),
+          child: Row(
           children: [
             Container(
               width: 36,
@@ -214,8 +214,8 @@ class _PartyTile extends StatelessWidget {
                 color: AppColors.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppSizes.radiusSm),
               ),
-              child: const Icon(
-                Icons.person_outline_rounded,
+              child: Icon(
+                config.subLedgerIcon,
                 color: AppColors.primary,
                 size: AppSizes.iconSm,
               ),
@@ -234,6 +234,18 @@ class _PartyTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (party.description != null &&
+                      party.description!.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    MyText(
+                      party.description!,
+                      font: AppFont.sourceSans,
+                      size: AppSizes.caption,
+                      color: AppColors.textHint,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                   const SizedBox(height: AppSizes.xs),
                   Row(
                     children: [
@@ -272,6 +284,7 @@ class _PartyTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

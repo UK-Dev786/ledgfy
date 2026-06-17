@@ -219,6 +219,7 @@ abstract class AppText {
       'This action cannot be undone and your data will never return.';
   static const ledgerAddOpponent = 'Add Opponent';
   static const ledgerAddTeam = 'Add Team';
+  static const ledgerAddParty = 'Add Party';
   static const ledgerOpponentNameLabel = 'Opponent Name';
   static const ledgerOpponentNameHint = 'e.g. Ahmed Traders';
   static const ledgerTeamNameLabel = 'Team Member Name';
@@ -327,6 +328,20 @@ abstract class AppText {
   static const ledgerEntryProjectCost = 'Cost';
   static const ledgerAddProjectIncome = 'Add Project Income';
   static const ledgerAddProjectCost = 'Add Project Cost';
+  static const ledgerAddProject = 'Add Project';
+  static const ledgerProjectLabel = 'Project Name';
+  static const ledgerProjectHint = 'e.g. House construction, shop renovation';
+  static const ledgerProjectsTitle = 'Projects';
+  static const ledgerProjectsSubtitle =
+      'Per-project income and cost — tap a project to add entries.';
+  static const ledgerProjectsEmpty =
+      'Tap + to add your first project with an optional description.';
+  static const ledgerDeleteProject = 'Delete Project';
+  static const ledgerDeleteProjectTitle = 'Delete this project?';
+  static const ledgerDeleteProjectMessage =
+      'This will permanently delete all entries for this project. '
+      'This action cannot be undone and your data will never return.';
+  static const ledgerHistoryProjectEmpty = 'No entries for this project yet.';
   static const ledgerMilestoneLabel = 'Milestone (Optional)';
   static const ledgerMilestoneHint = 'e.g. Phase 1, Material purchase';
   static const ledgerEmptyProject =
@@ -346,5 +361,5 @@ abstract class AppText {
   static const ledgerTypeDescExpense =
       'Expense only — track spending by category.';
   static const ledgerTypeDescProject =
-      'Project budget — track income and costs with milestones.';
+      'Project budget — add projects, then track income and costs per project.';
 }

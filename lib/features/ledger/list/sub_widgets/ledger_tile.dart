@@ -1,16 +1,17 @@
-import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/my_card.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/shared_entrance_animation.dart';
 import '../../models/ledger_item.dart';
 import '../../models/ledger_type_config.dart';
-import '../../shared/sub_widgets/ledger_flow_amount.dart';
+import '../../shared/sub_widgets/ledger_amount_expand_button.dart';
+import '../../shared/sub_widgets/ledger_simple_amount.dart';
 
-class LedgerTile extends StatelessWidget {
+class LedgerTile extends StatefulWidget {
   final LedgerItem ledger;
   final int index;
   final VoidCallback? onTap;
@@ -23,78 +24,114 @@ class LedgerTile extends StatelessWidget {
   });
 
   @override
+  State<LedgerTile> createState() => _LedgerTileState();
+}
+
+class _LedgerTileState extends State<LedgerTile> {
+  late bool _showFullAmounts = widget.ledger.config.showsFullAmountsByDefault;
+
+  String _format(double amount) {
+    if (_showFullAmounts) return CurrencyFormatter.format(amount);
+    return CurrencyFormatter.formatCompact(amount);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final config = ledger.config;
+    final config = widget.ledger.config;
 
     return SharedEntranceAnimation(
-      delay: Duration(milliseconds: 80 * index.clamp(0, 4)),
-      child: Bounce(
-        duration: const Duration(milliseconds: 110),
-        onTap: onTap,
-        child: MyCard(
-          borderRadius: AppSizes.radiusLg,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.md,
-            vertical: AppSizes.sm + 2,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppSizes.radiusSm + 2),
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.28),
-                  ),
-                ),
-                child: Icon(
-                  ledger.type.icon,
-                  color: AppColors.primary,
-                  size: AppSizes.iconSm + 2,
-                ),
-              ),
-              const SizedBox(width: AppSizes.sm + 2),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+      delay: Duration(milliseconds: 80 * widget.index.clamp(0, 4)),
+      child: MyCard(
+        borderRadius: AppSizes.radiusLg,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.md,
+          vertical: AppSizes.sm + 2,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: widget.onTap,
+                borderRadius: BorderRadius.circular(AppSizes.radiusLg),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    MyText(
-                      ledger.title,
-                      font: AppFont.inter,
-                      size: AppSizes.subtitle,
-                      color: AppColors.white,
-                      weight: FontWeight.w600,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (ledger.hasDescription) ...[
-                      const SizedBox(height: 2),
-                      MyText(
-                        ledger.description,
-                        font: AppFont.sourceSans,
-                        size: AppSizes.caption,
-                        color: AppColors.textHint,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.12),
+                        borderRadius:
+                            BorderRadius.circular(AppSizes.radiusSm + 2),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.28),
+                        ),
                       ),
-                    ],
-                    const SizedBox(height: AppSizes.sm),
-                    _AmountsRow(ledger: ledger, config: config),
+                      child: Icon(
+                        widget.ledger.type.icon,
+                        color: AppColors.primary,
+                        size: AppSizes.iconSm + 2,
+                      ),
+                    ),
+                    const SizedBox(width: AppSizes.sm + 2),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          MyText(
+                            widget.ledger.title,
+                            font: AppFont.inter,
+                            size: AppSizes.subtitle,
+                            color: AppColors.white,
+                            weight: FontWeight.w600,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (widget.ledger.hasDescription) ...[
+                            const SizedBox(height: 2),
+                            MyText(
+                              widget.ledger.description,
+                              font: AppFont.sourceSans,
+                              size: AppSizes.caption,
+                              color: AppColors.textHint,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                          const SizedBox(height: AppSizes.sm),
+                          _AmountsRow(
+                            ledger: widget.ledger,
+                            config: config,
+                            formatter: _format,
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(width: AppSizes.xs),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.textHint,
-                size: AppSizes.iconSm + 2,
+            ),
+            if (config.showAmountExpandButton)
+              LedgerAmountExpandButton(
+                showFullAmounts: _showFullAmounts,
+                onTap: () =>
+                    setState(() => _showFullAmounts = !_showFullAmounts),
               ),
-            ],
-          ),
+            InkWell(
+              onTap: widget.onTap,
+              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+              child: const Padding(
+                padding: EdgeInsets.all(AppSizes.xs),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.textHint,
+                  size: AppSizes.iconSm + 2,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -104,49 +141,56 @@ class LedgerTile extends StatelessWidget {
 class _AmountsRow extends StatelessWidget {
   final LedgerItem ledger;
   final LedgerTypeConfig config;
+  final String Function(double) formatter;
 
-  const _AmountsRow({required this.ledger, required this.config});
+  const _AmountsRow({
+    required this.ledger,
+    required this.config,
+    required this.formatter,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (config.isExpenseOnly) {
-      return LedgerFlowAmount(
+      return LedgerSimpleAmount(
         icon: config.debitIcon,
         color: config.debitColor,
         amount: ledger.balance,
-        compact: true,
-        abbreviate: true,
+        formatter: formatter,
+        iconSize: 12,
       );
     }
 
     return Row(
       children: [
-        Expanded(
-          child: LedgerFlowAmount(
-            icon: config.creditIcon,
-            color: config.creditColor,
-            amount: ledger.creditTotal,
-            compact: true,
-            abbreviate: true,
+        LedgerSimpleAmount(
+          icon: config.outflowIcon,
+          color: config.outflowColor,
+          amount: config.outflowAmount(
+            creditTotal: ledger.creditTotal,
+            debitTotal: ledger.debitTotal,
           ),
+          formatter: formatter,
+          iconSize: 12,
         ),
-        Expanded(
-          child: LedgerFlowAmount(
-            icon: config.debitIcon,
-            color: config.debitColor,
-            amount: ledger.debitTotal,
-            compact: true,
-            abbreviate: true,
+        const SizedBox(width: AppSizes.sm),
+        LedgerSimpleAmount(
+          icon: config.inflowIcon,
+          color: config.inflowColor,
+          amount: config.inflowAmount(
+            creditTotal: ledger.creditTotal,
+            debitTotal: ledger.debitTotal,
           ),
+          formatter: formatter,
+          iconSize: 12,
         ),
-        Expanded(
-          child: LedgerFlowAmount(
-            icon: Icons.account_balance_wallet_outlined,
-            color: _balanceColor(ledger.balance),
-            amount: ledger.balance,
-            compact: true,
-            abbreviate: true,
-          ),
+        const SizedBox(width: AppSizes.sm),
+        LedgerSimpleAmount(
+          icon: Icons.account_balance_wallet_outlined,
+          color: _balanceColor(ledger.balance),
+          amount: ledger.balance,
+          formatter: formatter,
+          iconSize: 12,
         ),
       ],
     );

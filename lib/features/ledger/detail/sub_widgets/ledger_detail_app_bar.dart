@@ -6,6 +6,7 @@ import '../../../../core/constants/app_text.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/rounded_button.dart';
 import '../../shared/sub_widgets/ledger_amount_toggle_button.dart';
+import 'ledger_app_bar_menu.dart';
 
 class LedgerAppBarMenuOption {
   final String id;
@@ -44,6 +45,14 @@ class LedgerDetailAppBar extends StatelessWidget {
     this.menuOptions = const [],
     this.onMenuSelected,
   });
+
+  Future<void> _openMenu(BuildContext context) async {
+    final selected = await LedgerAppBarMenu.show(
+      context,
+      options: menuOptions,
+    );
+    if (selected != null) onMenuSelected?.call(selected);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,40 +100,13 @@ class LedgerDetailAppBar extends StatelessWidget {
               onToggle: onToggleAmounts!,
             ),
           if (hasMenu)
-            PopupMenuButton<String>(
+            IconButton(
+              onPressed: () => _openMenu(context),
               icon: const Icon(
                 Icons.more_vert_rounded,
                 color: AppColors.textHint,
                 size: AppSizes.iconMd,
               ),
-              color: AppColors.surface,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-              ),
-              onSelected: onMenuSelected,
-              itemBuilder: (_) => menuOptions
-                  .map(
-                    (option) => PopupMenuItem<String>(
-                      value: option.id,
-                      child: Row(
-                        children: [
-                          Icon(
-                            option.icon,
-                            color: option.color ?? AppColors.textHint,
-                            size: AppSizes.iconSm,
-                          ),
-                          const SizedBox(width: AppSizes.sm),
-                          Text(
-                            option.label,
-                            style: TextStyle(
-                              color: option.color ?? AppColors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                  .toList(),
             ),
         ],
       ),

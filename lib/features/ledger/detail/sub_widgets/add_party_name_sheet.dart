@@ -9,19 +9,21 @@ import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/my_text_field.dart';
 import '../../../../core/widgets/shared_bottom_sheet.dart';
 
-typedef OnPartyNameAdded = void Function(String name);
+typedef OnPartyAdded = void Function(String name, String? description);
 
 class AddPartyNameSheet extends StatefulWidget {
   final String title;
   final String label;
   final String hint;
-  final OnPartyNameAdded onAdd;
+  final IconData nameIcon;
+  final OnPartyAdded onAdd;
 
   const AddPartyNameSheet({
     super.key,
     required this.title,
     required this.label,
     required this.hint,
+    this.nameIcon = Icons.person_outline_rounded,
     required this.onAdd,
   });
 
@@ -30,7 +32,8 @@ class AddPartyNameSheet extends StatefulWidget {
     required String title,
     required String label,
     required String hint,
-    required OnPartyNameAdded onAdd,
+    IconData nameIcon = Icons.person_outline_rounded,
+    required OnPartyAdded onAdd,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -41,6 +44,7 @@ class AddPartyNameSheet extends StatefulWidget {
         title: title,
         label: label,
         hint: hint,
+        nameIcon: nameIcon,
         onAdd: onAdd,
       ),
     );
@@ -53,17 +57,21 @@ class AddPartyNameSheet extends StatefulWidget {
 class _AddPartyNameSheetState extends State<AddPartyNameSheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
 
   @override
   void dispose() {
     _nameController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-    widget.onAdd(_nameController.text.trim());
+    final name = _nameController.text.trim();
+    final description = _descriptionController.text.trim();
     Navigator.of(context).pop();
+    widget.onAdd(name, description.isEmpty ? null : description);
   }
 
   @override
@@ -89,8 +97,8 @@ class _AddPartyNameSheetState extends State<AddPartyNameSheet> {
               hintText: widget.hint,
               controller: _nameController,
               keyboardType: TextInputType.name,
-              prefixIcon: const Icon(
-                Icons.person_outline_rounded,
+              prefixIcon: Icon(
+                widget.nameIcon,
                 color: AppColors.primary,
               ),
               validator: (value) {
@@ -99,6 +107,17 @@ class _AddPartyNameSheetState extends State<AddPartyNameSheet> {
                 }
                 return null;
               },
+            ),
+            SizedBox(height: context.h * 2),
+            MyTextField(
+              title: AppText.ledgerDescriptionLabel,
+              hintText: AppText.ledgerDescriptionHint,
+              controller: _descriptionController,
+              keyboardType: TextInputType.text,
+              prefixIcon: const Icon(
+                Icons.notes_outlined,
+                color: AppColors.primary,
+              ),
             ),
             SizedBox(height: context.h * 3),
             MyButton(

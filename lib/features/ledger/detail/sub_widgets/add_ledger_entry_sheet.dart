@@ -9,6 +9,7 @@ import '../../../../core/widgets/my_button.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/my_text_field.dart';
 import '../../../../core/widgets/shared_bottom_sheet.dart';
+import '../../models/ledger_accounting_mode.dart';
 import '../../models/ledger_entry.dart';
 import '../../models/ledger_type_config.dart';
 import 'expense_category_picker.dart';
@@ -77,7 +78,10 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
   LedgerTypeConfig get _config => widget.config;
   bool get _inPartyContext => widget.partyName != null;
   bool get _showNameField =>
-      !_inPartyContext && !_config.requiresParty && !_config.isExpenseOnly;
+      !_inPartyContext &&
+      !_config.requiresParty &&
+      !_config.isExpenseOnly &&
+      _config.mode != LedgerAccountingMode.cashBook;
 
   @override
   void dispose() {

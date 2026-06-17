@@ -21,6 +21,33 @@ abstract class CurrencyFormatter {
     return '${getActiveCurrencyCode()} ${formatSync(amount)}';
   }
 
+  /// Compact summary style: 1.1k, 2.5M — used only on top summary cards.
+  static String formatCompact(double amount) {
+    final code = getActiveCurrencyCode();
+    final sign = amount < 0 ? '-' : '';
+    final abs = amount.abs();
+
+    if (abs >= 1000000000) {
+      return '$code $sign${_compactUnit(abs / 1000000000)}B';
+    }
+    if (abs >= 1000000) {
+      return '$code $sign${_compactUnit(abs / 1000000)}M';
+    }
+    if (abs >= 1000) {
+      return '$code $sign${_compactUnit(abs / 1000)}k';
+    }
+
+    return '$code $sign${formatSync(abs)}';
+  }
+
+  static String _compactUnit(double value) {
+    final rounded = (value * 10).round() / 10;
+    if (rounded == rounded.roundToDouble()) {
+      return rounded.toInt().toString();
+    }
+    return rounded.toStringAsFixed(1);
+  }
+
   /// Short labels for list cards only — full number below 10 Lac,
   /// then "X Lac" / "X Crore" with spelled-out words.
   static String formatReadable(double amount) {

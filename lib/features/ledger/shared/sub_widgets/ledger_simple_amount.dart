@@ -4,6 +4,8 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/my_text.dart';
 
+typedef AmountFormatter = String Function(double amount);
+
 class LedgerSimpleAmount extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -11,6 +13,7 @@ class LedgerSimpleAmount extends StatelessWidget {
   final bool abbreviate;
   final double iconSize;
   final double textSize;
+  final AmountFormatter? formatter;
 
   const LedgerSimpleAmount({
     super.key,
@@ -20,10 +23,15 @@ class LedgerSimpleAmount extends StatelessWidget {
     this.abbreviate = false,
     this.iconSize = AppSizes.iconSm,
     this.textSize = AppSizes.caption,
+    this.formatter,
   });
 
   @override
   Widget build(BuildContext context) {
+    final text = formatter != null
+        ? formatter!(amount)
+        : CurrencyFormatter.format(amount, abbreviate: abbreviate);
+
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: Alignment.centerLeft,
@@ -33,7 +41,7 @@ class LedgerSimpleAmount extends StatelessWidget {
           Icon(icon, size: iconSize, color: color),
           const SizedBox(width: AppSizes.xs),
           MyText(
-            CurrencyFormatter.format(amount, abbreviate: abbreviate),
+            text,
             font: AppFont.inter,
             size: textSize,
             color: color,

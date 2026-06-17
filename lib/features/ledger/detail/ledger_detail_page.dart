@@ -6,9 +6,12 @@ import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
 import '../models/ledger_entry.dart';
 import '../models/ledger_item.dart';
+import '../shared/ledger_page_route.dart';
 import 'ledger_history_page.dart';
 import 'ledger_party_detail_page.dart';
 import 'sub_widgets/add_ledger_entry_sheet.dart';
+import 'sub_widgets/add_party_name_sheet.dart';
+import 'sub_widgets/ledger_history_list.dart';
 import 'sub_widgets/ledger_party_section.dart';
 import 'sub_widgets/ledger_detail_app_bar.dart';
 import 'sub_widgets/ledger_detail_fabs.dart';
@@ -27,24 +30,40 @@ class LedgerDetailPage extends StatefulWidget {
 class _LedgerDetailPageState extends State<LedgerDetailPage> {
   LedgerItem get _ledger => widget.ledger;
 
-  void _openPartyDetail(String partyName) {
-    Navigator.of(context)
-        .push<void>(
-          MaterialPageRoute<void>(
-            builder: (_) => LedgerPartyDetailPage(
-              ledger: _ledger,
-              partyName: partyName,
-            ),
-          ),
-        )
-        .then((_) => setState(() {}));
+  Future<void> _openPartyDetail(String partyName) async {
+    await Navigator.of(context).push<void>(
+      ledgerPageRoute(
+        LedgerPartyDetailPage(
+          ledger: _ledger,
+          partyName: partyName,
+        ),
+      ),
+    );
+    if (!mounted) return;
+    setState(() {});
   }
 
   void _openHistory() {
     Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) => LedgerHistoryPage(ledger: _ledger),
-      ),
+      ledgerPageRoute(LedgerHistoryPage(ledger: _ledger)),
+    );
+  }
+
+  void _openAddSubLedger() {
+    final config = _ledger.config;
+    AddPartyNameSheet.show(
+      context,
+      title: config.addSubLedgerTitle,
+      label: config.partyLabel,
+      hint: config.partyHint,
+      nameIcon: config.subLedgerIcon,
+      onAdd: (name, description) {
+        setState(() => _ledger.addParty(name, description: description));
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _openPartyDetail(name);
+        });
+      },
     );
   }
 
@@ -84,14 +103,18 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final supportsParties = _ledger.config.supportsPartyLedger;
+    final config = _ledger.config;
+    final supportsSubLedgers = config.supportsSubLedgers;
+    final showInlineHistory = !supportsSubLedgers;
+    final showFullAmounts = config.showsFullAmountsByDefault;
 
     return ThemedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         floatingActionButton: LedgerDetailFabs(
-          config: _ledger.config,
-          onAddTap: _openEntrySheet,
+          config: config,
+          onAddTap: supportsSubLedgers ? null : _openEntrySheet,
+          onAddSubLedger: supportsSubLedgers ? _openAddSubLedger : null,
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SafeArea(
@@ -101,8 +124,8 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
               LedgerDetailAppBar(
                 title: _ledger.title,
                 onBack: () => Navigator.of(context).pop(),
-                showHistoryButton: true,
-                onHistoryTap: _openHistory,
+                showHistoryButton: supportsSubLedgers,
+                onHistoryTap: supportsSubLedgers ? _openHistory : null,
                 menuOptions: const [
                   LedgerAppBarMenuOption(
                     id: 'delete',
@@ -125,13 +148,21 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       LedgerDetailSummary(ledger: _ledger),
-                      if (supportsParties) ...[
+                      if (supportsSubLedgers) ...[
                         const SizedBox(height: AppSizes.lg),
                         LedgerPartySection(
                           parties: _ledger.partyBalances,
-                          config: _ledger.config,
+                          config: config,
                           showFullAmounts: false,
                           onPartyTap: _openPartyDetail,
+                        ),
+                      ],
+                      if (showInlineHistory) ...[
+                        const SizedBox(height: AppSizes.lg),
+                        LedgerHistoryList(
+                          entries: _ledger.entries,
+                          config: config,
+                          showFullAmounts: showFullAmounts,
                         ),
                       ],
                     ],

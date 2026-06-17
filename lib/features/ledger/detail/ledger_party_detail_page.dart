@@ -9,6 +9,7 @@ import '../../../di/auth_providers.dart';
 import '../models/ledger_entry.dart';
 import '../models/ledger_item.dart';
 import '../models/party_balance.dart';
+import '../shared/ledger_page_route.dart';
 import 'sub_widgets/add_ledger_entry_sheet.dart';
 import 'sub_widgets/add_party_name_sheet.dart';
 import 'sub_widgets/ledger_detail_app_bar.dart';
@@ -57,11 +58,22 @@ class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
 
   bool get _isOrganization {
     final accountType =
-        ref.watch(authStateChangesProvider).valueOrNull?.accountType;
+        ref.read(authStateChangesProvider).valueOrNull?.accountType;
     return accountType == AppText.accountTypeOrganization;
   }
 
   List<LedgerAppBarMenuOption> get _menuOptions {
+    if (_ledger.config.isProjectLedger) {
+      return [
+        LedgerAppBarMenuOption(
+          id: 'delete',
+          label: _ledger.config.deleteSubLedgerLabel,
+          icon: Icons.delete_outline_rounded,
+          color: AppColors.error,
+        ),
+      ];
+    }
+
     return [
       const LedgerAppBarMenuOption(
         id: 'add_opponent',
@@ -115,10 +127,11 @@ class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
           ? AppText.ledgerTeamNameLabel
           : AppText.ledgerOpponentNameLabel,
       hint: isTeam ? AppText.ledgerTeamNameHint : AppText.ledgerOpponentNameHint,
-      onAdd: (name) {
+      onAdd: (name, description) {
+        _ledger.addParty(name, description: description);
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(
-            builder: (_) => LedgerPartyDetailPage(
+          ledgerPageRoute(
+            LedgerPartyDetailPage(
               ledger: _ledger,
               partyName: name,
             ),
@@ -128,27 +141,23 @@ class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
     );
   }
 
-  Future<void> _deleteParty() async {
+  Future<void> _deleteSubLedger() async {
+    final config = _ledger.config;
     final confirmed = await LedgerDeleteDialog.show(
       context,
-      title: AppText.ledgerDeletePartyTitle,
-      message: AppText.ledgerDeletePartyMessage,
+      title: config.deleteSubLedgerTitle,
+      message: config.deleteSubLedgerMessage,
     );
     if (!confirmed || !mounted) return;
 
-    _ledger.entries.removeWhere(
-      (entry) =>
-          entry.partyName != null &&
-          entry.partyName!.trim().toLowerCase() ==
-              _partyName.trim().toLowerCase(),
-    );
+    setState(() => _ledger.removeParty(_partyName));
     Navigator.of(context).pop();
   }
 
   void _handleMenu(String value) {
     switch (value) {
       case 'delete':
-        _deleteParty();
+        _deleteSubLedger();
       case 'add_opponent':
         _openNewParty(isTeam: false);
       case 'add_team':

@@ -53,13 +53,86 @@ class LedgerTypeConfig {
 
   bool get isExpenseOnly => mode == LedgerAccountingMode.expenseOnly;
 
+  /// Expense shows one total — full PKR by default, no compact toggle.
+  bool get showsFullAmountsByDefault => isExpenseOnly;
+
+  bool get showAmountExpandButton => !isExpenseOnly;
+
   bool get hasDualEntry => !isExpenseOnly;
 
   bool get supportsPartyLedger => mode == LedgerAccountingMode.udhar;
 
+  bool get supportsSubLedgers =>
+      mode == LedgerAccountingMode.udhar ||
+      mode == LedgerAccountingMode.project;
+
+  bool get isProjectLedger => mode == LedgerAccountingMode.project;
+
+  String get addSubLedgerTitle => isProjectLedger
+      ? AppText.ledgerAddProject
+      : AppText.ledgerAddParty;
+
+  String get subLedgerSectionTitle => isProjectLedger
+      ? AppText.ledgerProjectsTitle
+      : AppText.ledgerPartiesTitle;
+
+  String get subLedgerSectionSubtitle => isProjectLedger
+      ? AppText.ledgerProjectsSubtitle
+      : AppText.ledgerPartiesSubtitle;
+
+  String get subLedgerEmptyMessage => isProjectLedger
+      ? AppText.ledgerProjectsEmpty
+      : AppText.ledgerPartiesEmpty;
+
+  String get subLedgerHistoryEmpty => isProjectLedger
+      ? AppText.ledgerHistoryProjectEmpty
+      : AppText.ledgerHistoryPartyEmpty;
+
+  String get deleteSubLedgerLabel => isProjectLedger
+      ? AppText.ledgerDeleteProject
+      : AppText.ledgerDeleteParty;
+
+  String get deleteSubLedgerTitle => isProjectLedger
+      ? AppText.ledgerDeleteProjectTitle
+      : AppText.ledgerDeletePartyTitle;
+
+  String get deleteSubLedgerMessage => isProjectLedger
+      ? AppText.ledgerDeleteProjectMessage
+      : AppText.ledgerDeletePartyMessage;
+
+  IconData get subLedgerIcon => isProjectLedger
+      ? Icons.work_outline_rounded
+      : Icons.person_outline_rounded;
+
+  IconData get addSubLedgerFabIcon => isProjectLedger
+      ? Icons.add_business_outlined
+      : Icons.person_add_alt_1_rounded;
+
   Color get creditColor => AppColors.success;
 
   Color get debitColor => AppColors.error;
+
+  Color get outflowColor => creditColor;
+
+  Color get inflowColor => debitColor;
+
+  IconData get outflowIcon => creditIcon;
+
+  IconData get inflowIcon => debitIcon;
+
+  String get outflowLabel => creditLabel;
+
+  String get inflowLabel => debitLabel;
+
+  LedgerEntryType get outflowEntryType => creditEntryType;
+
+  LedgerEntryType get inflowEntryType => debitEntryType!;
+
+  double outflowAmount({required double creditTotal, required double debitTotal}) =>
+      creditTotal;
+
+  double inflowAmount({required double creditTotal, required double debitTotal}) =>
+      debitTotal;
 
   LedgerEntryType get creditEntryType => creditTypes.first;
 
@@ -88,8 +161,8 @@ class LedgerTypeConfig {
   }
 
   Color colorForEntry(LedgerEntryType entryType) {
-    if (creditTypes.contains(entryType)) return creditColor;
-    if (debitTypes.contains(entryType)) return debitColor;
+    if (creditTypes.contains(entryType)) return outflowColor;
+    if (debitTypes.contains(entryType)) return inflowColor;
     return AppColors.textTertiary;
   }
 
@@ -202,6 +275,8 @@ class LedgerTypeConfig {
       debitIcon: Icons.construction_outlined,
       creditTypes: const [LedgerEntryType.income],
       debitTypes: const [LedgerEntryType.outgoing],
+      partyLabel: AppText.ledgerProjectLabel,
+      partyHint: AppText.ledgerProjectHint,
       requiresNote: true,
       noteLabel: AppText.ledgerMilestoneLabel,
       noteHint: AppText.ledgerMilestoneHint,

@@ -7,16 +7,28 @@ import '../../models/ledger_type_config.dart';
 
 class LedgerDetailFabs extends StatelessWidget {
   final LedgerTypeConfig config;
-  final void Function(LedgerEntryType type) onAddTap;
+  final void Function(LedgerEntryType type)? onAddTap;
+  final VoidCallback? onAddSubLedger;
 
   const LedgerDetailFabs({
     super.key,
     required this.config,
-    required this.onAddTap,
+    this.onAddTap,
+    this.onAddSubLedger,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (config.supportsSubLedgers && onAddSubLedger != null) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: AppSizes.md),
+        child: RoundedButton(
+          onTap: onAddSubLedger!,
+          icon: config.addSubLedgerFabIcon,
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.md),
       child: Column(
@@ -24,21 +36,21 @@ class LedgerDetailFabs extends StatelessWidget {
         children: [
           if (config.isExpenseOnly)
             RoundedButton(
-              onTap: () => onAddTap(config.singleEntryType),
+              onTap: () => onAddTap!(config.singleEntryType),
               icon: config.debitIcon,
               iconColor: config.debitColor,
             )
           else ...[
             RoundedButton(
-              onTap: () => onAddTap(config.creditEntryType),
-              icon: config.creditIcon,
-              iconColor: config.creditColor,
+              onTap: () => onAddTap!(config.outflowEntryType),
+              icon: config.outflowIcon,
+              iconColor: config.outflowColor,
             ),
             const SizedBox(height: AppSizes.md),
             RoundedButton(
-              onTap: () => onAddTap(config.debitEntryType!),
-              icon: config.debitIcon,
-              iconColor: config.debitColor,
+              onTap: () => onAddTap!(config.inflowEntryType),
+              icon: config.inflowIcon,
+              iconColor: config.inflowColor,
             ),
           ],
         ],

@@ -1,4 +1,5 @@
 import 'ledger_entry.dart';
+import 'ledger_party.dart';
 import 'ledger_type.dart';
 import 'ledger_type_config.dart';
 import 'party_balance.dart';
@@ -10,6 +11,7 @@ class LedgerItem {
   final LedgerType type;
   final DateTime createdAt;
   final List<LedgerEntry> entries;
+  final List<LedgerParty> parties;
   final double openingBalance;
 
   LedgerItem({
@@ -19,8 +21,10 @@ class LedgerItem {
     required this.type,
     required this.createdAt,
     List<LedgerEntry>? entries,
+    List<LedgerParty>? parties,
     this.openingBalance = 0,
-  }) : entries = entries ?? [];
+  })  : entries = entries ?? [],
+        parties = parties ?? [];
 
   LedgerTypeConfig get config => LedgerTypeConfig.forType(type);
 
@@ -37,8 +41,38 @@ class LedgerItem {
     return openingBalance + creditTotal - debitTotal;
   }
 
-  List<PartyBalance> get partyBalances =>
-      PartyBalanceCalculator.fromEntries(entries: entries, config: config);
+  List<PartyBalance> get partyBalances => PartyBalanceCalculator.calculate(
+        entries: entries,
+        config: config,
+        parties: parties,
+      );
+
+  void addParty(String name, {String? description}) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return;
+
+    final exists = parties.any(
+      (party) => party.name.toLowerCase() == trimmed.toLowerCase(),
+    );
+    if (exists) return;
+
+    parties.add(
+      LedgerParty(
+        name: trimmed,
+        description: description?.trim().isEmpty == true
+            ? null
+            : description?.trim(),
+      ),
+    );
+  }
+
+  void removeParty(String name) {
+    final key = name.trim().toLowerCase();
+    parties.removeWhere((party) => party.name.toLowerCase() == key);
+    entries.removeWhere(
+      (entry) => entry.partyName?.trim().toLowerCase() == key,
+    );
+  }
 
   bool get hasDescription => description.trim().isNotEmpty;
 
