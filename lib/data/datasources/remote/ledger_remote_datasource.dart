@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../features/ledger/models/ledger_entry.dart';
 import '../../../features/ledger/models/ledger_item.dart';
@@ -12,8 +13,9 @@ import '../../models/ledger_party_model.dart';
 
 class LedgerRemoteDataSource {
   final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
 
-  LedgerRemoteDataSource(this._firestore);
+  LedgerRemoteDataSource(this._firestore, this._auth);
 
   CollectionReference<Map<String, dynamic>> _ledgers(String userId) {
     return _firestore.collection('users').doc(userId).collection('ledgers');
@@ -27,65 +29,89 @@ class LedgerRemoteDataSource {
   }
 
   Stream<List<LedgerItem>> watchLedgers(String userId) {
-    return _ledgers(userId)
+    late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>
+        ledgerSubscription;
+    final entrySubscriptions =
+        <String, StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>{};
+    final entryLists = <String, List<LedgerEntry>>{};
+    var latestDocs = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+
+    final controller = StreamController<List<LedgerItem>>.broadcast();
+
+    List<LedgerItem> buildItems() {
+      return latestDocs
+          .map(
+            (doc) => LedgerItemModel.fromFirestore(
+              doc,
+              entries: entryLists[doc.id] ?? const [],
+            ).toEntity(),
+          )
+          .toList();
+    }
+
+    void emitItems() {
+      if (controller.isClosed) return;
+      controller.add(buildItems());
+    }
+
+    void syncEntryListeners() {
+      final activeIds = latestDocs.map((doc) => doc.id).toSet();
+
+      for (final ledgerId in entrySubscriptions.keys.toList()) {
+        if (!activeIds.contains(ledgerId)) {
+          entrySubscriptions.remove(ledgerId)?.cancel();
+          entryLists.remove(ledgerId);
+        }
+      }
+
+      for (final doc in latestDocs) {
+        final ledgerId = doc.id;
+        if (entrySubscriptions.containsKey(ledgerId)) continue;
+
+        entrySubscriptions[ledgerId] = doc.reference
+            .collection('entries')
+            .orderBy('createdAt', descending: true)
+            .snapshots()
+            .listen(
+          (entrySnapshot) {
+            entryLists[ledgerId] = entrySnapshot.docs
+                .map((entryDoc) => LedgerEntryModel.fromFirestore(entryDoc).toEntity())
+                .toList();
+            emitItems();
+          },
+          onError: controller.addError,
+        );
+      }
+    }
+
+    ledgerSubscription = _ledgers(userId)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .asyncExpand(_watchEntriesForLedgers);
-  }
-
-  Stream<List<LedgerItem>> _watchEntriesForLedgers(
-    QuerySnapshot<Map<String, dynamic>> ledgerSnapshot,
-  ) {
-    final docs = ledgerSnapshot.docs;
-    if (docs.isEmpty) {
-      return Stream.value(const []);
-    }
-
-    final controller = StreamController<List<LedgerItem>>();
-    final entryLists = List<List<LedgerEntry>>.generate(
-      docs.length,
-      (_) => const [],
+        .listen(
+      (ledgerSnapshot) {
+        latestDocs = ledgerSnapshot.docs;
+        syncEntryListeners();
+        emitItems();
+      },
+      onError: controller.addError,
     );
-    final subscriptions = <StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>[];
-
-    void emit() {
-      if (controller.isClosed) return;
-      final items = List<LedgerItem>.generate(docs.length, (index) {
-        return LedgerItemModel.fromFirestore(
-          docs[index],
-          entries: entryLists[index],
-        ).toEntity();
-      });
-      controller.add(items);
-    }
-
-    for (var index = 0; index < docs.length; index++) {
-      final ledgerIndex = index;
-      final subscription = docs[index].reference
-          .collection('entries')
-          .orderBy('createdAt', descending: true)
-          .snapshots()
-          .listen(
-        (entrySnapshot) {
-          entryLists[ledgerIndex] = entrySnapshot.docs
-              .map((doc) => LedgerEntryModel.fromFirestore(doc).toEntity())
-              .toList();
-          emit();
-        },
-        onError: controller.addError,
-      );
-      subscriptions.add(subscription);
-    }
-
-    emit();
 
     controller.onCancel = () async {
-      for (final subscription in subscriptions) {
+      await ledgerSubscription.cancel();
+      for (final subscription in entrySubscriptions.values) {
         await subscription.cancel();
       }
+      entrySubscriptions.clear();
+      entryLists.clear();
     };
 
     return controller.stream;
+  }
+
+  Future<void> _ensureAuthReady() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    await user.getIdToken(true);
   }
 
   Future<String> createLedger({
@@ -94,6 +120,7 @@ class LedgerRemoteDataSource {
     required String description,
     required LedgerType type,
   }) async {
+    await _ensureAuthReady();
     final now = DateTime.now();
     final doc = await _ledgers(userId).add({
       'title': title,
@@ -111,6 +138,7 @@ class LedgerRemoteDataSource {
     required String userId,
     required String ledgerId,
   }) async {
+    await _ensureAuthReady();
     final ledgerRef = _ledgerRef(userId, ledgerId);
     await _deleteCollectionInBatches(ledgerRef.collection('entries'));
     await ledgerRef.delete();
@@ -121,6 +149,7 @@ class LedgerRemoteDataSource {
     required String ledgerId,
     required double openingBalance,
   }) async {
+    await _ensureAuthReady();
     await _ledgerRef(userId, ledgerId).update({
       'openingBalance': openingBalance,
       'updatedAt': FieldValue.serverTimestamp(),
@@ -132,6 +161,7 @@ class LedgerRemoteDataSource {
     required String ledgerId,
     required LedgerParty party,
   }) async {
+    await _ensureAuthReady();
     final ledgerRef = _ledgerRef(userId, ledgerId);
     await _firestore.runTransaction((transaction) async {
       final snapshot = await transaction.get(ledgerRef);
@@ -159,6 +189,7 @@ class LedgerRemoteDataSource {
     required String ledgerId,
     required String partyName,
   }) async {
+    await _ensureAuthReady();
     final ledgerRef = _ledgerRef(userId, ledgerId);
     final key = partyName.trim().toLowerCase();
 
@@ -192,6 +223,7 @@ class LedgerRemoteDataSource {
     required String ledgerId,
     required LedgerEntry entry,
   }) async {
+    await _ensureAuthReady();
     final model = LedgerEntryModel.fromEntity(entry);
     final ledgerRef = _ledgerRef(userId, ledgerId);
     await ledgerRef.collection('entries').doc(entry.id).set(model.toFirestore());

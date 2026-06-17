@@ -10,7 +10,10 @@ import '../features/ledger/models/ledger_type.dart';
 import 'auth_providers.dart';
 
 final ledgerRemoteDataSourceProvider = Provider<LedgerRemoteDataSource>((ref) {
-  return LedgerRemoteDataSource(ref.watch(firestoreProvider));
+  return LedgerRemoteDataSource(
+    ref.watch(firestoreProvider),
+    ref.watch(firebaseAuthProvider),
+  );
 });
 
 final ledgerRepositoryProvider = Provider<ILedgerRepository>((ref) {
@@ -21,7 +24,7 @@ final currentUserIdProvider = Provider<String?>((ref) {
   return ref.watch(authStateChangesProvider).valueOrNull?.id;
 });
 
-final ledgersStreamProvider = StreamProvider.autoDispose<List<LedgerItem>>((ref) {
+final ledgersStreamProvider = StreamProvider<List<LedgerItem>>((ref) {
   final userId = ref.watch(currentUserIdProvider);
   if (userId == null) {
     return Stream.value(const []);
@@ -32,7 +35,10 @@ final ledgersStreamProvider = StreamProvider.autoDispose<List<LedgerItem>>((ref)
 });
 
 final ledgersProvider = Provider<List<LedgerItem>>((ref) {
-  return ref.watch(ledgersStreamProvider).valueOrNull ?? const [];
+  return ref.watch(ledgersStreamProvider).maybeWhen(
+        data: (ledgers) => ledgers,
+        orElse: () => const [],
+      );
 });
 
 final ledgerByIdProvider = Provider.family<LedgerItem?, String>((ref, ledgerId) {

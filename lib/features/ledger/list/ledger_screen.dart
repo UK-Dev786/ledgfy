@@ -58,9 +58,6 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
   @override
   Widget build(BuildContext context) {
     final ledgersAsync = ref.watch(ledgersStreamProvider);
-    final ledgers = ref.watch(ledgersProvider);
-    final filtered = _filteredLedgers(ledgers);
-    final hasLedgers = ledgers.isNotEmpty;
 
     return ThemedGradientBackground(
       child: Scaffold(
@@ -87,49 +84,54 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
                 ),
               ),
             ),
-            data: (_) => SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                AppSizes.lg,
-                AppSizes.md,
-                AppSizes.lg,
-                AppSizes.xxl * 2,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const LedgerHeader(),
-                  if (hasLedgers) ...[
-                    const SizedBox(height: AppSizes.md),
-                    LedgerTypeFilterChips(
-                      selectedTypeId: _selectedTypeId,
-                      onSelected: (typeId) {
-                        setState(() => _selectedTypeId = typeId);
-                      },
-                    ),
+            data: (ledgers) {
+              final filtered = _filteredLedgers(ledgers);
+              final hasLedgers = ledgers.isNotEmpty;
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSizes.lg,
+                  AppSizes.md,
+                  AppSizes.lg,
+                  AppSizes.xxl * 2,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const LedgerHeader(),
+                    if (hasLedgers) ...[
+                      const SizedBox(height: AppSizes.md),
+                      LedgerTypeFilterChips(
+                        selectedTypeId: _selectedTypeId,
+                        onSelected: (typeId) {
+                          setState(() => _selectedTypeId = typeId);
+                        },
+                      ),
+                    ],
+                    const SizedBox(height: AppSizes.lg),
+                    if (hasLedgers)
+                      filtered.isEmpty
+                          ? MyCard(
+                              borderRadius: AppSizes.radiusMd,
+                              child: const MyText(
+                                AppText.ledgersFilterEmpty,
+                                font: AppFont.sourceSans,
+                                size: AppSizes.subtitle,
+                                color: AppColors.textHint,
+                                align: TextAlign.center,
+                                height: 1.45,
+                              ),
+                            )
+                          : LedgerListView(
+                              ledgers: filtered,
+                              onLedgerTap: _openLedgerDetail,
+                            )
+                    else
+                      const LedgerEmptyState(),
                   ],
-                  const SizedBox(height: AppSizes.lg),
-                  if (hasLedgers)
-                    filtered.isEmpty
-                        ? MyCard(
-                            borderRadius: AppSizes.radiusMd,
-                            child: const MyText(
-                              AppText.ledgersFilterEmpty,
-                              font: AppFont.sourceSans,
-                              size: AppSizes.subtitle,
-                              color: AppColors.textHint,
-                              align: TextAlign.center,
-                              height: 1.45,
-                            ),
-                          )
-                        : LedgerListView(
-                            ledgers: filtered,
-                            onLedgerTap: _openLedgerDetail,
-                          )
-                  else
-                    const LedgerEmptyState(),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),
