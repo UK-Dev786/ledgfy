@@ -1,4 +1,23 @@
-enum ReportsPeriod { daily, monthly }
+enum ReportsPeriod {
+  today,
+  thisWeek,
+  thisMonth,
+  thisYear,
+}
+
+class ReportsDateRange {
+  final DateTime start;
+  final DateTime end;
+
+  const ReportsDateRange({
+    required this.start,
+    required this.end,
+  });
+
+  bool contains(DateTime date) {
+    return !date.isBefore(start) && date.isBefore(end);
+  }
+}
 
 class PeriodPlPoint {
   final String label;
@@ -12,6 +31,18 @@ class PeriodPlPoint {
     required this.income,
     required this.expense,
   });
+
+  PeriodPlPoint copyWith({
+    double? income,
+    double? expense,
+  }) {
+    return PeriodPlPoint(
+      label: label,
+      periodStart: periodStart,
+      income: income ?? this.income,
+      expense: expense ?? this.expense,
+    );
+  }
 
   double get net => income - expense;
 }
@@ -27,6 +58,7 @@ class PartyRoleSlice {
 }
 
 class ReportsSnapshot {
+  final ReportsPeriod period;
   final List<PeriodPlPoint> plPoints;
   final List<PartyRoleSlice> partyRoles;
   final double totalIncome;
@@ -34,6 +66,7 @@ class ReportsSnapshot {
   final double netPl;
 
   const ReportsSnapshot({
+    required this.period,
     required this.plPoints,
     required this.partyRoles,
     required this.totalIncome,
@@ -41,8 +74,6 @@ class ReportsSnapshot {
     required this.netPl,
   });
 
-  bool get hasPlData => plPoints.any((point) => point.income > 0 || point.expense > 0);
-
-  bool get hasPartyRoleData =>
-      partyRoles.any((slice) => slice.amount > 0);
+  bool get hasPlData =>
+      plPoints.any((point) => point.income > 0 || point.expense > 0);
 }

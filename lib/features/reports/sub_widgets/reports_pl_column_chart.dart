@@ -49,6 +49,7 @@ class ReportsPlColumnChart extends StatelessWidget {
               margin: EdgeInsets.zero,
               primaryXAxis: CategoryAxis(
                 majorGridLines: const MajorGridLines(width: 0),
+                interval: points.length > 12 ? 3 : 1,
                 axisLine: AxisLine(
                   color: AppColors.textHint.withValues(alpha: 0.2),
                 ),

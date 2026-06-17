@@ -397,8 +397,12 @@ abstract class AppText {
   static const reportsSubtitle = 'Daily & monthly P&L with party insights';
   static const reportsEmpty =
       'Add ledgers and entries to see P&L charts and party breakdowns here.';
-  static const reportsPeriodDaily = 'Daily';
-  static const reportsPeriodMonthly = 'Monthly';
+  static const reportsPeriodToday = 'Today';
+  static const reportsPeriodThisWeek = 'This Week';
+  static const reportsPeriodThisMonth = 'This Month';
+  static const reportsPeriodThisYear = 'This Year';
+  static const reportsPeriodEmpty =
+      'No income or expense in this period. Try another filter.';
   static const reportsIncome = 'Income';
   static const reportsExpense = 'Expense';
   static const reportsNetPl = 'Net P&L';

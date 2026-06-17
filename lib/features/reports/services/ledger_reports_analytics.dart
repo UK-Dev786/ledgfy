@@ -8,8 +8,11 @@ abstract final class LedgerReportsAnalytics {
   static ReportsSnapshot build({
     required List<LedgerItem> ledgers,
     required ReportsPeriod period,
+    DateTime? now,
   }) {
-    final buckets = <String, ({DateTime start, double income, double expense})>{};
+    final reference = now ?? DateTime.now();
+    final range = _rangeFor(period, reference);
+    final buckets = _emptyBuckets(period, range, reference);
 
     var totalIncome = 0.0;
     var totalExpense = 0.0;
@@ -17,25 +20,19 @@ abstract final class LedgerReportsAnalytics {
     for (final ledger in ledgers) {
       final config = ledger.config;
       for (final entry in ledger.entries) {
-        final key = _bucketKey(entry.createdAt, period);
-        final start = _bucketStart(entry.createdAt, period);
-        buckets.putIfAbsent(
-          key,
-          () => (start: start, income: 0.0, expense: 0.0),
-        );
+        if (!range.contains(entry.createdAt)) continue;
 
-        final current = buckets[key]!;
+        final index = _bucketIndex(entry.createdAt, period, range);
+        if (index == null || index < 0 || index >= buckets.length) continue;
+
+        final current = buckets[index];
         if (config.creditTypes.contains(entry.type)) {
-          buckets[key] = (
-            start: current.start,
+          buckets[index] = current.copyWith(
             income: current.income + entry.amount,
-            expense: current.expense,
           );
           totalIncome += entry.amount;
         } else if (config.debitTypes.contains(entry.type)) {
-          buckets[key] = (
-            start: current.start,
-            income: current.income,
+          buckets[index] = current.copyWith(
             expense: current.expense + entry.amount,
           );
           totalExpense += entry.amount;
@@ -43,52 +40,105 @@ abstract final class LedgerReportsAnalytics {
       }
     }
 
-    final sortedKeys = buckets.keys.toList()
-      ..sort((a, b) => buckets[a]!.start.compareTo(buckets[b]!.start));
-
-    var plPoints = sortedKeys
-        .map((key) {
-          final bucket = buckets[key]!;
-          return PeriodPlPoint(
-            label: _labelFor(bucket.start, period),
-            periodStart: bucket.start,
-            income: bucket.income,
-            expense: bucket.expense,
-          );
-        })
-        .toList();
-
-    if (plPoints.isEmpty) {
-      plPoints.addAll(_emptyPeriodPoints(period));
-    } else if (period == ReportsPeriod.daily) {
-      plPoints.sort((a, b) => a.periodStart.compareTo(b.periodStart));
-      while (plPoints.length < 7) {
-        final first = plPoints.first.periodStart;
-        final previous = first.subtract(const Duration(days: 1));
-        plPoints.insert(
-          0,
-          PeriodPlPoint(
-            label: _labelFor(previous, period),
-            periodStart: previous,
-            income: 0,
-            expense: 0,
-          ),
-        );
-      }
-      if (plPoints.length > 7) {
-        plPoints.removeRange(0, plPoints.length - 7);
-      }
-    }
-
-    final partyRoles = _partyRoleSlices(ledgers);
-
     return ReportsSnapshot(
-      plPoints: plPoints,
-      partyRoles: partyRoles,
+      period: period,
+      plPoints: buckets,
+      partyRoles: _partyRoleSlices(ledgers),
       totalIncome: totalIncome,
       totalExpense: totalExpense,
       netPl: totalIncome - totalExpense,
     );
+  }
+
+  static ReportsDateRange _rangeFor(ReportsPeriod period, DateTime now) {
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final weekday = now.weekday;
+    final thisMonday = todayStart.subtract(Duration(days: weekday - DateTime.monday));
+
+    return switch (period) {
+      ReportsPeriod.today => ReportsDateRange(
+          start: todayStart,
+          end: todayStart.add(const Duration(days: 1)),
+        ),
+      ReportsPeriod.thisWeek => ReportsDateRange(
+          start: thisMonday,
+          end: thisMonday.add(const Duration(days: 7)),
+        ),
+      ReportsPeriod.thisMonth => ReportsDateRange(
+          start: DateTime(now.year, now.month, 1),
+          end: DateTime(now.year, now.month + 1, 1),
+        ),
+      ReportsPeriod.thisYear => ReportsDateRange(
+          start: DateTime(now.year, 1, 1),
+          end: DateTime(now.year + 1, 1, 1),
+        ),
+    };
+  }
+
+  static List<PeriodPlPoint> _emptyBuckets(
+    ReportsPeriod period,
+    ReportsDateRange range,
+    DateTime now,
+  ) {
+    return switch (period) {
+      ReportsPeriod.today => List.generate(24, (hour) {
+          final start = DateTime(
+            range.start.year,
+            range.start.month,
+            range.start.day,
+            hour,
+          );
+          return PeriodPlPoint(
+            label: DateFormat('ha').format(start),
+            periodStart: start,
+            income: 0,
+            expense: 0,
+          );
+        }),
+      ReportsPeriod.thisWeek => List.generate(7, (index) {
+          final day = range.start.add(Duration(days: index));
+          return PeriodPlPoint(
+            label: DateFormat('E').format(day),
+            periodStart: day,
+            income: 0,
+            expense: 0,
+          );
+        }),
+      ReportsPeriod.thisMonth => List.generate(now.day, (index) {
+          final day = DateTime(now.year, now.month, index + 1);
+          return PeriodPlPoint(
+            label: '${day.day}',
+            periodStart: day,
+            income: 0,
+            expense: 0,
+          );
+        }),
+      ReportsPeriod.thisYear => List.generate(now.month, (index) {
+          final month = DateTime(now.year, index + 1, 1);
+          return PeriodPlPoint(
+            label: DateFormat('MMM').format(month),
+            periodStart: month,
+            income: 0,
+            expense: 0,
+          );
+        }),
+    };
+  }
+
+  static int? _bucketIndex(
+    DateTime date,
+    ReportsPeriod period,
+    ReportsDateRange range,
+  ) {
+    if (!range.contains(date)) return null;
+
+    return switch (period) {
+      ReportsPeriod.today => date.hour,
+      ReportsPeriod.thisWeek =>
+        date.difference(DateTime(range.start.year, range.start.month, range.start.day)).inDays,
+      ReportsPeriod.thisMonth => date.day - 1,
+      ReportsPeriod.thisYear => date.month - 1,
+    };
   }
 
   static List<PartyRoleSlice> _partyRoleSlices(List<LedgerItem> ledgers) {
@@ -110,49 +160,5 @@ abstract final class LedgerReportsAnalytics {
       PartyRoleSlice(role: AppText.reportsCustomerRole, amount: customerTotal),
       PartyRoleSlice(role: AppText.reportsSupplierRole, amount: supplierTotal),
     ];
-  }
-
-  static List<PeriodPlPoint> _emptyPeriodPoints(ReportsPeriod period) {
-    final now = DateTime.now();
-    if (period == ReportsPeriod.monthly) {
-      return List.generate(6, (index) {
-        final month = DateTime(now.year, now.month - (5 - index), 1);
-        return PeriodPlPoint(
-          label: _labelFor(month, period),
-          periodStart: month,
-          income: 0,
-          expense: 0,
-        );
-      });
-    }
-
-    return List.generate(7, (index) {
-      final day = DateTime(now.year, now.month, now.day - (6 - index));
-      return PeriodPlPoint(
-        label: _labelFor(day, period),
-        periodStart: day,
-        income: 0,
-        expense: 0,
-      );
-    });
-  }
-
-  static String _bucketKey(DateTime date, ReportsPeriod period) {
-    final start = _bucketStart(date, period);
-    return '${start.year}-${start.month}-${start.day}';
-  }
-
-  static DateTime _bucketStart(DateTime date, ReportsPeriod period) {
-    if (period == ReportsPeriod.monthly) {
-      return DateTime(date.year, date.month, 1);
-    }
-    return DateTime(date.year, date.month, date.day);
-  }
-
-  static String _labelFor(DateTime date, ReportsPeriod period) {
-    if (period == ReportsPeriod.monthly) {
-      return DateFormat('MMM').format(date);
-    }
-    return DateFormat('E').format(date);
   }
 }

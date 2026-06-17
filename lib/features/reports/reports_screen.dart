@@ -25,7 +25,7 @@ class ReportsScreen extends ConsumerStatefulWidget {
 }
 
 class _ReportsScreenState extends ConsumerState<ReportsScreen> {
-  ReportsPeriod _period = ReportsPeriod.daily;
+  ReportsPeriod _period = ReportsPeriod.thisWeek;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
       period: _period,
     );
     final hasLedgers = ledgers.isNotEmpty;
-    final hasEntries = ledgers.any((ledger) => ledger.entries.isNotEmpty);
+    final hasAnyEntries = ledgers.any((ledger) => ledger.entries.isNotEmpty);
 
     return ThemedGradientBackground(
       child: Scaffold(
@@ -55,7 +55,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   child: _ReportsHeader(),
                 ),
                 const SizedBox(height: AppSizes.lg),
-                if (!hasLedgers || !hasEntries) ...[
+                if (!hasLedgers || !hasAnyEntries) ...[
                   MyCard(
                     borderRadius: AppSizes.radiusLg,
                     child: const MyText(
@@ -84,6 +84,17 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                       onChanged: (period) => setState(() => _period = period),
                     ),
                   ),
+                  if (!snapshot.hasPlData) ...[
+                    const SizedBox(height: AppSizes.sm),
+                    const MyText(
+                      AppText.reportsPeriodEmpty,
+                      font: AppFont.sourceSans,
+                      size: AppSizes.caption,
+                      color: AppColors.textHint,
+                      align: TextAlign.center,
+                      height: 1.4,
+                    ),
+                  ],
                   const SizedBox(height: AppSizes.lg),
                   SharedEntranceAnimation(
                     delay: const Duration(milliseconds: 140),
