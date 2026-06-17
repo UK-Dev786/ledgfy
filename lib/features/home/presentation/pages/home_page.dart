@@ -7,6 +7,7 @@ import '../../../../core/widgets/my_card.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/themed_gradient_bg.dart';
 import '../../home_screen.dart';
+import '../../../ledger/ledger_screen.dart';
 import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -27,10 +28,7 @@ class _HomePageState extends State<HomePage> {
         index: _currentIndex,
         children: [
           HomeScreen(onProfileTap: () => setState(() => _currentIndex = 3)),
-          const _PlaceholderTab(
-            icon: Icons.menu_book_rounded,
-            label: AppText.homeLedgersTab,
-          ),
+          const LedgerScreen(),
           const _PlaceholderTab(
             icon: Icons.insert_chart_outlined_rounded,
             label: AppText.homeAnalyticsTab,

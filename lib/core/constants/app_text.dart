@@ -190,4 +190,23 @@ abstract class AppText {
   static const homeNetPositiveHint = 'Income exceeds expenses this month';
   static const homeNetNegativeHint = 'Expenses exceed income this month';
   static const homeNetNeutralHint = 'Income and expenses are balanced';
+
+  // Ledgers
+  static const ledgersTitle = 'Ledgers';
+  static const ledgersSubtitle = 'Organize your books by purpose';
+  static const ledgersEmptyTitle = 'No ledgers yet';
+  static const ledgersEmptySubtitle =
+      'Create your first ledger to start tracking income and expenses.';
+  static const ledgersCreateTitle = 'Create Ledger';
+  static const ledgersNameLabel = 'Ledger Name';
+  static const ledgersNameHint = 'e.g. Main Store, Personal Budget';
+  static const ledgersNameRequired = 'Ledger name is required';
+  static const ledgersTypeLabel = 'Ledger Type';
+  static const ledgersCreateButton = 'Create Ledger';
+  static const ledgerTypeGeneral = 'General Ledger';
+  static const ledgerTypeWholesale = 'Wholesale';
+  static const ledgerTypeRetail = 'Retail';
+  static const ledgerTypeCashBook = 'Cash Book';
+  static const ledgerTypeExpense = 'Expense Tracker';
+  static const ledgerTypeProject = 'Project';
 }

@@ -1,0 +1,120 @@
+import 'package:flutter/material.dart';
+import 'package:ledgify/core/extensions/context_extensions.dart';
+
+import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_sizes.dart';
+import '../../../core/constants/app_text.dart';
+import '../../../core/widgets/my_button.dart';
+import '../../../core/widgets/my_text.dart';
+import '../../../core/widgets/my_text_field.dart';
+import '../../../core/widgets/shared_bottom_sheet.dart';
+import '../models/ledger_type.dart';
+import 'ledger_type_picker.dart';
+
+typedef OnLedgerCreated = void Function(String title, LedgerType type);
+
+class CreateLedgerSheet extends StatefulWidget {
+  final OnLedgerCreated onCreate;
+
+  const CreateLedgerSheet({super.key, required this.onCreate});
+
+  static Future<void> show(
+    BuildContext context, {
+    required OnLedgerCreated onCreate,
+  }) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => CreateLedgerSheet(onCreate: onCreate),
+    );
+  }
+
+  @override
+  State<CreateLedgerSheet> createState() => _CreateLedgerSheetState();
+}
+
+class _CreateLedgerSheetState extends State<CreateLedgerSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
+  LedgerType _selectedType = LedgerType.general;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+    widget.onCreate(_titleController.text.trim(), _selectedType);
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SharedBottomSheet(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Center(
+              child: Icon(
+                Icons.menu_book_rounded,
+                color: AppColors.primary,
+                size: AppSizes.iconLg,
+              ),
+            ),
+            SizedBox(height: context.h * 1.5),
+            MyText(
+              AppText.ledgersCreateTitle,
+              font: AppFont.inter,
+              size: AppSizes.header3,
+              color: AppColors.white,
+              weight: FontWeight.bold,
+              align: TextAlign.center,
+            ),
+            SizedBox(height: context.h * 2.5),
+            MyTextField(
+              title: AppText.ledgersNameLabel,
+              hintText: AppText.ledgersNameHint,
+              controller: _titleController,
+              keyboardType: TextInputType.text,
+              prefixIcon: const Icon(
+                Icons.edit_outlined,
+                color: AppColors.primary,
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return AppText.ledgersNameRequired;
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: context.h * 2),
+            MyText(
+              AppText.ledgersTypeLabel,
+              font: AppFont.inter,
+              size: AppSizes.body,
+              color: AppColors.white,
+              weight: FontWeight.w600,
+            ),
+            SizedBox(height: context.h * 1.2),
+            LedgerTypePicker(
+              selected: _selectedType,
+              onSelected: (type) => setState(() => _selectedType = type),
+            ),
+            SizedBox(height: context.h * 3),
+            MyButton(
+              text: AppText.ledgersCreateButton,
+              onTap: _submit,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
