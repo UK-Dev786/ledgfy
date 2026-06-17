@@ -381,6 +381,8 @@ abstract class AppText {
   static const ledgerReportShareBody =
       'Khata report from Ledgify — your pro digital khata app. '
       'Download Ledgify on Google Play & App Store.';
+  static const ledgerReportPrint = 'Print';
+  static const ledgerReportShare = 'Share';
   static const ledgerOpeningBalance = 'Opening Balance';
   static const ledgerOpeningBalanceTitle = 'Set Opening Balance';
   static const ledgerOpeningBalanceSubtitle =

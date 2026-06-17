@@ -206,85 +206,87 @@ class _PartyTile extends StatelessWidget {
             vertical: AppSizes.sm + 2,
           ),
           child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                ),
+                child: Icon(
+                  config.subLedgerIcon,
+                  color: AppColors.primary,
+                  size: AppSizes.iconSm,
+                ),
               ),
-              child: Icon(
-                config.subLedgerIcon,
-                color: AppColors.primary,
-                size: AppSizes.iconSm,
-              ),
-            ),
-            const SizedBox(width: AppSizes.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  MyText(
-                    party.name,
-                    font: AppFont.inter,
-                    size: AppSizes.subtitle,
-                    color: AppColors.white,
-                    weight: FontWeight.w600,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (party.description != null &&
-                      party.description!.isNotEmpty) ...[
-                    const SizedBox(height: 2),
+              const SizedBox(width: AppSizes.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     MyText(
-                      party.description!,
-                      font: AppFont.sourceSans,
-                      size: AppSizes.caption,
-                      color: AppColors.textHint,
+                      party.name,
+                      font: AppFont.inter,
+                      size: AppSizes.subtitle,
+                      color: AppColors.white,
+                      weight: FontWeight.w600,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                  const SizedBox(height: AppSizes.xs),
-                  Row(
-                    children: [
-                      LedgerSimpleAmount(
-                        icon: config.creditIcon,
-                        color: config.creditColor,
-                        amount: party.given,
-                        abbreviate: !showFullAmounts,
-                        iconSize: 12,
-                      ),
-                      const SizedBox(width: AppSizes.sm),
-                      LedgerSimpleAmount(
-                        icon: config.debitIcon,
-                        color: config.debitColor,
-                        amount: party.received,
-                        abbreviate: !showFullAmounts,
-                        iconSize: 12,
+                    if (party.description != null &&
+                        party.description!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      MyText(
+                        party.description!,
+                        font: AppFont.sourceSans,
+                        size: AppSizes.caption,
+                        color: AppColors.textHint,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                  ),
-                ],
+                    const SizedBox(height: AppSizes.xs),
+                    Row(
+                      children: [
+                        LedgerSimpleAmount(
+                          icon: config.creditIcon,
+                          color: config.creditColor,
+                          amount: party.given,
+                          abbreviate: !showFullAmounts,
+                          iconSize: 12,
+                        ),
+                        const SizedBox(width: AppSizes.sm),
+                        Expanded(
+                          child: LedgerSimpleAmount(
+                            icon: config.debitIcon,
+                            color: config.debitColor,
+                            amount: party.received,
+                            abbreviate: !showFullAmounts,
+                            iconSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: AppSizes.sm),
-            LedgerSimpleAmount(
-              icon: Icons.account_balance_wallet_outlined,
-              color: balanceColor,
-              amount: party.balance,
-              abbreviate: !showFullAmounts,
-            ),
-            const SizedBox(width: AppSizes.xs),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.textHint,
-              size: AppSizes.iconSm + 2,
-            ),
-          ],
+              const SizedBox(width: AppSizes.sm),
+              LedgerSimpleAmount(
+                icon: Icons.account_balance_wallet_outlined,
+                color: balanceColor,
+                amount: party.balance,
+                abbreviate: !showFullAmounts,
+              ),
+              const SizedBox(width: AppSizes.xs),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.textHint,
+                size: AppSizes.iconSm + 2,
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
