@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
-import '../../../../core/constants/app_text.dart';
 import '../../../../core/widgets/my_card.dart';
-import '../../../../core/widgets/my_text.dart';
-import '../../../../core/widgets/themed_gradient_bg.dart';
 import '../../home_screen.dart';
 import '../../../ledger/list/ledger_screen.dart';
+import '../../../reports/reports_screen.dart';
 import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -29,10 +27,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           HomeScreen(onProfileTap: () => setState(() => _currentIndex = 3)),
           const LedgerScreen(),
-          const _PlaceholderTab(
-            icon: Icons.insert_chart_outlined_rounded,
-            label: AppText.homeAnalyticsTab,
-          ),
+          const ReportsScreen(),
           const ProfilePage(),
         ],
       ),
@@ -118,49 +113,6 @@ class _NavItem extends StatelessWidget {
             icon,
             size: AppSizes.iconMd,
             color: selected ? AppColors.primary : AppColors.textHint,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PlaceholderTab extends StatelessWidget {
-  final IconData icon;
-  final String label;
-
-  const _PlaceholderTab({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return ThemedGradientBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Center(
-          child: MyCard(
-            tint: MyCardTint.dark,
-            borderRadius: AppSizes.radiusLg,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: AppSizes.iconLg, color: AppColors.primary),
-                const SizedBox(height: AppSizes.md),
-                MyText(
-                  label,
-                  font: AppFont.inter,
-                  size: AppSizes.title,
-                  color: AppColors.white,
-                  weight: FontWeight.w700,
-                ),
-                const SizedBox(height: AppSizes.xs),
-                MyText(
-                  AppText.homeComingSoon,
-                  font: AppFont.sourceSans,
-                  size: AppSizes.subtitle,
-                  color: AppColors.textHint,
-                ),
-              ],
-            ),
           ),
         ),
       ),

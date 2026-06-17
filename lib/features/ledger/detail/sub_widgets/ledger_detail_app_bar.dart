@@ -30,6 +30,7 @@ class LedgerDetailAppBar extends StatelessWidget {
   final bool showAmountToggle;
   final bool showFullAmounts;
   final VoidCallback? onToggleAmounts;
+  final VoidCallback? onReportTap;
   final List<LedgerAppBarMenuOption> menuOptions;
   final ValueChanged<String>? onMenuSelected;
 
@@ -42,6 +43,7 @@ class LedgerDetailAppBar extends StatelessWidget {
     this.showAmountToggle = false,
     this.showFullAmounts = false,
     this.onToggleAmounts,
+    this.onReportTap,
     this.menuOptions = const [],
     this.onMenuSelected,
   });
@@ -90,6 +92,16 @@ class LedgerDetailAppBar extends StatelessWidget {
               tooltip: AppText.ledgerDetailHistory,
               icon: const Icon(
                 Icons.history_rounded,
+                color: AppColors.textHint,
+                size: AppSizes.iconMd,
+              ),
+            ),
+          if (onReportTap != null)
+            IconButton(
+              onPressed: onReportTap,
+              tooltip: AppText.ledgerReportTitle,
+              icon: const Icon(
+                Icons.picture_as_pdf_outlined,
                 color: AppColors.textHint,
                 size: AppSizes.iconMd,
               ),

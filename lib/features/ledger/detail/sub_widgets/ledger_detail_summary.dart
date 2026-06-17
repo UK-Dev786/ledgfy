@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_text.dart';
 import '../../models/ledger_item.dart';
 import '../../shared/sub_widgets/ledger_summary_card.dart';
 
@@ -31,6 +32,14 @@ class LedgerDetailSummary extends StatelessWidget {
     return LedgerSummaryCard(
       showExpandButton: config.showAmountExpandButton,
       amounts: [
+        if (ledger.openingBalance != 0) ...[
+          LedgerSummaryAmount(
+            icon: Icons.savings_outlined,
+            color: AppColors.textTertiary,
+            amount: ledger.openingBalance,
+            label: AppText.ledgerOpeningBalance,
+          ),
+        ],
         LedgerSummaryAmount(
           icon: config.outflowIcon,
           color: config.outflowColor,

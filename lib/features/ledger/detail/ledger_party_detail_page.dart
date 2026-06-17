@@ -9,6 +9,7 @@ import '../../../di/auth_providers.dart';
 import '../models/ledger_entry.dart';
 import '../models/ledger_item.dart';
 import '../models/party_balance.dart';
+import '../shared/khata_report/khata_report_page.dart';
 import '../shared/ledger_page_route.dart';
 import 'sub_widgets/add_ledger_entry_sheet.dart';
 import 'sub_widgets/add_party_name_sheet.dart';
@@ -141,6 +142,14 @@ class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
     );
   }
 
+  void _openReport() {
+    KhataReportPage.open(
+      context,
+      ledger: _ledger,
+      partyName: _partyName,
+    );
+  }
+
   Future<void> _deleteSubLedger() async {
     final config = _ledger.config;
     final confirmed = await LedgerDeleteDialog.show(
@@ -182,6 +191,7 @@ class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
               LedgerDetailAppBar(
                 title: _partyName,
                 onBack: () => Navigator.of(context).pop(),
+                onReportTap: _openReport,
                 menuOptions: _menuOptions,
                 onMenuSelected: _handleMenu,
               ),

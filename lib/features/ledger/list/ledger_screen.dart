@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
@@ -6,6 +7,7 @@ import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/my_card.dart';
 import '../../../core/widgets/my_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
+import '../../../di/ledger_providers.dart';
 import '../detail/ledger_detail_page.dart';
 import '../models/ledger_item.dart';
 import 'sub_widgets/create_ledger_sheet.dart';
@@ -15,16 +17,17 @@ import 'sub_widgets/ledger_header.dart';
 import 'sub_widgets/ledger_list_view.dart';
 import 'sub_widgets/ledger_type_filter_chips.dart';
 
-class LedgerScreen extends StatefulWidget {
+class LedgerScreen extends ConsumerStatefulWidget {
   const LedgerScreen({super.key});
 
   @override
-  State<LedgerScreen> createState() => _LedgerScreenState();
+  ConsumerState<LedgerScreen> createState() => _LedgerScreenState();
 }
 
-class _LedgerScreenState extends State<LedgerScreen> {
-  final List<LedgerItem> _ledgers = [];
+class _LedgerScreenState extends ConsumerState<LedgerScreen> {
   String? _selectedTypeId;
+
+  List<LedgerItem> get _ledgers => ref.watch(ledgersProvider);
 
   List<LedgerItem> get _filteredLedgers {
     if (_selectedTypeId == null) return _ledgers;
@@ -42,10 +45,9 @@ class _LedgerScreenState extends State<LedgerScreen> {
         )
         .then((deletedId) {
           if (deletedId != null) {
-            setState(() {
-              _ledgers.removeWhere((item) => item.id == deletedId);
-            });
+            ref.read(ledgersProvider.notifier).remove(deletedId);
           } else {
+            ref.read(ledgersProvider.notifier).notifyChanged();
             setState(() {});
           }
         });
@@ -55,17 +57,15 @@ class _LedgerScreenState extends State<LedgerScreen> {
     CreateLedgerSheet.show(
       context,
       onCreate: (title, type, description) {
-        setState(() {
-          _ledgers.add(
-            LedgerItem(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              title: title,
-              description: description,
-              type: type,
-              createdAt: DateTime.now(),
-            ),
-          );
-        });
+        ref.read(ledgersProvider.notifier).add(
+              LedgerItem(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                title: title,
+                description: description,
+                type: type,
+                createdAt: DateTime.now(),
+              ),
+            );
       },
     );
   }

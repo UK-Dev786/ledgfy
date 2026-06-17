@@ -6,6 +6,8 @@ import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
 import '../models/ledger_entry.dart';
 import '../models/ledger_item.dart';
+import '../models/ledger_type_config.dart';
+import '../shared/khata_report/khata_report_page.dart';
 import '../shared/ledger_page_route.dart';
 import 'ledger_history_page.dart';
 import 'ledger_party_detail_page.dart';
@@ -17,6 +19,7 @@ import 'sub_widgets/ledger_detail_app_bar.dart';
 import 'sub_widgets/ledger_detail_fabs.dart';
 import 'sub_widgets/ledger_detail_summary.dart';
 import 'sub_widgets/ledger_delete_dialog.dart';
+import 'sub_widgets/opening_balance_sheet.dart';
 
 class LedgerDetailPage extends StatefulWidget {
   final LedgerItem ledger;
@@ -90,6 +93,18 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
     );
   }
 
+  void _openReport() {
+    KhataReportPage.open(context, ledger: _ledger);
+  }
+
+  void _openOpeningBalance() {
+    OpeningBalanceSheet.show(
+      context,
+      initialBalance: _ledger.openingBalance,
+      onSave: (balance) => setState(() => _ledger.openingBalance = balance),
+    );
+  }
+
   Future<void> _handleDelete() async {
     final confirmed = await LedgerDeleteDialog.show(context);
     if (confirmed && mounted) {
@@ -98,7 +113,29 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
   }
 
   void _handleMenu(String value) {
-    if (value == 'delete') _handleDelete();
+    switch (value) {
+      case 'delete':
+        _handleDelete();
+      case 'opening_balance':
+        _openOpeningBalance();
+    }
+  }
+
+  List<LedgerAppBarMenuOption> _menuOptions(LedgerTypeConfig config) {
+    return [
+      if (!config.isExpenseOnly)
+        const LedgerAppBarMenuOption(
+          id: 'opening_balance',
+          label: AppText.ledgerSetOpeningBalance,
+          icon: Icons.savings_outlined,
+        ),
+      const LedgerAppBarMenuOption(
+        id: 'delete',
+        label: AppText.ledgerDeleteLedger,
+        icon: Icons.delete_outline_rounded,
+        color: AppColors.error,
+      ),
+    ];
   }
 
   @override
@@ -126,14 +163,8 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
                 onBack: () => Navigator.of(context).pop(),
                 showHistoryButton: supportsSubLedgers,
                 onHistoryTap: supportsSubLedgers ? _openHistory : null,
-                menuOptions: const [
-                  LedgerAppBarMenuOption(
-                    id: 'delete',
-                    label: AppText.ledgerDeleteLedger,
-                    icon: Icons.delete_outline_rounded,
-                    color: AppColors.error,
-                  ),
-                ],
+                onReportTap: _openReport,
+                menuOptions: _menuOptions(config),
                 onMenuSelected: _handleMenu,
               ),
               Expanded(

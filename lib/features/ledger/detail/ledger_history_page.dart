@@ -5,6 +5,7 @@ import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
 import '../models/ledger_entry.dart';
 import '../models/ledger_item.dart';
+import '../shared/khata_report/khata_report_page.dart';
 import 'sub_widgets/ledger_detail_app_bar.dart';
 import 'sub_widgets/ledger_history_list.dart';
 
@@ -45,6 +46,11 @@ class LedgerHistoryPage extends StatelessWidget {
               LedgerDetailAppBar(
                 title: AppText.ledgerDetailHistory,
                 onBack: () => Navigator.of(context).pop(),
+                onReportTap: () => KhataReportPage.open(
+                  context,
+                  ledger: ledger,
+                  partyName: partyName,
+                ),
               ),
               Expanded(
                 child: SingleChildScrollView(

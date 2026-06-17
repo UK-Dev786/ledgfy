@@ -12,7 +12,7 @@ class LedgerItem {
   final DateTime createdAt;
   final List<LedgerEntry> entries;
   final List<LedgerParty> parties;
-  final double openingBalance;
+  double openingBalance;
 
   LedgerItem({
     required this.id,
