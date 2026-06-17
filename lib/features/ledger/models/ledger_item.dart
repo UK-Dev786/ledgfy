@@ -1,3 +1,4 @@
+import 'ledger_entry.dart';
 import 'ledger_type.dart';
 
 class LedgerItem {
@@ -6,18 +7,24 @@ class LedgerItem {
   final String description;
   final LedgerType type;
   final DateTime createdAt;
-  final double income;
-  final double outgoing;
+  final List<LedgerEntry> entries;
 
-  const LedgerItem({
+  LedgerItem({
     required this.id,
     required this.title,
     this.description = '',
     required this.type,
     required this.createdAt,
-    this.income = 0,
-    this.outgoing = 0,
-  });
+    List<LedgerEntry>? entries,
+  }) : entries = entries ?? [];
+
+  double get income => entries
+      .where((entry) => entry.type == LedgerEntryType.income)
+      .fold(0.0, (sum, entry) => sum + entry.amount);
+
+  double get outgoing => entries
+      .where((entry) => entry.type == LedgerEntryType.outgoing)
+      .fold(0.0, (sum, entry) => sum + entry.amount);
 
   double get subtotal => income - outgoing;
 

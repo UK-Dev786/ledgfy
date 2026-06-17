@@ -1,9 +1,6 @@
-import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_sizes.dart';
-import '../../../core/widgets/my_card.dart';
+import '../../../core/widgets/rounded_button.dart';
 
 class LedgerFab extends StatelessWidget {
   final VoidCallback onTap;
@@ -12,26 +9,9 @@ class LedgerFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Bounce(
-      duration: const Duration(milliseconds: 110),
+    return RoundedButton(
       onTap: onTap,
-      child: SizedBox(
-        width: AppSizes.buttonHeight,
-        height: AppSizes.buttonHeight,
-        child: MyCard(
-          tint: MyCardTint.dark,
-          borderRadius: AppSizes.radiusFull,
-          blur: 24,
-          padding: EdgeInsets.zero,
-          child: const Center(
-            child: Icon(
-              Icons.add_rounded,
-              color: AppColors.primary,
-              size: AppSizes.iconMd,
-            ),
-          ),
-        ),
-      ),
+      icon: Icons.add_rounded,
     );
   }
 }

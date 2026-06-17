@@ -6,8 +6,13 @@ import 'ledger_tile.dart';
 
 class LedgerListView extends StatelessWidget {
   final List<LedgerItem> ledgers;
+  final ValueChanged<LedgerItem>? onLedgerTap;
 
-  const LedgerListView({super.key, required this.ledgers});
+  const LedgerListView({
+    super.key,
+    required this.ledgers,
+    this.onLedgerTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +25,7 @@ class LedgerListView extends StatelessWidget {
         return LedgerTile(
           ledger: ledgers[index],
           index: index,
+          onTap: onLedgerTap == null ? null : () => onLedgerTap!(ledgers[index]),
         );
       },
     );

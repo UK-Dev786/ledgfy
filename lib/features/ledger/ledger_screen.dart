@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/app_sizes.dart';
 import '../../core/widgets/themed_gradient_bg.dart';
+import 'ledger_detail_page.dart';
 import 'models/ledger_item.dart';
 import 'sub_widgets/create_ledger_sheet.dart';
 import 'sub_widgets/ledger_empty_state.dart';
@@ -18,6 +19,16 @@ class LedgerScreen extends StatefulWidget {
 
 class _LedgerScreenState extends State<LedgerScreen> {
   final List<LedgerItem> _ledgers = [];
+
+  void _openLedgerDetail(LedgerItem ledger) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<void>(
+            builder: (_) => LedgerDetailPage(ledger: ledger),
+          ),
+        )
+        .then((_) => setState(() {}));
+  }
 
   void _openCreateLedgerSheet() {
     CreateLedgerSheet.show(
@@ -61,7 +72,10 @@ class _LedgerScreenState extends State<LedgerScreen> {
                 const LedgerHeader(),
                 const SizedBox(height: AppSizes.lg),
                 if (hasLedgers)
-                  LedgerListView(ledgers: _ledgers)
+                  LedgerListView(
+                    ledgers: _ledgers,
+                    onLedgerTap: _openLedgerDetail,
+                  )
                 else
                   const LedgerEmptyState(),
               ],

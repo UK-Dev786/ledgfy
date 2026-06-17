@@ -23,29 +23,49 @@ class LedgerFlowAmount extends StatelessWidget {
     final iconBoxSize = compact ? 18.0 : 22.0;
     final iconSize = compact ? 11.0 : 13.0;
     final textSize = compact ? AppSizes.caption : AppSizes.subtitle;
+    final gap = compact ? AppSizes.xs : AppSizes.sm;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: iconBoxSize,
-          height: iconBoxSize,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-            border: Border.all(color: color.withValues(alpha: 0.28)),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedWidth = constraints.maxWidth.isFinite;
+        final amountText = FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: MyText(
+            CurrencyFormatter.format(
+              amount,
+              compact: compact,
+            ),
+            font: AppFont.inter,
+            size: textSize,
+            color: color,
+            weight: FontWeight.w700,
+            maxLines: 1,
           ),
-          child: Icon(icon, size: iconSize, color: color),
-        ),
-        SizedBox(width: compact ? AppSizes.xs : AppSizes.sm),
-        MyText(
-          CurrencyFormatter.format(amount),
-          font: AppFont.inter,
-          size: textSize,
-          color: color,
-          weight: FontWeight.w700,
-        ),
-      ],
+        );
+
+        return Row(
+          mainAxisSize:
+              hasBoundedWidth ? MainAxisSize.max : MainAxisSize.min,
+          children: [
+            Container(
+              width: iconBoxSize,
+              height: iconBoxSize,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                border: Border.all(color: color.withValues(alpha: 0.28)),
+              ),
+              child: Icon(icon, size: iconSize, color: color),
+            ),
+            SizedBox(width: gap),
+            if (hasBoundedWidth)
+              Expanded(child: amountText)
+            else
+              amountText,
+          ],
+        );
+      },
     );
   }
 }

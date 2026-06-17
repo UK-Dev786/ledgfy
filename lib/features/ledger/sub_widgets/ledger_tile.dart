@@ -1,3 +1,4 @@
+import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -11,24 +12,29 @@ import 'ledger_flow_amount.dart';
 class LedgerTile extends StatelessWidget {
   final LedgerItem ledger;
   final int index;
+  final VoidCallback? onTap;
 
   const LedgerTile({
     super.key,
     required this.ledger,
     required this.index,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return SharedEntranceAnimation(
       delay: Duration(milliseconds: 80 * index.clamp(0, 4)),
-      child: MyCard(
-        borderRadius: AppSizes.radiusLg,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.md,
-          vertical: AppSizes.sm + 2,
-        ),
-        child: Row(
+      child: Bounce(
+        duration: const Duration(milliseconds: 110),
+        onTap: onTap,
+        child: MyCard(
+          borderRadius: AppSizes.radiusLg,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.md,
+            vertical: AppSizes.sm + 2,
+          ),
+          child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
@@ -74,27 +80,31 @@ class LedgerTile extends StatelessWidget {
                     ),
                   ],
                   const SizedBox(height: AppSizes.sm),
-                  Wrap(
-                    spacing: AppSizes.sm + 2,
-                    runSpacing: AppSizes.xs,
+                  Row(
                     children: [
-                      LedgerFlowAmount(
-                        icon: Icons.arrow_upward_rounded,
-                        color: AppColors.success,
-                        amount: ledger.income,
-                        compact: true,
+                      Expanded(
+                        child: LedgerFlowAmount(
+                          icon: Icons.arrow_upward_rounded,
+                          color: AppColors.success,
+                          amount: ledger.income,
+                          compact: true,
+                        ),
                       ),
-                      LedgerFlowAmount(
-                        icon: Icons.arrow_downward_rounded,
-                        color: AppColors.error,
-                        amount: ledger.outgoing,
-                        compact: true,
+                      Expanded(
+                        child: LedgerFlowAmount(
+                          icon: Icons.arrow_downward_rounded,
+                          color: AppColors.error,
+                          amount: ledger.outgoing,
+                          compact: true,
+                        ),
                       ),
-                      LedgerFlowAmount(
-                        icon: Icons.account_balance_wallet_outlined,
-                        color: _subtotalColor(ledger.subtotal),
-                        amount: ledger.subtotal,
-                        compact: true,
+                      Expanded(
+                        child: LedgerFlowAmount(
+                          icon: Icons.account_balance_wallet_outlined,
+                          color: _subtotalColor(ledger.subtotal),
+                          amount: ledger.subtotal,
+                          compact: true,
+                        ),
                       ),
                     ],
                   ),
@@ -108,6 +118,7 @@ class LedgerTile extends StatelessWidget {
               size: AppSizes.iconSm + 2,
             ),
           ],
+          ),
         ),
       ),
     );

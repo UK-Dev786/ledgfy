@@ -211,4 +211,20 @@ abstract class AppText {
   static const ledgerTypeCashBook = 'Cash Book';
   static const ledgerTypeExpense = 'Expense Tracker';
   static const ledgerTypeProject = 'Project';
+
+  // Ledger detail
+  static const ledgerDetailIncome = 'Income';
+  static const ledgerDetailOutgoing = 'Outgoing';
+  static const ledgerDetailSubtotal = 'Subtotal';
+  static const ledgerDetailHistory = 'History';
+  static const ledgerDetailEmptyHistory =
+      'No transactions yet. Use the buttons below to add income or outgoing.';
+  static const ledgerDetailAddIncome = 'Add Income';
+  static const ledgerDetailAddOutgoing = 'Add Outgoing';
+  static const ledgerDetailAmountLabel = 'Amount';
+  static const ledgerDetailAmountHint = 'Enter amount';
+  static const ledgerDetailAmountRequired = 'Amount is required';
+  static const ledgerDetailAmountInvalid =
+      'Enter a valid amount greater than zero';
+  static const ledgerDetailAddButton = 'Add';
 }
