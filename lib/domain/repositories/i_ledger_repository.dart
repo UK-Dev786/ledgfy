@@ -18,6 +18,13 @@ abstract class ILedgerRepository {
     required String ledgerId,
   });
 
+  Future<void> updateLedger({
+    required String userId,
+    required String ledgerId,
+    required String title,
+    required String description,
+  });
+
   Future<void> updateOpeningBalance({
     required String userId,
     required String ledgerId,

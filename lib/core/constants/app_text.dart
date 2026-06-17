@@ -241,6 +241,8 @@ abstract class AppText {
   static const ledgersDescriptionHint = 'e.g. Monthly shop records';
   static const ledgersTypeLabel = 'Ledger Type';
   static const ledgersCreateButton = 'Create Ledger';
+  static const ledgersEditTitle = 'Edit Ledger';
+  static const ledgersSaveButton = 'Save Changes';
   static const ledgerTypeGeneral = 'Udhar Book';
   static const ledgerTypeWholesale = 'Wholesale';
   static const ledgerTypeRetail = 'Retail';

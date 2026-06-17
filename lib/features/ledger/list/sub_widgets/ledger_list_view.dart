@@ -7,11 +7,15 @@ import 'ledger_tile.dart';
 class LedgerListView extends StatelessWidget {
   final List<LedgerItem> ledgers;
   final ValueChanged<LedgerItem>? onLedgerTap;
+  final ValueChanged<LedgerItem>? onLedgerEdit;
+  final ValueChanged<LedgerItem>? onLedgerDelete;
 
   const LedgerListView({
     super.key,
     required this.ledgers,
     this.onLedgerTap,
+    this.onLedgerEdit,
+    this.onLedgerDelete,
   });
 
   @override
@@ -22,10 +26,13 @@ class LedgerListView extends StatelessWidget {
       itemCount: ledgers.length,
       separatorBuilder: (_, __) => const SizedBox(height: AppSizes.md),
       itemBuilder: (context, index) {
+        final ledger = ledgers[index];
         return LedgerTile(
-          ledger: ledgers[index],
+          ledger: ledger,
           index: index,
-          onTap: onLedgerTap == null ? null : () => onLedgerTap!(ledgers[index]),
+          onTap: onLedgerTap == null ? null : () => onLedgerTap!(ledger),
+          onEdit: onLedgerEdit == null ? null : () => onLedgerEdit!(ledger),
+          onDelete: onLedgerDelete,
         );
       },
     );

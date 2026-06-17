@@ -45,7 +45,7 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
   void _openCreateLedgerSheet() {
     CreateLedgerSheet.show(
       context,
-      onCreate: (title, type, description) {
+      onSubmit: (title, type, description) {
         ref.read(ledgerControllerProvider).createLedger(
               title: title,
               description: description,
@@ -53,6 +53,24 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
             );
       },
     );
+  }
+
+  void _openEditLedgerSheet(LedgerItem ledger) {
+    CreateLedgerSheet.show(
+      context,
+      ledger: ledger,
+      onSubmit: (title, _, description) {
+        ref.read(ledgerControllerProvider).updateLedger(
+              ledgerId: ledger.id,
+              title: title,
+              description: description,
+            );
+      },
+    );
+  }
+
+  void _deleteLedger(LedgerItem ledger) {
+    ref.read(ledgerControllerProvider).deleteLedger(ledger.id);
   }
 
   @override
@@ -125,6 +143,8 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
                           : LedgerListView(
                               ledgers: filtered,
                               onLedgerTap: _openLedgerDetail,
+                              onLedgerEdit: _openEditLedgerSheet,
+                              onLedgerDelete: _deleteLedger,
                             )
                     else
                       const LedgerEmptyState(),

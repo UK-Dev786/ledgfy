@@ -42,6 +42,21 @@ class LedgerRepositoryImpl implements ILedgerRepository {
   }
 
   @override
+  Future<void> updateLedger({
+    required String userId,
+    required String ledgerId,
+    required String title,
+    required String description,
+  }) {
+    return _remoteDataSource.updateLedger(
+      userId: userId,
+      ledgerId: ledgerId,
+      title: title,
+      description: description,
+    );
+  }
+
+  @override
   Future<void> updateOpeningBalance({
     required String userId,
     required String ledgerId,

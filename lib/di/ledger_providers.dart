@@ -81,6 +81,22 @@ class LedgerController {
     await _repository.deleteLedger(userId: userId, ledgerId: ledgerId);
   }
 
+  Future<void> updateLedger({
+    required String ledgerId,
+    required String title,
+    required String description,
+  }) async {
+    final userId = _userId;
+    if (userId == null) return;
+
+    await _repository.updateLedger(
+      userId: userId,
+      ledgerId: ledgerId,
+      title: title,
+      description: description,
+    );
+  }
+
   Future<void> updateOpeningBalance({
     required String ledgerId,
     required double openingBalance,

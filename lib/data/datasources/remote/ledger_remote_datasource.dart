@@ -144,6 +144,20 @@ class LedgerRemoteDataSource {
     await ledgerRef.delete();
   }
 
+  Future<void> updateLedger({
+    required String userId,
+    required String ledgerId,
+    required String title,
+    required String description,
+  }) async {
+    await _ensureAuthReady();
+    await _ledgerRef(userId, ledgerId).update({
+      'title': title,
+      'description': description,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   Future<void> updateOpeningBalance({
     required String userId,
     required String ledgerId,

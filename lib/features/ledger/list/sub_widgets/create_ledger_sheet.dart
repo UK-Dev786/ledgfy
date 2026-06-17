@@ -8,31 +8,41 @@ import '../../../../core/widgets/my_button.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/my_text_field.dart';
 import '../../../../core/widgets/shared_bottom_sheet.dart';
+import '../../models/ledger_item.dart';
 import '../../models/ledger_type.dart';
 import '../../models/ledger_type_config.dart';
 import 'ledger_type_picker.dart';
 
-typedef OnLedgerCreated = void Function(
+typedef OnLedgerSubmitted = void Function(
   String title,
   LedgerType type,
   String description,
 );
 
 class CreateLedgerSheet extends StatefulWidget {
-  final OnLedgerCreated onCreate;
+  final LedgerItem? ledger;
+  final OnLedgerSubmitted onSubmit;
 
-  const CreateLedgerSheet({super.key, required this.onCreate});
+  const CreateLedgerSheet({
+    super.key,
+    this.ledger,
+    required this.onSubmit,
+  });
 
   static Future<void> show(
     BuildContext context, {
-    required OnLedgerCreated onCreate,
+    LedgerItem? ledger,
+    required OnLedgerSubmitted onSubmit,
   }) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => CreateLedgerSheet(onCreate: onCreate),
+      builder: (sheetContext) => CreateLedgerSheet(
+        ledger: ledger,
+        onSubmit: onSubmit,
+      ),
     );
   }
 
@@ -42,9 +52,20 @@ class CreateLedgerSheet extends StatefulWidget {
 
 class _CreateLedgerSheetState extends State<CreateLedgerSheet> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  LedgerType _selectedType = LedgerType.general;
+  late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
+  late LedgerType _selectedType;
+
+  bool get _isEditing => widget.ledger != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.ledger?.title ?? '');
+    _descriptionController =
+        TextEditingController(text: widget.ledger?.description ?? '');
+    _selectedType = widget.ledger?.type ?? LedgerType.general;
+  }
 
   @override
   void dispose() {
@@ -55,7 +76,7 @@ class _CreateLedgerSheetState extends State<CreateLedgerSheet> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-    widget.onCreate(
+    widget.onSubmit(
       _titleController.text.trim(),
       _selectedType,
       _descriptionController.text.trim(),
@@ -81,7 +102,7 @@ class _CreateLedgerSheetState extends State<CreateLedgerSheet> {
             ),
             SizedBox(height: context.h * 1.5),
             MyText(
-              AppText.ledgersCreateTitle,
+              _isEditing ? AppText.ledgersEditTitle : AppText.ledgersCreateTitle,
               font: AppFont.inter,
               size: AppSizes.header3,
               color: AppColors.white,
@@ -125,9 +146,15 @@ class _CreateLedgerSheetState extends State<CreateLedgerSheet> {
               weight: FontWeight.w600,
             ),
             SizedBox(height: context.h * 1.2),
-            LedgerTypePicker(
-              selected: _selectedType,
-              onSelected: (type) => setState(() => _selectedType = type),
+            AbsorbPointer(
+              absorbing: _isEditing,
+              child: Opacity(
+                opacity: _isEditing ? 0.55 : 1,
+                child: LedgerTypePicker(
+                  selected: _selectedType,
+                  onSelected: (type) => setState(() => _selectedType = type),
+                ),
+              ),
             ),
             SizedBox(height: context.h * 1.2),
             MyText(
@@ -139,7 +166,9 @@ class _CreateLedgerSheetState extends State<CreateLedgerSheet> {
             ),
             SizedBox(height: context.h * 3),
             MyButton(
-              text: AppText.ledgersCreateButton,
+              text: _isEditing
+                  ? AppText.ledgersSaveButton
+                  : AppText.ledgersCreateButton,
               onTap: _submit,
             ),
           ],
