@@ -199,6 +199,21 @@ abstract class AppText {
   static const ledgersEmptySubtitle =
       'Create your first pro khata book. Each type has its own smart entry method — like Easy Khata, but built for serious business.';
   static const ledgerProBadge = 'PRO';
+  static const ledgersFilterAll = 'All';
+  static const ledgersFilterEmpty = 'No ledgers for this type yet.';
+  static const ledgerPartiesSearchHint = 'Search parties...';
+  static const ledgerPartiesSearchEmpty = 'No parties match your search.';
+  static const ledgerShowFullAmounts = 'Show full amounts';
+  static const ledgerShowShortAmounts = 'Show short amounts';
+  static const ledgerDeleteLedger = 'Delete Ledger';
+  static const ledgerDeleteTitle = 'Delete this ledger?';
+  static const ledgerDeleteMessage =
+      'This will permanently delete this ledger and all its entries. '
+      'This action cannot be undone and your data will never return.';
+  static const ledgerDeleteConfirm = 'Delete Forever';
+  static const ledgerDeleteCancel = 'Cancel';
+  static const ledgerHistoryPartyEmpty = 'No entries for this party yet.';
+  static const ledgerDefaultEntryName = 'Entry';
   static const ledgerPartiesTitle = 'Parties';
   static const ledgerPartiesSubtitle =
       'Per-customer udhar balance — auto-calculated from your entries.';
@@ -244,6 +259,10 @@ abstract class AppText {
   static const ledgerPartyHint = 'Customer or supplier name';
   static const ledgerNoteLabel = 'Note (Optional)';
   static const ledgerNoteHint = 'Add a short note';
+  static const ledgerDescriptionLabel = 'Description (Optional)';
+  static const ledgerDescriptionHint = 'e.g. Bill #12, monthly rent';
+  static const ledgerEntryNameLabel = 'Name';
+  static const ledgerEntryNameHint = 'e.g. Daily sales, rent paid';
   static const ledgerEmptyUdhar =
       'No entries yet. Add Given when you give credit, Received when payment comes back.';
 

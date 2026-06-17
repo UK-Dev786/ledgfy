@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
+import '../../../core/constants/app_text.dart';
+import '../../../core/widgets/my_card.dart';
+import '../../../core/widgets/my_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
 import '../detail/ledger_detail_page.dart';
 import '../models/ledger_item.dart';
@@ -9,6 +13,7 @@ import 'sub_widgets/ledger_empty_state.dart';
 import 'sub_widgets/ledger_fab.dart';
 import 'sub_widgets/ledger_header.dart';
 import 'sub_widgets/ledger_list_view.dart';
+import 'sub_widgets/ledger_type_filter_chips.dart';
 
 class LedgerScreen extends StatefulWidget {
   const LedgerScreen({super.key});
@@ -19,15 +24,31 @@ class LedgerScreen extends StatefulWidget {
 
 class _LedgerScreenState extends State<LedgerScreen> {
   final List<LedgerItem> _ledgers = [];
+  String? _selectedTypeId;
+
+  List<LedgerItem> get _filteredLedgers {
+    if (_selectedTypeId == null) return _ledgers;
+    return _ledgers
+        .where((ledger) => ledger.type.id == _selectedTypeId)
+        .toList();
+  }
 
   void _openLedgerDetail(LedgerItem ledger) {
     Navigator.of(context)
-        .push(
-          MaterialPageRoute<void>(
+        .push<String?>(
+          MaterialPageRoute<String?>(
             builder: (_) => LedgerDetailPage(ledger: ledger),
           ),
         )
-        .then((_) => setState(() {}));
+        .then((deletedId) {
+          if (deletedId != null) {
+            setState(() {
+              _ledgers.removeWhere((item) => item.id == deletedId);
+            });
+          } else {
+            setState(() {});
+          }
+        });
   }
 
   void _openCreateLedgerSheet() {
@@ -52,6 +73,7 @@ class _LedgerScreenState extends State<LedgerScreen> {
   @override
   Widget build(BuildContext context) {
     final hasLedgers = _ledgers.isNotEmpty;
+    final filtered = _filteredLedgers;
 
     return ThemedGradientBackground(
       child: Scaffold(
@@ -70,12 +92,33 @@ class _LedgerScreenState extends State<LedgerScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const LedgerHeader(),
+                if (hasLedgers) ...[
+                  const SizedBox(height: AppSizes.md),
+                  LedgerTypeFilterChips(
+                    selectedTypeId: _selectedTypeId,
+                    onSelected: (typeId) {
+                      setState(() => _selectedTypeId = typeId);
+                    },
+                  ),
+                ],
                 const SizedBox(height: AppSizes.lg),
                 if (hasLedgers)
-                  LedgerListView(
-                    ledgers: _ledgers,
-                    onLedgerTap: _openLedgerDetail,
-                  )
+                  filtered.isEmpty
+                      ? MyCard(
+                          borderRadius: AppSizes.radiusMd,
+                          child: const MyText(
+                            AppText.ledgersFilterEmpty,
+                            font: AppFont.sourceSans,
+                            size: AppSizes.subtitle,
+                            color: AppColors.textHint,
+                            align: TextAlign.center,
+                            height: 1.45,
+                          ),
+                        )
+                      : LedgerListView(
+                          ledgers: filtered,
+                          onLedgerTap: _openLedgerDetail,
+                        )
                 else
                   const LedgerEmptyState(),
               ],

@@ -19,12 +19,14 @@ class AddLedgerEntrySheet extends StatefulWidget {
   final LedgerTypeConfig config;
   final LedgerEntryType type;
   final OnLedgerEntryAdded onAdd;
+  final String? partyName;
 
   const AddLedgerEntrySheet({
     super.key,
     required this.config,
     required this.type,
     required this.onAdd,
+    this.partyName,
   });
 
   static Future<void> show(
@@ -32,6 +34,7 @@ class AddLedgerEntrySheet extends StatefulWidget {
     required LedgerTypeConfig config,
     required LedgerEntryType type,
     required OnLedgerEntryAdded onAdd,
+    String? partyName,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -42,6 +45,7 @@ class AddLedgerEntrySheet extends StatefulWidget {
         config: config,
         type: type,
         onAdd: onAdd,
+        partyName: partyName,
       ),
     );
   }
@@ -66,31 +70,50 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _partyController = TextEditingController();
+  final _nameController = TextEditingController();
   final _noteController = TextEditingController();
   String? _selectedCategory;
 
   LedgerTypeConfig get _config => widget.config;
+  bool get _inPartyContext => widget.partyName != null;
+  bool get _showNameField =>
+      !_inPartyContext && !_config.requiresParty && !_config.isExpenseOnly;
 
   @override
   void dispose() {
     _amountController.dispose();
     _partyController.dispose();
+    _nameController.dispose();
     _noteController.dispose();
     super.dispose();
   }
 
+  String? _buildNote() {
+    final name = _showNameField
+        ? _nameController.text.trim()
+        : '';
+    final desc = _noteController.text.trim();
+    if (name.isNotEmpty && desc.isNotEmpty) return '$name · $desc';
+    if (name.isNotEmpty) return name;
+    if (desc.isNotEmpty) return desc;
+    return null;
+  }
+
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
+
+    final party = _inPartyContext
+        ? widget.partyName
+        : (_partyController.text.trim().isEmpty
+              ? null
+              : _partyController.text.trim());
+
     widget.onAdd(
       LedgerEntryDraft(
         amount: double.parse(_amountController.text.trim()),
         type: widget.type,
-        partyName: _partyController.text.trim().isEmpty
-            ? null
-            : _partyController.text.trim(),
-        note: _noteController.text.trim().isEmpty
-            ? null
-            : _noteController.text.trim(),
+        partyName: party,
+        note: _buildNote(),
         category: _selectedCategory,
       ),
     );
@@ -122,8 +145,18 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
               weight: FontWeight.bold,
               align: TextAlign.center,
             ),
+            if (_inPartyContext) ...[
+              SizedBox(height: context.h * 1),
+              MyText(
+                widget.partyName!,
+                font: AppFont.sourceSans,
+                size: AppSizes.subtitle,
+                color: AppColors.textHint,
+                align: TextAlign.center,
+              ),
+            ],
             SizedBox(height: context.h * 2.5),
-            if (_config.requiresParty) ...[
+            if (!_inPartyContext && _config.requiresParty) ...[
               MyTextField(
                 title: _config.partyLabel,
                 hintText: _config.partyHint,
@@ -142,7 +175,7 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
               ),
               SizedBox(height: context.h * 2),
             ],
-            if (_config.requiresCategory) ...[
+            if (!_inPartyContext && _config.requiresCategory) ...[
               MyText(
                 AppText.ledgerExpenseCategoryLabel,
                 font: AppFont.inter,
@@ -155,9 +188,19 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
                 selected: _selectedCategory,
                 onSelected: (value) => setState(() => _selectedCategory = value),
               ),
-              if (_formKey.currentState?.validate() == false &&
-                  _selectedCategory == null)
-                const SizedBox.shrink(),
+              SizedBox(height: context.h * 2),
+            ],
+            if (_showNameField) ...[
+              MyTextField(
+                title: AppText.ledgerEntryNameLabel,
+                hintText: AppText.ledgerEntryNameHint,
+                controller: _nameController,
+                keyboardType: TextInputType.text,
+                prefixIcon: const Icon(
+                  Icons.label_outline_rounded,
+                  color: AppColors.primary,
+                ),
+              ),
               SizedBox(height: context.h * 2),
             ],
             MyTextField(
@@ -180,19 +223,17 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
                 return null;
               },
             ),
-            if (_config.requiresNote) ...[
-              SizedBox(height: context.h * 2),
-              MyTextField(
-                title: _config.noteLabel,
-                hintText: _config.noteHint,
-                controller: _noteController,
-                keyboardType: TextInputType.text,
-                prefixIcon: const Icon(
-                  Icons.notes_outlined,
-                  color: AppColors.primary,
-                ),
+            SizedBox(height: context.h * 2),
+            MyTextField(
+              title: AppText.ledgerDescriptionLabel,
+              hintText: AppText.ledgerDescriptionHint,
+              controller: _noteController,
+              keyboardType: TextInputType.text,
+              prefixIcon: const Icon(
+                Icons.notes_outlined,
+                color: AppColors.primary,
               ),
-            ],
+            ),
             SizedBox(height: context.h * 3),
             MyButton(
               text: AppText.ledgerDetailAddButton,

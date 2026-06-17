@@ -5,54 +5,25 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/widgets/my_card.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/shared_entrance_animation.dart';
-import '../../models/ledger_item.dart';
+import '../../models/ledger_type_config.dart';
+import '../../models/party_balance.dart';
 import '../../shared/sub_widgets/ledger_flow_amount.dart';
 
-class LedgerDetailSummary extends StatelessWidget {
-  final LedgerItem ledger;
+class LedgerPartySummary extends StatelessWidget {
+  final PartyBalance party;
+  final LedgerTypeConfig config;
   final bool showFullAmounts;
 
-  const LedgerDetailSummary({
+  const LedgerPartySummary({
     super.key,
-    required this.ledger,
+    required this.party,
+    required this.config,
     this.showFullAmounts = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final config = ledger.config;
-
     final abbreviate = !showFullAmounts;
-
-    if (config.isExpenseOnly) {
-      return SharedEntranceAnimation(
-        child: MyCard(
-          borderRadius: AppSizes.radiusLg,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.lg,
-            vertical: AppSizes.md,
-          ),
-          child: Column(
-            children: [
-              MyText(
-                config.balanceLabel,
-                font: AppFont.sourceSans,
-                size: AppSizes.caption,
-                color: AppColors.textHint,
-              ),
-              const SizedBox(height: AppSizes.sm),
-              LedgerFlowAmount(
-                icon: config.debitIcon,
-                color: config.debitColor,
-                amount: ledger.balance,
-                compact: true,
-                abbreviate: abbreviate,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
 
     return SharedEntranceAnimation(
       child: MyCard(
@@ -69,7 +40,7 @@ class LedgerDetailSummary extends StatelessWidget {
                 child: LedgerFlowAmount(
                   icon: config.creditIcon,
                   color: config.creditColor,
-                  amount: ledger.creditTotal,
+                  amount: party.given,
                   compact: true,
                   abbreviate: abbreviate,
                 ),
@@ -86,7 +57,7 @@ class LedgerDetailSummary extends StatelessWidget {
                 child: LedgerFlowAmount(
                   icon: config.debitIcon,
                   color: config.debitColor,
-                  amount: ledger.debitTotal,
+                  amount: party.received,
                   compact: true,
                   abbreviate: abbreviate,
                 ),
@@ -102,8 +73,8 @@ class LedgerDetailSummary extends StatelessWidget {
                 label: config.balanceLabel,
                 child: LedgerFlowAmount(
                   icon: Icons.account_balance_wallet_outlined,
-                  color: _balanceColor(ledger.balance),
-                  amount: ledger.balance,
+                  color: _balanceColor(party.balance),
+                  amount: party.balance,
                   compact: true,
                   abbreviate: abbreviate,
                 ),
