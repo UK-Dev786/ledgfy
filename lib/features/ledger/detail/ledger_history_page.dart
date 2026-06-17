@@ -1,41 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
+import '../../../di/ledger_providers.dart';
 import '../models/ledger_entry.dart';
-import '../models/ledger_item.dart';
 import '../shared/khata_report/khata_report_page.dart';
 import 'sub_widgets/ledger_detail_app_bar.dart';
 import 'sub_widgets/ledger_history_list.dart';
 
-class LedgerHistoryPage extends StatelessWidget {
-  final LedgerItem ledger;
+class LedgerHistoryPage extends ConsumerWidget {
+  final String ledgerId;
   final String? partyName;
   final bool preferDescriptionAsTitle;
 
   const LedgerHistoryPage({
     super.key,
-    required this.ledger,
+    required this.ledgerId,
     this.partyName,
     this.preferDescriptionAsTitle = false,
   });
 
-  List<LedgerEntry> _entries() {
+  List<LedgerEntry> _entries(WidgetRef ref) {
+    final ledger = ref.watch(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return const [];
+
     final party = partyName;
     if (party == null) return ledger.entries;
+
+    final key = party.trim().toLowerCase();
     return ledger.entries
         .where(
           (entry) =>
               entry.partyName != null &&
-              entry.partyName!.trim().toLowerCase() ==
-                  party.trim().toLowerCase(),
+              entry.partyName!.trim().toLowerCase() == key,
         )
         .toList();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ledger = ref.watch(ledgerByIdProvider(ledgerId));
+    if (ledger == null) {
+      return const ThemedGradientBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
     return ThemedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -61,7 +76,7 @@ class LedgerHistoryPage extends StatelessWidget {
                     AppSizes.xxl,
                   ),
                   child: LedgerHistoryList(
-                    entries: _entries(),
+                    entries: _entries(ref),
                     config: ledger.config,
                     showFullAmounts: false,
                     preferDescriptionAsTitle: preferDescriptionAsTitle,

@@ -8,10 +8,10 @@ import '../../../core/constants/app_text.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/my_card.dart';
 import '../../../core/widgets/my_text.dart';
-import '../home_mock_data.dart';
+import '../models/home_dashboard_data.dart';
 
 class HomeTopLedgers extends StatefulWidget {
-  final List<MockLedgerGroup> ledgerGroups;
+  final List<HomeLedgerGroup> ledgerGroups;
 
   const HomeTopLedgers({super.key, required this.ledgerGroups});
 
@@ -31,6 +31,16 @@ class _HomeTopLedgersState extends State<HomeTopLedgers>
       duration: const Duration(milliseconds: 600),
     );
     unawaited(_startAnimations());
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeTopLedgers oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.ledgerGroups != widget.ledgerGroups) {
+      _progressController
+        ..reset()
+        ..forward();
+    }
   }
 
   Future<void> _startAnimations() async {

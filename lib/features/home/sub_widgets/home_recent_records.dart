@@ -5,13 +5,20 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/my_text.dart';
 import '../../../core/widgets/shared_entrance_animation.dart';
-import '../home_mock_data.dart';
+import '../models/home_dashboard_data.dart';
 import 'home_record_tile.dart';
 
 class HomeRecentRecords extends StatelessWidget {
-  final List<MockLedgerEntry> entries;
+  final List<HomeRecordItem> entries;
+  final VoidCallback? onSeeAll;
+  final ValueChanged<HomeRecordItem>? onEntryTap;
 
-  const HomeRecentRecords({super.key, required this.entries});
+  const HomeRecentRecords({
+    super.key,
+    required this.entries,
+    this.onSeeAll,
+    this.onEntryTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +43,8 @@ class HomeRecentRecords extends StatelessWidget {
                 size: AppSizes.subtitle,
                 color: AppColors.primary,
                 weight: FontWeight.w600,
-                isOnTap: true,
-                onTap: () {
-                  // TODO: navigate to Ledger tab.
-                },
+                isOnTap: onSeeAll != null,
+                onTap: onSeeAll,
               ),
             ],
           ),
@@ -51,7 +56,12 @@ class HomeRecentRecords extends StatelessWidget {
             child: SharedEntranceAnimation(
               delay: Duration(milliseconds: 360 + (index * 60)),
               distance: 16,
-              child: HomeRecordTile(entry: entries[index]),
+              child: HomeRecordTile(
+                entry: entries[index],
+                onTap: onEntryTap == null
+                    ? null
+                    : () => onEntryTap!(entries[index]),
+              ),
             ),
           );
         }),

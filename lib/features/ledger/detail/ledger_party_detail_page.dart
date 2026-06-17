@@ -6,8 +6,8 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
 import '../../../di/auth_providers.dart';
+import '../../../di/ledger_providers.dart';
 import '../models/ledger_entry.dart';
-import '../models/ledger_item.dart';
 import '../models/party_balance.dart';
 import '../shared/khata_report/khata_report_page.dart';
 import '../shared/ledger_page_route.dart';
@@ -19,56 +19,58 @@ import 'sub_widgets/ledger_delete_dialog.dart';
 import 'sub_widgets/ledger_history_list.dart';
 import 'sub_widgets/ledger_party_summary.dart';
 
-class LedgerPartyDetailPage extends ConsumerStatefulWidget {
-  final LedgerItem ledger;
+class LedgerPartyDetailPage extends ConsumerWidget {
+  final String ledgerId;
   final String partyName;
 
   const LedgerPartyDetailPage({
     super.key,
-    required this.ledger,
+    required this.ledgerId,
     required this.partyName,
   });
 
-  @override
-  ConsumerState<LedgerPartyDetailPage> createState() =>
-      _LedgerPartyDetailPageState();
-}
+  List<LedgerEntry> _partyEntries(WidgetRef ref) {
+    final ledger = ref.watch(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return const [];
 
-class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
-  LedgerItem get _ledger => widget.ledger;
-  String get _partyName => widget.partyName;
-
-  List<LedgerEntry> get _partyEntries {
-    return _ledger.entries
+    final key = partyName.trim().toLowerCase();
+    return ledger.entries
         .where(
           (entry) =>
               entry.partyName != null &&
-              entry.partyName!.trim().toLowerCase() ==
-                  _partyName.trim().toLowerCase(),
+              entry.partyName!.trim().toLowerCase() == key,
         )
         .toList();
   }
 
-  PartyBalance get _partyBalance {
-    final existing = _ledger.partyBalances
-        .where((p) => p.name.toLowerCase() == _partyName.toLowerCase())
+  PartyBalance _partyBalance(WidgetRef ref) {
+    final ledger = ref.watch(ledgerByIdProvider(ledgerId));
+    if (ledger == null) {
+      return PartyBalance(name: partyName, given: 0, received: 0);
+    }
+
+    final existing = ledger.partyBalances
+        .where((party) => party.name.toLowerCase() == partyName.toLowerCase())
         .toList();
     if (existing.isNotEmpty) return existing.first;
-    return PartyBalance(name: _partyName, given: 0, received: 0);
+    return PartyBalance(name: partyName, given: 0, received: 0);
   }
 
-  bool get _isOrganization {
+  bool _isOrganization(WidgetRef ref) {
     final accountType =
-        ref.read(authStateChangesProvider).valueOrNull?.accountType;
+        ref.watch(authStateChangesProvider).valueOrNull?.accountType;
     return accountType == AppText.accountTypeOrganization;
   }
 
-  List<LedgerAppBarMenuOption> get _menuOptions {
-    if (_ledger.config.isProjectLedger) {
+  List<LedgerAppBarMenuOption> _menuOptions(WidgetRef ref) {
+    final ledger = ref.watch(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return const [];
+
+    if (ledger.config.isProjectLedger) {
       return [
         LedgerAppBarMenuOption(
           id: 'delete',
-          label: _ledger.config.deleteSubLedgerLabel,
+          label: ledger.config.deleteSubLedgerLabel,
           icon: Icons.delete_outline_rounded,
           color: AppColors.error,
         ),
@@ -81,7 +83,7 @@ class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
         label: AppText.ledgerAddOpponent,
         icon: Icons.person_add_outlined,
       ),
-      if (_isOrganization)
+      if (_isOrganization(ref))
         const LedgerAppBarMenuOption(
           id: 'add_team',
           label: AppText.ledgerAddTeam,
@@ -96,31 +98,30 @@ class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
     ];
   }
 
-  void _openEntrySheet(LedgerEntryType type) {
+  void _openEntrySheet(BuildContext context, WidgetRef ref, LedgerEntryType type) {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+
     AddLedgerEntrySheet.show(
       context,
-      config: _ledger.config,
+      config: ledger.config,
       type: type,
-      partyName: _partyName,
+      partyName: partyName,
       onAdd: (draft) {
-        setState(() {
-          _ledger.entries.add(
-            LedgerEntry(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              amount: draft.amount,
-              type: draft.type,
-              createdAt: DateTime.now(),
-              partyName: _partyName,
-              note: draft.note,
-              category: draft.category,
-            ),
-          );
-        });
+        ref.read(ledgerControllerProvider).addEntry(
+              ledgerId: ledgerId,
+              draft: draft,
+              partyName: partyName,
+            );
       },
     );
   }
 
-  void _openNewParty({required bool isTeam}) {
+  void _openNewParty(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool isTeam,
+  }) {
     AddPartyNameSheet.show(
       context,
       title: isTeam ? AppText.ledgerAddTeam : AppText.ledgerAddOpponent,
@@ -128,13 +129,18 @@ class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
           ? AppText.ledgerTeamNameLabel
           : AppText.ledgerOpponentNameLabel,
       hint: isTeam ? AppText.ledgerTeamNameHint : AppText.ledgerOpponentNameHint,
-      onAdd: (name, description) {
-        _ledger.addParty(name, description: description);
+      onAdd: (name, description) async {
+        await ref.read(ledgerControllerProvider).addParty(
+              ledgerId: ledgerId,
+              name: name,
+              description: description,
+            );
+        if (!context.mounted) return;
         Navigator.of(context).pushReplacement(
           ledgerPageRoute(
             LedgerPartyDetailPage(
-              ledger: _ledger,
-              partyName: name,
+              ledgerId: ledgerId,
+              partyName: name.trim(),
             ),
           ),
         );
@@ -142,46 +148,75 @@ class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
     );
   }
 
-  void _openReport() {
+  void _openReport(BuildContext context, WidgetRef ref) {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+
     KhataReportPage.open(
       context,
-      ledger: _ledger,
-      partyName: _partyName,
+      ledger: ledger,
+      partyName: partyName,
     );
   }
 
-  Future<void> _deleteSubLedger() async {
-    final config = _ledger.config;
+  Future<void> _deleteSubLedger(BuildContext context, WidgetRef ref) async {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+
+    final config = ledger.config;
     final confirmed = await LedgerDeleteDialog.show(
       context,
       title: config.deleteSubLedgerTitle,
       message: config.deleteSubLedgerMessage,
     );
-    if (!confirmed || !mounted) return;
+    if (!confirmed || !context.mounted) return;
 
-    setState(() => _ledger.removeParty(_partyName));
+    await ref.read(ledgerControllerProvider).removeParty(
+          ledgerId: ledgerId,
+          partyName: partyName,
+        );
+    if (!context.mounted) return;
     Navigator.of(context).pop();
   }
 
-  void _handleMenu(String value) {
+  void _handleMenu(BuildContext context, WidgetRef ref, String value) {
     switch (value) {
       case 'delete':
-        _deleteSubLedger();
+        _deleteSubLedger(context, ref);
       case 'add_opponent':
-        _openNewParty(isTeam: false);
+        _openNewParty(context, ref, isTeam: false);
       case 'add_team':
-        _openNewParty(isTeam: true);
+        _openNewParty(context, ref, isTeam: true);
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ledger = ref.watch(ledgerByIdProvider(ledgerId));
+    if (ledger == null) {
+      return const ThemedGradientBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(AppColors.primary),
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final config = ledger.config;
+    final partyEntries = _partyEntries(ref);
+    final partyBalance = _partyBalance(ref);
+
     return ThemedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         floatingActionButton: LedgerDetailFabs(
-          config: _ledger.config,
-          onAddTap: _openEntrySheet,
+          config: config,
+          onAddTap: (type) => _openEntrySheet(context, ref, type),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SafeArea(
@@ -189,11 +224,11 @@ class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               LedgerDetailAppBar(
-                title: _partyName,
+                title: partyName,
                 onBack: () => Navigator.of(context).pop(),
-                onReportTap: _openReport,
-                menuOptions: _menuOptions,
-                onMenuSelected: _handleMenu,
+                onReportTap: () => _openReport(context, ref),
+                menuOptions: _menuOptions(ref),
+                onMenuSelected: (value) => _handleMenu(context, ref, value),
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -207,13 +242,13 @@ class _LedgerPartyDetailPageState extends ConsumerState<LedgerPartyDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       LedgerPartySummary(
-                        party: _partyBalance,
-                        config: _ledger.config,
+                        party: partyBalance,
+                        config: config,
                       ),
                       const SizedBox(height: AppSizes.lg),
                       LedgerHistoryList(
-                        entries: _partyEntries,
-                        config: _ledger.config,
+                        entries: partyEntries,
+                        config: config,
                         showFullAmounts: false,
                         preferDescriptionAsTitle: true,
                       ),

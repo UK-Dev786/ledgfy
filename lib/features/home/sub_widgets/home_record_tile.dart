@@ -6,12 +6,17 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/my_card.dart';
 import '../../../core/widgets/my_text.dart';
-import '../home_mock_data.dart';
+import '../models/home_dashboard_data.dart';
 
 class HomeRecordTile extends StatelessWidget {
-  final MockLedgerEntry entry;
+  final HomeRecordItem entry;
+  final VoidCallback? onTap;
 
-  const HomeRecordTile({super.key, required this.entry});
+  const HomeRecordTile({
+    super.key,
+    required this.entry,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +24,7 @@ class HomeRecordTile extends StatelessWidget {
     final amountColor = entry.isIncome ? AppColors.success : AppColors.error;
 
     return GestureDetector(
-      onTap: () {
-        // TODO: navigate to entry detail.
-      },
+      onTap: onTap,
       child: MyCard(
         borderRadius: AppSizes.radiusMd,
         padding: const EdgeInsets.all(AppSizes.md),
@@ -34,7 +37,11 @@ class HomeRecordTile extends StatelessWidget {
                 color: AppColors.primaryTint.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppSizes.radiusSm),
               ),
-              child: Icon(entry.icon, color: AppColors.primary, size: AppSizes.iconMd),
+              child: Icon(
+                entry.icon,
+                color: AppColors.primary,
+                size: AppSizes.iconMd,
+              ),
             ),
             const SizedBox(width: AppSizes.md),
             Expanded(

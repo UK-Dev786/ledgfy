@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_text.dart';
+import '../../../core/widgets/my_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
+import '../../../di/ledger_providers.dart';
 import '../models/ledger_entry.dart';
-import '../models/ledger_item.dart';
 import '../models/ledger_type_config.dart';
 import '../shared/khata_report/khata_report_page.dart';
 import '../shared/ledger_page_route.dart';
@@ -21,103 +23,135 @@ import 'sub_widgets/ledger_detail_summary.dart';
 import 'sub_widgets/ledger_delete_dialog.dart';
 import 'sub_widgets/opening_balance_sheet.dart';
 
-class LedgerDetailPage extends StatefulWidget {
-  final LedgerItem ledger;
+class LedgerDetailPage extends ConsumerWidget {
+  final String ledgerId;
 
-  const LedgerDetailPage({super.key, required this.ledger});
+  const LedgerDetailPage({super.key, required this.ledgerId});
 
   @override
-  State<LedgerDetailPage> createState() => _LedgerDetailPageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ledgersAsync = ref.watch(ledgersStreamProvider);
+    final ledger = ref.watch(ledgerByIdProvider(ledgerId));
+
+    return ledgersAsync.when(
+      loading: () => const _LedgerDetailLoading(),
+      error: (error, _) => _LedgerDetailError(message: error.toString()),
+      data: (_) {
+        if (ledger == null) {
+          return const _LedgerDetailMissing();
+        }
+        return _LedgerDetailBody(ledgerId: ledgerId);
+      },
+    );
+  }
 }
 
-class _LedgerDetailPageState extends State<LedgerDetailPage> {
-  LedgerItem get _ledger => widget.ledger;
+class _LedgerDetailBody extends ConsumerWidget {
+  final String ledgerId;
 
-  Future<void> _openPartyDetail(String partyName) async {
+  const _LedgerDetailBody({required this.ledgerId});
+
+  Future<void> _openPartyDetail(
+    BuildContext context,
+    String partyName,
+  ) async {
     await Navigator.of(context).push<void>(
       ledgerPageRoute(
         LedgerPartyDetailPage(
-          ledger: _ledger,
+          ledgerId: ledgerId,
           partyName: partyName,
         ),
       ),
     );
-    if (!mounted) return;
-    setState(() {});
   }
 
-  void _openHistory() {
+  void _openHistory(BuildContext context, WidgetRef ref) {
     Navigator.of(context).push<void>(
-      ledgerPageRoute(LedgerHistoryPage(ledger: _ledger)),
+      ledgerPageRoute(LedgerHistoryPage(ledgerId: ledgerId)),
     );
   }
 
-  void _openAddSubLedger() {
-    final config = _ledger.config;
+  void _openAddSubLedger(BuildContext context, WidgetRef ref) {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+
+    final config = ledger.config;
     AddPartyNameSheet.show(
       context,
       title: config.addSubLedgerTitle,
       label: config.partyLabel,
       hint: config.partyHint,
       nameIcon: config.subLedgerIcon,
-      onAdd: (name, description) {
-        setState(() => _ledger.addParty(name, description: description));
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          _openPartyDetail(name);
-        });
+      onAdd: (name, description) async {
+        await ref.read(ledgerControllerProvider).addParty(
+              ledgerId: ledgerId,
+              name: name,
+              description: description,
+            );
+        if (!context.mounted) return;
+        await _openPartyDetail(context, name.trim());
       },
     );
   }
 
-  void _openEntrySheet(LedgerEntryType type) {
+  void _openEntrySheet(
+    BuildContext context,
+    WidgetRef ref,
+    LedgerEntryType type,
+  ) {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+
     AddLedgerEntrySheet.show(
       context,
-      config: _ledger.config,
+      config: ledger.config,
       type: type,
       onAdd: (draft) {
-        setState(() {
-          _ledger.entries.add(
-            LedgerEntry(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              amount: draft.amount,
-              type: draft.type,
-              createdAt: DateTime.now(),
-              partyName: draft.partyName,
-              note: draft.note,
-              category: draft.category,
-            ),
-          );
-        });
+        ref.read(ledgerControllerProvider).addEntry(
+              ledgerId: ledgerId,
+              draft: draft,
+            );
       },
     );
   }
 
-  void _openReport() {
-    KhataReportPage.open(context, ledger: _ledger);
+  void _openReport(BuildContext context, WidgetRef ref) {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+    KhataReportPage.open(context, ledger: ledger);
   }
 
-  void _openOpeningBalance() {
+  void _openOpeningBalance(BuildContext context, WidgetRef ref) {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+
     OpeningBalanceSheet.show(
       context,
-      initialBalance: _ledger.openingBalance,
-      onSave: (balance) => setState(() => _ledger.openingBalance = balance),
+      initialBalance: ledger.openingBalance,
+      onSave: (balance) {
+        ref.read(ledgerControllerProvider).updateOpeningBalance(
+              ledgerId: ledgerId,
+              openingBalance: balance,
+            );
+      },
     );
   }
 
-  Future<void> _handleDelete() async {
+  Future<void> _handleDelete(BuildContext context, WidgetRef ref) async {
     final confirmed = await LedgerDeleteDialog.show(context);
-    if (confirmed && mounted) {
-      Navigator.of(context).pop(_ledger.id);
-    }
+    if (!confirmed || !context.mounted) return;
+
+    await ref.read(ledgerControllerProvider).deleteLedger(ledgerId);
+    if (!context.mounted) return;
+    Navigator.of(context).pop();
   }
 
-  void _handleMenu(String value) {
+  void _handleMenu(BuildContext context, WidgetRef ref, String value) {
     switch (value) {
       case 'delete':
-        _handleDelete();
+        _handleDelete(context, ref);
       case 'opening_balance':
-        _openOpeningBalance();
+        _openOpeningBalance(context, ref);
     }
   }
 
@@ -139,8 +173,13 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final config = _ledger.config;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ledger = ref.watch(ledgerByIdProvider(ledgerId));
+    if (ledger == null) {
+      return const _LedgerDetailMissing();
+    }
+
+    final config = ledger.config;
     final supportsSubLedgers = config.supportsSubLedgers;
     final showInlineHistory = !supportsSubLedgers;
     final showFullAmounts = config.showsFullAmountsByDefault;
@@ -150,8 +189,11 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
         backgroundColor: Colors.transparent,
         floatingActionButton: LedgerDetailFabs(
           config: config,
-          onAddTap: supportsSubLedgers ? null : _openEntrySheet,
-          onAddSubLedger: supportsSubLedgers ? _openAddSubLedger : null,
+          onAddTap: supportsSubLedgers
+              ? null
+              : (type) => _openEntrySheet(context, ref, type),
+          onAddSubLedger:
+              supportsSubLedgers ? () => _openAddSubLedger(context, ref) : null,
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SafeArea(
@@ -159,13 +201,14 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               LedgerDetailAppBar(
-                title: _ledger.title,
+                title: ledger.title,
                 onBack: () => Navigator.of(context).pop(),
                 showHistoryButton: supportsSubLedgers,
-                onHistoryTap: supportsSubLedgers ? _openHistory : null,
-                onReportTap: _openReport,
+                onHistoryTap:
+                    supportsSubLedgers ? () => _openHistory(context, ref) : null,
+                onReportTap: () => _openReport(context, ref),
                 menuOptions: _menuOptions(config),
-                onMenuSelected: _handleMenu,
+                onMenuSelected: (value) => _handleMenu(context, ref, value),
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -178,20 +221,21 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      LedgerDetailSummary(ledger: _ledger),
+                      LedgerDetailSummary(ledger: ledger),
                       if (supportsSubLedgers) ...[
                         const SizedBox(height: AppSizes.lg),
                         LedgerPartySection(
-                          parties: _ledger.partyBalances,
+                          parties: ledger.partyBalances,
                           config: config,
                           showFullAmounts: false,
-                          onPartyTap: _openPartyDetail,
+                          onPartyTap: (partyName) =>
+                              _openPartyDetail(context, partyName),
                         ),
                       ],
                       if (showInlineHistory) ...[
                         const SizedBox(height: AppSizes.lg),
                         LedgerHistoryList(
-                          entries: _ledger.entries,
+                          entries: ledger.entries,
                           config: config,
                           showFullAmounts: showFullAmounts,
                         ),
@@ -201,6 +245,88 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LedgerDetailLoading extends StatelessWidget {
+  const _LedgerDetailLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const ThemedGradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(AppColors.primary),
+            strokeWidth: 2,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LedgerDetailMissing extends StatelessWidget {
+  const _LedgerDetailMissing();
+
+  @override
+  Widget build(BuildContext context) {
+    return ThemedGradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Column(
+            children: [
+              LedgerDetailAppBar(
+                title: AppText.ledgersTitle,
+                onBack: () => Navigator.of(context).pop(),
+              ),
+              const Expanded(
+                child: Center(
+                  child: MyText(
+                    AppText.homeErrorGeneric,
+                    font: AppFont.sourceSans,
+                    size: AppSizes.subtitle,
+                    color: AppColors.textHint,
+                    align: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LedgerDetailError extends StatelessWidget {
+  final String message;
+
+  const _LedgerDetailError({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return ThemedGradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSizes.lg),
+              child: MyText(
+                message,
+                font: AppFont.sourceSans,
+                size: AppSizes.subtitle,
+                color: AppColors.error,
+                align: TextAlign.center,
+              ),
+            ),
           ),
         ),
       ),

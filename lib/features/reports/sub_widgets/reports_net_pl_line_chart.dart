@@ -11,8 +11,18 @@ import '../models/reports_chart_data.dart';
 
 class ReportsNetPlLineChart extends StatelessWidget {
   final List<PeriodPlPoint> points;
+  final bool showFullAmounts;
 
-  const ReportsNetPlLineChart({super.key, required this.points});
+  const ReportsNetPlLineChart({
+    super.key,
+    required this.points,
+    this.showFullAmounts = false,
+  });
+
+  String _format(double amount) {
+    if (showFullAmounts) return CurrencyFormatter.format(amount);
+    return CurrencyFormatter.formatCompact(amount);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +116,7 @@ class ReportsNetPlLineChart extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: MyText(
-                      '${item.label}: ${CurrencyFormatter.format(item.net)}',
+                      '${item.label}: ${_format(item.net)}',
                       font: AppFont.sourceSans,
                       size: AppSizes.caption,
                       color: AppColors.white,

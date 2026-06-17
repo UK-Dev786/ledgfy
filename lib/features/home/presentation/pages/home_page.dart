@@ -25,7 +25,10 @@ class _HomePageState extends State<HomePage> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          HomeScreen(onProfileTap: () => setState(() => _currentIndex = 3)),
+          HomeScreen(
+            onProfileTap: () => setState(() => _currentIndex = 3),
+            onLedgerTap: () => setState(() => _currentIndex = 1),
+          ),
           const LedgerScreen(),
           const ReportsScreen(),
           const ProfilePage(),

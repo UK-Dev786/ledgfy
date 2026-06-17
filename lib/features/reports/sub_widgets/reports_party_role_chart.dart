@@ -11,8 +11,18 @@ import '../models/reports_chart_data.dart';
 
 class ReportsPartyRoleChart extends StatelessWidget {
   final List<PartyRoleSlice> slices;
+  final bool showFullAmounts;
 
-  const ReportsPartyRoleChart({super.key, required this.slices});
+  const ReportsPartyRoleChart({
+    super.key,
+    required this.slices,
+    this.showFullAmounts = false,
+  });
+
+  String _format(double amount) {
+    if (showFullAmounts) return CurrencyFormatter.format(amount);
+    return CurrencyFormatter.formatCompact(amount);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +125,7 @@ class ReportsPartyRoleChart extends StatelessWidget {
                       ),
                     ),
                     MyText(
-                      CurrencyFormatter.format(slice.amount),
+                      _format(slice.amount),
                       font: AppFont.inter,
                       size: AppSizes.caption,
                       color: AppColors.white,

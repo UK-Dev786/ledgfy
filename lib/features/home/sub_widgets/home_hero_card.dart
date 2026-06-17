@@ -28,9 +28,9 @@ class HomeHeroCard extends StatefulWidget {
 class _HomeHeroCardState extends State<HomeHeroCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _income;
-  late final Animation<double> _expense;
-  late final Animation<double> _net;
+  late Animation<double> _income;
+  late Animation<double> _expense;
+  late Animation<double> _net;
 
   @override
   void initState() {
@@ -39,13 +39,7 @@ class _HomeHeroCardState extends State<HomeHeroCard>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
-    final curve = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _income = Tween(begin: 0.0, end: widget.totalIncome).animate(curve);
-    _expense = Tween(begin: 0.0, end: widget.totalExpense).animate(curve);
-    _net = Tween(
-      begin: 0.0,
-      end: widget.totalIncome - widget.totalExpense,
-    ).animate(curve);
+    _bindAnimations();
     unawaited(
       Future<void>.delayed(
         const Duration(milliseconds: 100),
@@ -54,10 +48,36 @@ class _HomeHeroCardState extends State<HomeHeroCard>
     );
   }
 
+  void _bindAnimations({double incomeStart = 0, double expenseStart = 0}) {
+    final curve = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _income = Tween(begin: incomeStart, end: widget.totalIncome).animate(curve);
+    _expense =
+        Tween(begin: expenseStart, end: widget.totalExpense).animate(curve);
+    _net = Tween(
+      begin: incomeStart - expenseStart,
+      end: widget.totalIncome - widget.totalExpense,
+    ).animate(curve);
+  }
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeHeroCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.totalIncome != widget.totalIncome ||
+        oldWidget.totalExpense != widget.totalExpense) {
+      _bindAnimations(
+        incomeStart: _income.value,
+        expenseStart: _expense.value,
+      );
+      _controller
+        ..reset()
+        ..forward();
+    }
   }
 
   @override

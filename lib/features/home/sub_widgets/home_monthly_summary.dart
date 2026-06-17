@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/widgets/shared_entrance_animation.dart';
 import '../home_mock_data.dart';
+import '../models/home_dashboard_data.dart';
 import 'home_spending_chart.dart';
 import 'home_top_ledgers.dart';
 
 class TopLedgers extends StatelessWidget {
-  final List<MockLedgerGroup> ledgerGroups;
+  final List<HomeLedgerGroup> ledgerGroups;
   final List<MockDailyTotal> dailyTotals;
 
   const TopLedgers({

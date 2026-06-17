@@ -129,6 +129,7 @@ abstract class AppText {
   static const homeGreetingMorning = 'Good morning';
   static const homeGreetingAfternoon = 'Good afternoon';
   static const homeGreetingEvening = 'Good evening';
+  static const homeGuestName = 'there';
 
   // Home — Hero card
   static const homeOverviewSuffix = 'Overview';

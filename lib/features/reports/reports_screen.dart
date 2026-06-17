@@ -26,9 +26,11 @@ class ReportsScreen extends ConsumerStatefulWidget {
 
 class _ReportsScreenState extends ConsumerState<ReportsScreen> {
   ReportsPeriod _period = ReportsPeriod.thisWeek;
+  bool _showFullAmounts = false;
 
   @override
   Widget build(BuildContext context) {
+    final ledgersAsync = ref.watch(ledgersStreamProvider);
     final ledgers = ref.watch(ledgersProvider);
     final snapshot = LedgerReportsAnalytics.build(
       ledgers: ledgers,
@@ -41,77 +43,107 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              AppSizes.lg,
-              AppSizes.md,
-              AppSizes.lg,
-              AppSizes.xxl * 2,
+          child: ledgersAsync.when(
+            loading: () => const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                strokeWidth: 2,
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SharedEntranceAnimation(
-                  child: _ReportsHeader(),
+            error: (error, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSizes.lg),
+                child: MyText(
+                  error.toString(),
+                  font: AppFont.sourceSans,
+                  size: AppSizes.subtitle,
+                  color: AppColors.error,
+                  align: TextAlign.center,
                 ),
-                const SizedBox(height: AppSizes.lg),
-                if (!hasLedgers || !hasAnyEntries) ...[
-                  MyCard(
-                    borderRadius: AppSizes.radiusLg,
-                    child: const MyText(
-                      AppText.reportsEmpty,
-                      font: AppFont.sourceSans,
-                      size: AppSizes.subtitle,
-                      color: AppColors.textHint,
-                      align: TextAlign.center,
-                      height: 1.45,
-                    ),
+              ),
+            ),
+            data: (_) => SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSizes.lg,
+                AppSizes.md,
+                AppSizes.lg,
+                AppSizes.xxl * 2,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SharedEntranceAnimation(
+                    child: _ReportsHeader(),
                   ),
-                ] else ...[
-                  SharedEntranceAnimation(
-                    delay: const Duration(milliseconds: 60),
-                    child: ReportsSummaryStrip(
-                      totalIncome: snapshot.totalIncome,
-                      totalExpense: snapshot.totalExpense,
-                      netPl: snapshot.netPl,
+                  const SizedBox(height: AppSizes.lg),
+                  if (!hasLedgers || !hasAnyEntries) ...[
+                    MyCard(
+                      borderRadius: AppSizes.radiusLg,
+                      child: const MyText(
+                        AppText.reportsEmpty,
+                        font: AppFont.sourceSans,
+                        size: AppSizes.subtitle,
+                        color: AppColors.textHint,
+                        align: TextAlign.center,
+                        height: 1.45,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSizes.md),
-                  SharedEntranceAnimation(
-                    delay: const Duration(milliseconds: 100),
-                    child: ReportsPeriodToggle(
-                      selected: _period,
-                      onChanged: (period) => setState(() => _period = period),
+                  ] else ...[
+                    SharedEntranceAnimation(
+                      delay: const Duration(milliseconds: 60),
+                      child: ReportsSummaryStrip(
+                        totalIncome: snapshot.totalIncome,
+                        totalExpense: snapshot.totalExpense,
+                        netPl: snapshot.netPl,
+                        showFullAmounts: _showFullAmounts,
+                        onToggleAmounts: () {
+                          setState(() => _showFullAmounts = !_showFullAmounts);
+                        },
+                      ),
                     ),
-                  ),
-                  if (!snapshot.hasPlData) ...[
-                    const SizedBox(height: AppSizes.sm),
-                    const MyText(
-                      AppText.reportsPeriodEmpty,
-                      font: AppFont.sourceSans,
-                      size: AppSizes.caption,
-                      color: AppColors.textHint,
-                      align: TextAlign.center,
-                      height: 1.4,
+                    const SizedBox(height: AppSizes.md),
+                    SharedEntranceAnimation(
+                      delay: const Duration(milliseconds: 100),
+                      child: ReportsPeriodToggle(
+                        selected: _period,
+                        onChanged: (period) => setState(() => _period = period),
+                      ),
+                    ),
+                    if (!snapshot.hasPlData) ...[
+                      const SizedBox(height: AppSizes.sm),
+                      const MyText(
+                        AppText.reportsPeriodEmpty,
+                        font: AppFont.sourceSans,
+                        size: AppSizes.caption,
+                        color: AppColors.textHint,
+                        align: TextAlign.center,
+                        height: 1.4,
+                      ),
+                    ],
+                    const SizedBox(height: AppSizes.lg),
+                    SharedEntranceAnimation(
+                      delay: const Duration(milliseconds: 140),
+                      child: ReportsPlColumnChart(points: snapshot.plPoints),
+                    ),
+                    const SizedBox(height: AppSizes.lg),
+                    SharedEntranceAnimation(
+                      delay: const Duration(milliseconds: 180),
+                      child: ReportsNetPlLineChart(
+                        points: snapshot.plPoints,
+                        showFullAmounts: _showFullAmounts,
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.lg),
+                    SharedEntranceAnimation(
+                      delay: const Duration(milliseconds: 220),
+                      child: ReportsPartyRoleChart(
+                        slices: snapshot.partyRoles,
+                        showFullAmounts: _showFullAmounts,
+                      ),
                     ),
                   ],
-                  const SizedBox(height: AppSizes.lg),
-                  SharedEntranceAnimation(
-                    delay: const Duration(milliseconds: 140),
-                    child: ReportsPlColumnChart(points: snapshot.plPoints),
-                  ),
-                  const SizedBox(height: AppSizes.lg),
-                  SharedEntranceAnimation(
-                    delay: const Duration(milliseconds: 180),
-                    child: ReportsNetPlLineChart(points: snapshot.plPoints),
-                  ),
-                  const SizedBox(height: AppSizes.lg),
-                  SharedEntranceAnimation(
-                    delay: const Duration(milliseconds: 220),
-                    child: ReportsPartyRoleChart(slices: snapshot.partyRoles),
-                  ),
                 ],
-              ],
+              ),
             ),
           ),
         ),
@@ -125,17 +157,17 @@ class _ReportsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const MyText(
+        MyText(
           AppText.reportsTitle,
           font: AppFont.inter,
           size: AppSizes.header2,
           color: AppColors.white,
           weight: FontWeight.w800,
         ),
-        const SizedBox(height: AppSizes.xs),
+        SizedBox(height: AppSizes.xs),
         MyText(
           '${AppText.appName} · ${AppText.reportsSubtitle}',
           font: AppFont.sourceSans,

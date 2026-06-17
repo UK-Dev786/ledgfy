@@ -9,7 +9,9 @@ import '../../../core/widgets/my_text.dart';
 import '../../../core/widgets/shared_entrance_animation.dart';
 
 class HomeEmptyState extends StatelessWidget {
-  const HomeEmptyState({super.key});
+  final VoidCallback? onAddTap;
+
+  const HomeEmptyState({super.key, this.onAddTap});
 
   @override
   Widget build(BuildContext context) {
@@ -44,9 +46,7 @@ class HomeEmptyState extends StatelessWidget {
             const SizedBox(height: AppSizes.lg),
             MyButton(
               text: AppText.homeAddFirstRecord,
-              onTap: () {
-                // TODO: navigate to Add Ledger Entry.
-              },
+              onTap: onAddTap ?? () {},
             ),
           ],
         ),
