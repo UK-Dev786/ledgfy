@@ -197,8 +197,8 @@ class _TopRightCornerTab extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             Positioned(
-              top: size * 0.20,
-              right: size * 0.14,
+              top: size * 0.12,
+              right: size * 0.12,
               child: child,
             ),
           ],
@@ -232,7 +232,7 @@ class _TopRightCornerTabClipper extends CustomClipper<Path> {
   const _TopRightCornerTabClipper({required this.cutSize});
 
   @override
-  Path getClip(Size size) => _roundedCornerTabPath(size, cutSize);
+  Path getClip(Size size) => _straightCornerTabPath(size);
 
   @override
   bool shouldReclip(_TopRightCornerTabClipper oldClipper) {
@@ -240,19 +240,12 @@ class _TopRightCornerTabClipper extends CustomClipper<Path> {
   }
 }
 
-double _cornerNotchRadius(double cut) => cut * 0.92;
-
-Path _roundedCornerTabPath(Size size, double cut) {
-  final notchRadius = _cornerNotchRadius(cut);
+Path _straightCornerTabPath(Size size) {
   return Path()
     ..moveTo(0, 0)
     ..lineTo(size.width, 0)
     ..lineTo(size.width, size.height)
-    ..arcToPoint(
-      Offset.zero,
-      radius: Radius.circular(notchRadius),
-      clockwise: false,
-    )
+    ..lineTo(0, 0)
     ..close();
 }
 
@@ -260,16 +253,11 @@ Path _cutCornerPath(Size size, double radius, double cutSize) {
   final width = size.width;
   final height = size.height;
   final cut = cutSize.clamp(0.0, width / 2);
-  final notchRadius = _cornerNotchRadius(cut);
 
   final path = Path()
     ..moveTo(radius, 0)
     ..lineTo(width - cut, 0)
-    ..arcToPoint(
-      Offset(width, cut),
-      radius: Radius.circular(notchRadius),
-      clockwise: true,
-    )
+    ..lineTo(width, cut)
     ..lineTo(width, height - radius)
     ..arcToPoint(
       Offset(width - radius, height),
