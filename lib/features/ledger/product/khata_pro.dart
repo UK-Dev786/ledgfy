@@ -14,11 +14,9 @@ abstract final class KhataPro {
     'Party-wise udhar balance (per customer/supplier)',
     'Full PKR amounts on detail, smart labels on list',
     'Given / Received udhar with party name',
-    'Wholesale credit sale + payment tracking',
-    'Retail udhaar + wasooli per customer',
     'Cash in / cash out cash book',
     'Expense tracker with categories',
-    'Project income vs cost with milestones',
+    'Project income vs cost per project',
   ];
 
   /// Next pro milestones (Firebase + backend).
@@ -27,7 +25,7 @@ abstract final class KhataPro {
     'SMS / WhatsApp payment reminders',
     'PDF & shareable khata reports',
     'Opening balance per ledger',
-    'Per-party dedicated khata screen',
+    'Wholesale & retail ledger types',
     'Supplier vs customer roles',
     'Daily / monthly P&L reports',
     'Bill photo attachments',

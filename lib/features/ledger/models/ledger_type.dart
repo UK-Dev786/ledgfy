@@ -19,18 +19,6 @@ class LedgerType {
     icon: Icons.menu_book_rounded,
   );
 
-  static const wholesale = LedgerType(
-    id: 'wholesale',
-    label: AppText.ledgerTypeWholesale,
-    icon: Icons.storefront_outlined,
-  );
-
-  static const retail = LedgerType(
-    id: 'retail',
-    label: AppText.ledgerTypeRetail,
-    icon: Icons.shopping_bag_outlined,
-  );
-
   static const cashBook = LedgerType(
     id: 'cash_book',
     label: AppText.ledgerTypeCashBook,
@@ -51,8 +39,6 @@ class LedgerType {
 
   static const List<LedgerType> all = [
     general,
-    wholesale,
-    retail,
     cashBook,
     expense,
     project,
