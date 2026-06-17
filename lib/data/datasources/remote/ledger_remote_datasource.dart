@@ -53,7 +53,6 @@ class LedgerRemoteDataSource {
 
     void emitPending() {
       if (_pendingController.isClosed) return;
-      // Only entry docs — ledger updatedAt bumps cause false "syncing".
       final entriesPending = latestEntrySnapshots.values.any(
         (snapshot) =>
             snapshot.docs.any((doc) => doc.metadata.hasPendingWrites),
@@ -145,7 +144,7 @@ class LedgerRemoteDataSource {
 
     ledgerSubscription = _ledgers(userId)
         .orderBy('createdAt', descending: true)
-        .snapshots()
+        .snapshots(includeMetadataChanges: true)
         .listen(
       (ledgerSnapshot) {
         latestDocs = ledgerSnapshot.docs;
@@ -183,6 +182,38 @@ class LedgerRemoteDataSource {
     final user = _auth.currentUser;
     if (user == null) return;
     await ensureAuthToken(user);
+  }
+
+  Future<DocumentSnapshot<Map<String, dynamic>>> _getLedgerDoc(
+    DocumentReference<Map<String, dynamic>> ledgerRef,
+  ) async {
+    try {
+      final cached = await ledgerRef.get(const GetOptions(source: Source.cache));
+      if (cached.exists) return cached;
+    } catch (_) {}
+
+    return ledgerRef.get(const GetOptions(source: Source.serverAndCache));
+  }
+
+  Future<List<LedgerPartyModel>> _readParties(
+    DocumentReference<Map<String, dynamic>> ledgerRef,
+  ) async {
+    final snapshot = await _getLedgerDoc(ledgerRef);
+    final data = snapshot.data() ?? {};
+    return (data['parties'] as List<dynamic>? ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map(LedgerPartyModel.fromMap)
+        .toList();
+  }
+
+  Future<void> _writeParties(
+    DocumentReference<Map<String, dynamic>> ledgerRef,
+    List<LedgerPartyModel> parties,
+  ) async {
+    await ledgerRef.set({
+      'parties': parties.map((party) => party.toMap()).toList(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   Future<String> createLedger({
@@ -248,25 +279,18 @@ class LedgerRemoteDataSource {
   }) async {
     await _ensureAuthReady();
     final ledgerRef = _ledgerRef(userId, ledgerId);
-    await _firestore.runTransaction((transaction) async {
-      final snapshot = await transaction.get(ledgerRef);
-      final data = snapshot.data() ?? {};
-      final parties = (data['parties'] as List<dynamic>? ?? const [])
-          .whereType<Map<String, dynamic>>()
-          .map(LedgerPartyModel.fromMap)
-          .toList();
+    final parties = await _readParties(ledgerRef);
 
-      final exists = parties.any(
-        (item) => item.name.toLowerCase() == party.name.toLowerCase(),
-      );
-      if (exists) return;
+    final exists = parties.any(
+      (item) => item.name.toLowerCase() == party.name.toLowerCase(),
+    );
+    if (exists) return;
 
-      parties.add(LedgerPartyModel.fromEntity(party));
-      transaction.update(ledgerRef, {
-        'parties': parties.map((item) => item.toMap()).toList(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    });
+    final partyMap = LedgerPartyModel.fromEntity(party).toMap();
+    await ledgerRef.set({
+      'parties': FieldValue.arrayUnion([partyMap]),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   Future<void> updateParty({
@@ -281,36 +305,27 @@ class LedgerRemoteDataSource {
     final newName = party.name.trim();
     final renamed = newName.toLowerCase() != currentKey;
 
-    await _firestore.runTransaction((transaction) async {
-      final snapshot = await transaction.get(ledgerRef);
-      final data = snapshot.data() ?? {};
-      final parties = (data['parties'] as List<dynamic>? ?? const [])
-          .whereType<Map<String, dynamic>>()
-          .map(LedgerPartyModel.fromMap)
-          .toList();
+    final parties = await _readParties(ledgerRef);
+    final index = parties.indexWhere(
+      (item) => item.name.toLowerCase() == currentKey,
+    );
+    if (index < 0) return;
 
-      final index = parties.indexWhere(
-        (item) => item.name.toLowerCase() == currentKey,
-      );
-      if (index < 0) return;
+    if (renamed &&
+        parties.any(
+          (item) => item.name.toLowerCase() == newName.toLowerCase(),
+        )) {
+      return;
+    }
 
-      if (renamed &&
-          parties.any(
-            (item) => item.name.toLowerCase() == newName.toLowerCase(),
-          )) {
-        return;
-      }
-
-      parties[index] = LedgerPartyModel.fromEntity(party);
-      transaction.update(ledgerRef, {
-        'parties': parties.map((item) => item.toMap()).toList(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    });
+    parties[index] = LedgerPartyModel.fromEntity(party);
+    await _writeParties(ledgerRef, parties);
 
     if (!renamed) return;
 
-    final entries = await ledgerRef.collection('entries').get();
+    final entries = await ledgerRef.collection('entries').get(
+      const GetOptions(source: Source.serverAndCache),
+    );
     final matching = entries.docs.where((doc) {
       final name = doc.data()['partyName'] as String?;
       return name != null && name.trim().toLowerCase() == currentKey;
@@ -335,23 +350,15 @@ class LedgerRemoteDataSource {
     final ledgerRef = _ledgerRef(userId, ledgerId);
     final key = partyName.trim().toLowerCase();
 
-    await _firestore.runTransaction((transaction) async {
-      final snapshot = await transaction.get(ledgerRef);
-      final data = snapshot.data() ?? {};
-      final parties = (data['parties'] as List<dynamic>? ?? const [])
-          .whereType<Map<String, dynamic>>()
-          .map(LedgerPartyModel.fromMap)
-          .where((party) => party.name.toLowerCase() != key)
-          .map((party) => party.toMap())
-          .toList();
+    final parties = await _readParties(ledgerRef);
+    final filtered = parties
+        .where((party) => party.name.toLowerCase() != key)
+        .toList();
+    await _writeParties(ledgerRef, filtered);
 
-      transaction.update(ledgerRef, {
-        'parties': parties,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    });
-
-    final entries = await ledgerRef.collection('entries').get();
+    final entries = await ledgerRef.collection('entries').get(
+      const GetOptions(source: Source.serverAndCache),
+    );
     await _deleteDocsInBatches(
       entries.docs.where((doc) {
         final name = doc.data()['partyName'] as String?;
