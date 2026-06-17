@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +20,7 @@ class SplashPage extends ConsumerStatefulWidget {
 
 class _SplashPageState extends ConsumerState<SplashPage> {
   bool _minDelayComplete = false;
+  bool _navigated = false;
 
   @override
   void initState() {
@@ -28,15 +30,39 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     });
   }
 
-  void _navigateIfReady(AsyncValue<dynamic> authState) {
-    if (!_minDelayComplete) return;
-    if (!authState.hasValue) return;
+  void _goHome() {
+    if (_navigated || !mounted) return;
+    _navigated = true;
+    context.go('/home');
+  }
 
-    final user = authState.value;
-    if (user != null) {
-      context.go('/home');
-    } else {
-      context.go('/login');
+  void _goLogin() {
+    if (_navigated || !mounted) return;
+    _navigated = true;
+    context.go('/login');
+  }
+
+  void _navigateIfReady(AsyncValue<dynamic> authState) {
+    if (!_minDelayComplete || _navigated) return;
+
+    if (authState.hasValue) {
+      final user = authState.value;
+      if (user != null) {
+        _goHome();
+      } else {
+        _goLogin();
+      }
+      return;
+    }
+
+    final cached = FirebaseAuth.instance.currentUser;
+    if (cached != null && cached.emailVerified) {
+      _goHome();
+      return;
+    }
+
+    if (authState.hasError) {
+      _goLogin();
     }
   }
 

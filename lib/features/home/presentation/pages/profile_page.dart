@@ -10,7 +10,9 @@ import '../../../../core/widgets/my_button.dart';
 import '../../../../core/widgets/my_card.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/themed_gradient_bg.dart';
+import '../../../../core/models/app_sync_status.dart';
 import '../../../../di/auth_providers.dart';
+import '../../../../di/sync_providers.dart';
 import '../../../../domain/entities/user.dart';
 import '../viewmodels/profile_viewmodel.dart';
 
@@ -34,6 +36,7 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateChangesProvider);
     final signOutState = ref.watch(profileViewModelProvider);
+    final syncStatus = ref.watch(appSyncStatusProvider);
     final isSigningOut = signOutState.isLoading;
 
     ref.listen(profileViewModelProvider, (previous, next) {
@@ -130,6 +133,22 @@ class ProfilePage extends ConsumerWidget {
                           ],
                           SizedBox(height: context.h * 1.2),
                           _VerifiedBadge(isVerified: user.isVerified),
+                          SizedBox(height: context.h * 1.2),
+                          syncStatus.when(
+                            data: (status) => _SyncStatusBadge(status: status),
+                            loading: () => const _SyncStatusBadge(
+                              status: AppSyncStatus(
+                                isOnline: true,
+                                hasPendingWrites: false,
+                              ),
+                            ),
+                            error: (_, __) => const _SyncStatusBadge(
+                              status: AppSyncStatus(
+                                isOnline: true,
+                                hasPendingWrites: false,
+                              ),
+                            ),
+                          ),
                           SizedBox(height: context.h * 2.5),
                           _ProfileInfoRow(
                             label: AppText.emailLabel,
@@ -165,6 +184,41 @@ class ProfilePage extends ConsumerWidget {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SyncStatusBadge extends StatelessWidget {
+  final AppSyncStatus status;
+
+  const _SyncStatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.md,
+        vertical: AppSizes.xs,
+      ),
+      decoration: BoxDecoration(
+        color: status.color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+        border: Border.all(color: status.color.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(status.icon, size: AppSizes.iconSm, color: status.color),
+          const SizedBox(width: AppSizes.xs),
+          MyText(
+            status.label,
+            font: AppFont.sourceSans,
+            size: AppSizes.caption,
+            color: status.color,
+            weight: FontWeight.w600,
+          ),
+        ],
       ),
     );
   }

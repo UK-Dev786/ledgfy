@@ -180,6 +180,11 @@ abstract class AppText {
   static const profileSignOut = 'Sign Out';
   static const profileVerified = 'Verified';
   static const profileNotVerified = 'Not verified';
+  static const syncLabel = 'Sync';
+  static const syncSynced = 'Synced';
+  static const syncSyncing = 'Syncing…';
+  static const syncOffline = 'Offline';
+  static const syncOfflinePending = 'Offline · saved on device';
 
   // Home — Errors
   static const homeErrorGeneric = 'Something went wrong.';

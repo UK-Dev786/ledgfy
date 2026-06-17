@@ -234,14 +234,17 @@ class AuthRepositoryImpl implements IAuthRepository {
       return null;
     }
 
-    var profile = await _firestoreService.getUserProfile(refreshed.uid);
+    final profile = await _firestoreService.getUserProfile(refreshed.uid);
 
     if (profile != null) {
-      if (!profile.isVerified) {
-        await _firestoreService.updateIsVerified(refreshed.uid, true);
-        profile = profile.copyWith(isVerified: true);
+      var resolved = profile;
+      if (!resolved.isVerified) {
+        try {
+          await _firestoreService.updateIsVerified(refreshed.uid, true);
+        } catch (_) {}
+        resolved = resolved.copyWith(isVerified: true);
       }
-      return profile.toEntity();
+      return resolved.toEntity();
     }
 
     return UserModel.fromFirebaseUser(

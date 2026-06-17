@@ -10,12 +10,18 @@ import '../../../features/ledger/models/ledger_type.dart';
 import '../../models/ledger_entry_model.dart';
 import '../../models/ledger_item_model.dart';
 import '../../models/ledger_party_model.dart';
+import '../../../core/utils/auth_token_helper.dart';
 
 class LedgerRemoteDataSource {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
   LedgerRemoteDataSource(this._firestore, this._auth);
+
+  final _pendingController = StreamController<bool>.broadcast();
+
+  /// Reactive pending-write flag — fed by [watchLedgers] snapshot metadata.
+  Stream<bool> get pendingWrites => _pendingController.stream;
 
   CollectionReference<Map<String, dynamic>> _ledgers(String userId) {
     return _firestore.collection('users').doc(userId).collection('ledgers');
@@ -35,9 +41,25 @@ class LedgerRemoteDataSource {
         <String, StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>{};
     final entryLists = <String, List<LedgerEntry>>{};
     final entryReady = <String, bool>{};
+    final latestEntrySnapshots =
+        <String, QuerySnapshot<Map<String, dynamic>>>{};
     var latestDocs = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
 
     final controller = StreamController<List<LedgerItem>>.broadcast();
+
+    if (!_pendingController.isClosed) {
+      _pendingController.add(false);
+    }
+
+    void emitPending() {
+      if (_pendingController.isClosed) return;
+      // Only entry docs — ledger updatedAt bumps cause false "syncing".
+      final entriesPending = latestEntrySnapshots.values.any(
+        (snapshot) =>
+            snapshot.docs.any((doc) => doc.metadata.hasPendingWrites),
+      );
+      _pendingController.add(entriesPending);
+    }
 
     List<LedgerItem> buildItems() {
       return latestDocs
@@ -77,12 +99,14 @@ class LedgerRemoteDataSource {
           entrySubscriptions.remove(ledgerId)?.cancel();
           entryLists.remove(ledgerId);
           entryReady.remove(ledgerId);
+          latestEntrySnapshots.remove(ledgerId);
           removedLedger = true;
         }
       }
 
       if (removedLedger) {
         emitWhenEntriesReady();
+        emitPending();
       }
 
       for (final doc in latestDocs) {
@@ -96,6 +120,7 @@ class LedgerRemoteDataSource {
             .snapshots()
             .listen(
           (entrySnapshot) {
+            latestEntrySnapshots[ledgerId] = entrySnapshot;
             entryLists[ledgerId] = entrySnapshot.docs
                 .map(
                   (entryDoc) =>
@@ -111,6 +136,7 @@ class LedgerRemoteDataSource {
             } else {
               emitItems();
             }
+            emitPending();
           },
           onError: controller.addError,
         );
@@ -127,12 +153,14 @@ class LedgerRemoteDataSource {
 
         if (latestDocs.isEmpty) {
           controller.add(const []);
+          emitPending();
           return;
         }
 
         if (latestDocs.every((doc) => entryReady[doc.id] == true)) {
           emitItems();
         }
+        emitPending();
       },
       onError: controller.addError,
     );
@@ -145,6 +173,7 @@ class LedgerRemoteDataSource {
       entrySubscriptions.clear();
       entryLists.clear();
       entryReady.clear();
+      latestEntrySnapshots.clear();
     };
 
     return controller.stream;
@@ -153,7 +182,7 @@ class LedgerRemoteDataSource {
   Future<void> _ensureAuthReady() async {
     final user = _auth.currentUser;
     if (user == null) return;
-    await user.getIdToken(true);
+    await ensureAuthToken(user);
   }
 
   Future<String> createLedger({

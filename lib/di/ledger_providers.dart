@@ -26,12 +26,20 @@ final currentUserIdProvider = Provider<String?>((ref) {
 
 final ledgersStreamProvider = StreamProvider<List<LedgerItem>>((ref) {
   final authAsync = ref.watch(authStateChangesProvider);
+  final repository = ref.watch(ledgerRepositoryProvider);
+  final cachedUid = ref.watch(firebaseAuthProvider).currentUser?.uid;
 
   if (authAsync.isLoading) {
+    if (cachedUid != null) {
+      return repository.watchLedgers(cachedUid);
+    }
     return const Stream<List<LedgerItem>>.empty();
   }
 
   if (authAsync.hasError) {
+    if (cachedUid != null) {
+      return repository.watchLedgers(cachedUid);
+    }
     return Stream<List<LedgerItem>>.error(
       authAsync.error!,
       authAsync.stackTrace,
@@ -43,7 +51,6 @@ final ledgersStreamProvider = StreamProvider<List<LedgerItem>>((ref) {
     return Stream.value(const []);
   }
 
-  final repository = ref.watch(ledgerRepositoryProvider);
   return repository.watchLedgers(userId);
 });
 

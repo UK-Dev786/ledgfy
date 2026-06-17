@@ -6,6 +6,7 @@ import '../../../core/constants/app_text.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../core/utils/auth_debug_log.dart';
 import '../../models/user_model.dart';
+import '../../../core/utils/auth_token_helper.dart';
 
 class AuthRemoteDataSource {
   final firebase_auth.FirebaseAuth _firebaseAuth;
@@ -21,7 +22,11 @@ class AuthRemoteDataSource {
 
   Future<void> reloadUser() async {
     AuthDebugLog.step('reloadUser: uid=${currentUser?.uid}');
-    await currentUser?.reload();
+    try {
+      await currentUser?.reload().timeout(const Duration(seconds: 3));
+    } catch (_) {
+      // Offline — keep cached Firebase user.
+    }
   }
 
   Future<firebase_auth.User> signInWithEmail(
@@ -189,7 +194,7 @@ class FirestoreService {
       AuthDebugLog.step('Firestore: no auth user before write');
       return;
     }
-    await user.getIdToken(true);
+    await ensureAuthToken(user);
     AuthDebugLog.step('Firestore: auth token ready uid=${user.uid}');
   }
 
@@ -234,6 +239,16 @@ class FirestoreService {
   Future<UserModel?> getUserProfile(String uid) async {
     AuthDebugLog.step('getUserProfile: uid=$uid');
     try {
+      final cached = await _users
+          .doc(uid)
+          .get(const GetOptions(source: Source.cache));
+      if (cached.exists && cached.data() != null) {
+        AuthDebugLog.step('getUserProfile: cache hit uid=$uid');
+        return UserModel.fromFirestore(cached.data()!, cached.id);
+      }
+    } catch (_) {}
+
+    try {
       await _ensureAuthReady();
       final doc = await _users.doc(uid).get();
       if (!doc.exists || doc.data() == null) {
@@ -244,7 +259,15 @@ class FirestoreService {
       return UserModel.fromFirestore(doc.data()!, doc.id);
     } catch (error, stackTrace) {
       AuthDebugLog.error('getUserProfile', error, stackTrace);
-      rethrow;
+      try {
+        final cached = await _users
+            .doc(uid)
+            .get(const GetOptions(source: Source.cache));
+        if (cached.exists && cached.data() != null) {
+          return UserModel.fromFirestore(cached.data()!, cached.id);
+        }
+      } catch (_) {}
+      return null;
     }
   }
 }
