@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/widgets/rounded_button.dart';
+import '../../../../core/widgets/rounded_button.dart';
 
 class LedgerFab extends StatelessWidget {
   final VoidCallback onTap;

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_sizes.dart';
-import '../../../core/constants/app_text.dart';
-import '../../../core/widgets/my_card.dart';
-import '../../../core/widgets/my_text.dart';
-import '../../../core/widgets/shared_entrance_animation.dart';
-import '../models/ledger_item.dart';
-import 'ledger_flow_amount.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/widgets/my_card.dart';
+import '../../../../core/widgets/my_text.dart';
+import '../../../../core/widgets/shared_entrance_animation.dart';
+import '../../models/ledger_item.dart';
+import '../../shared/sub_widgets/ledger_flow_amount.dart';
 
 class LedgerDetailSummary extends StatelessWidget {
   final LedgerItem ledger;
@@ -16,6 +15,37 @@ class LedgerDetailSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final config = ledger.config;
+
+    if (config.isExpenseOnly) {
+      return SharedEntranceAnimation(
+        child: MyCard(
+          borderRadius: AppSizes.radiusLg,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.lg,
+            vertical: AppSizes.md,
+          ),
+          child: Column(
+            children: [
+              MyText(
+                config.balanceLabel,
+                font: AppFont.sourceSans,
+                size: AppSizes.caption,
+                color: AppColors.textHint,
+              ),
+              const SizedBox(height: AppSizes.sm),
+              LedgerFlowAmount(
+                icon: config.debitIcon,
+                color: config.debitColor,
+                amount: ledger.balance,
+                compact: true,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return SharedEntranceAnimation(
       child: MyCard(
         borderRadius: AppSizes.radiusLg,
@@ -27,11 +57,11 @@ class LedgerDetailSummary extends StatelessWidget {
           children: [
             Expanded(
               child: _SummaryItem(
-                label: AppText.ledgerDetailIncome,
+                label: config.creditLabel,
                 child: LedgerFlowAmount(
-                  icon: Icons.arrow_upward_rounded,
-                  color: AppColors.success,
-                  amount: ledger.income,
+                  icon: config.creditIcon,
+                  color: config.creditColor,
+                  amount: ledger.creditTotal,
                   compact: true,
                 ),
               ),
@@ -43,11 +73,11 @@ class LedgerDetailSummary extends StatelessWidget {
             ),
             Expanded(
               child: _SummaryItem(
-                label: AppText.ledgerDetailOutgoing,
+                label: config.debitLabel,
                 child: LedgerFlowAmount(
-                  icon: Icons.arrow_downward_rounded,
-                  color: AppColors.error,
-                  amount: ledger.outgoing,
+                  icon: config.debitIcon,
+                  color: config.debitColor,
+                  amount: ledger.debitTotal,
                   compact: true,
                 ),
               ),
@@ -59,11 +89,11 @@ class LedgerDetailSummary extends StatelessWidget {
             ),
             Expanded(
               child: _SummaryItem(
-                label: AppText.ledgerDetailSubtotal,
+                label: config.balanceLabel,
                 child: LedgerFlowAmount(
                   icon: Icons.account_balance_wallet_outlined,
-                  color: _subtotalColor(ledger.subtotal),
-                  amount: ledger.subtotal,
+                  color: _balanceColor(ledger.balance),
+                  amount: ledger.balance,
                   compact: true,
                 ),
               ),
@@ -74,9 +104,9 @@ class LedgerDetailSummary extends StatelessWidget {
     );
   }
 
-  Color _subtotalColor(double subtotal) {
-    if (subtotal > 0) return AppColors.success;
-    if (subtotal < 0) return AppColors.error;
+  Color _balanceColor(double balance) {
+    if (balance > 0) return AppColors.success;
+    if (balance < 0) return AppColors.error;
     return AppColors.textTertiary;
   }
 }

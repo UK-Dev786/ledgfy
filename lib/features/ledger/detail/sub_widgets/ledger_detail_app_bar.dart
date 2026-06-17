@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_sizes.dart';
-import '../../../core/widgets/my_text.dart';
-import '../models/ledger_item.dart';
-import '../../../core/widgets/rounded_button.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/widgets/my_text.dart';
+import '../../models/ledger_item.dart';
+import '../../../../core/widgets/rounded_button.dart';
 
 class LedgerDetailAppBar extends StatelessWidget {
   final LedgerItem ledger;

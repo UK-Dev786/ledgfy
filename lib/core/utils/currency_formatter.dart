@@ -4,6 +4,10 @@ abstract class CurrencyFormatter {
   // TODO: make currency code dynamic per user settings.
   static String getActiveCurrencyCode() => 'PKR';
 
+  static const int _oneLac = 100000;
+  static const int _tenLac = 1000000;
+  static const int _oneCrore = 10000000;
+
   static String formatSync(double amount) {
     return NumberFormat.currency(
       locale: 'en_PK',
@@ -12,27 +16,25 @@ abstract class CurrencyFormatter {
     ).format(amount).trim();
   }
 
-  static String format(double amount, {bool compact = false}) {
-    if (compact) return formatReadable(amount);
+  static String format(double amount, {bool abbreviate = false}) {
+    if (abbreviate) return formatReadable(amount);
     return '${getActiveCurrencyCode()} ${formatSync(amount)}';
   }
 
-  /// Readable short form for tight UI — full number below 1 Lac,
-  /// then "X Lac" / "X Crore" (Pakistani style, no cryptic M/L letters).
+  /// Short labels for list cards only — full number below 10 Lac,
+  /// then "X Lac" / "X Crore" with spelled-out words.
   static String formatReadable(double amount) {
     final code = getActiveCurrencyCode();
     final sign = amount < 0 ? '-' : '';
     final abs = amount.abs();
 
-    // 1 Crore = 10,000,000
-    if (abs >= 10000000) {
-      final crore = abs / 10000000;
+    if (abs >= _oneCrore) {
+      final crore = abs / _oneCrore;
       return '$code $sign${_readableUnit(crore)} Crore';
     }
 
-    // 1 Lac = 100,000
-    if (abs >= 100000) {
-      final lac = abs / 100000;
+    if (abs >= _tenLac) {
+      final lac = abs / _oneLac;
       return '$code $sign${_readableUnit(lac)} Lac';
     }
 

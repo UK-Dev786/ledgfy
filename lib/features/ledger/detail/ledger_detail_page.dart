@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_sizes.dart';
-import '../../core/widgets/themed_gradient_bg.dart';
-import 'models/ledger_entry.dart';
-import 'models/ledger_item.dart';
-import 'sub_widgets/add_ledger_amount_sheet.dart';
+import '../../../core/constants/app_sizes.dart';
+import '../../../core/widgets/themed_gradient_bg.dart';
+import '../models/ledger_entry.dart';
+import '../models/ledger_item.dart';
+import 'sub_widgets/add_ledger_entry_sheet.dart';
+import 'sub_widgets/ledger_party_section.dart';
 import 'sub_widgets/ledger_detail_app_bar.dart';
 import 'sub_widgets/ledger_detail_fabs.dart';
 import 'sub_widgets/ledger_detail_summary.dart';
@@ -22,18 +23,22 @@ class LedgerDetailPage extends StatefulWidget {
 class _LedgerDetailPageState extends State<LedgerDetailPage> {
   LedgerItem get _ledger => widget.ledger;
 
-  void _openAmountSheet(LedgerEntryType type) {
-    AddLedgerAmountSheet.show(
+  void _openEntrySheet(LedgerEntryType type) {
+    AddLedgerEntrySheet.show(
       context,
+      config: _ledger.config,
       type: type,
-      onAdd: (amount) {
+      onAdd: (draft) {
         setState(() {
           _ledger.entries.add(
             LedgerEntry(
               id: DateTime.now().millisecondsSinceEpoch.toString(),
-              amount: amount,
-              type: type,
+              amount: draft.amount,
+              type: draft.type,
               createdAt: DateTime.now(),
+              partyName: draft.partyName,
+              note: draft.note,
+              category: draft.category,
             ),
           );
         });
@@ -46,7 +51,10 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
     return ThemedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        floatingActionButton: LedgerDetailFabs(onAddTap: _openAmountSheet),
+        floatingActionButton: LedgerDetailFabs(
+          config: _ledger.config,
+          onAddTap: _openEntrySheet,
+        ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SafeArea(
           child: Column(
@@ -68,8 +76,18 @@ class _LedgerDetailPageState extends State<LedgerDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       LedgerDetailSummary(ledger: _ledger),
+                      if (_ledger.config.supportsPartyLedger) ...[
+                        const SizedBox(height: AppSizes.lg),
+                        LedgerPartySection(
+                          parties: _ledger.partyBalances,
+                          config: _ledger.config,
+                        ),
+                      ],
                       const SizedBox(height: AppSizes.lg),
-                      LedgerHistoryList(entries: _ledger.entries),
+                      LedgerHistoryList(
+                        entries: _ledger.entries,
+                        config: _ledger.config,
+                      ),
                     ],
                   ),
                 ),

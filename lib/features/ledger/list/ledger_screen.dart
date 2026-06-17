@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_sizes.dart';
-import '../../core/widgets/themed_gradient_bg.dart';
-import 'ledger_detail_page.dart';
-import 'models/ledger_item.dart';
+import '../../../core/constants/app_sizes.dart';
+import '../../../core/widgets/themed_gradient_bg.dart';
+import '../detail/ledger_detail_page.dart';
+import '../models/ledger_item.dart';
 import 'sub_widgets/create_ledger_sheet.dart';
 import 'sub_widgets/ledger_empty_state.dart';
 import 'sub_widgets/ledger_fab.dart';

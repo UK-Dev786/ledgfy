@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_sizes.dart';
-import '../../../core/utils/currency_formatter.dart';
-import '../../../core/widgets/my_text.dart';
+import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/my_text.dart';
 
 class LedgerFlowAmount extends StatelessWidget {
   final IconData icon;
   final Color color;
   final double amount;
   final bool compact;
+  final bool abbreviate;
 
   const LedgerFlowAmount({
     super.key,
@@ -16,6 +17,7 @@ class LedgerFlowAmount extends StatelessWidget {
     required this.color,
     required this.amount,
     this.compact = false,
+    this.abbreviate = false,
   });
 
   @override
@@ -34,7 +36,7 @@ class LedgerFlowAmount extends StatelessWidget {
           child: MyText(
             CurrencyFormatter.format(
               amount,
-              compact: compact,
+              abbreviate: abbreviate,
             ),
             font: AppFont.inter,
             size: textSize,

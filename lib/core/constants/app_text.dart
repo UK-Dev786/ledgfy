@@ -5,7 +5,7 @@
 abstract class AppText {
   // ── App ─────────────────────────────────────────────────────────────────
   static const appName = 'Ledgify';
-  static const appTagline = 'Ledger Simplify';
+  static const appTagline = 'Pro Digital Khata';
 
   // ── Auth — Login page ────────────────────────────────────────────────────
   static const loginWelcome = 'Welcome to Ledgify';
@@ -193,10 +193,17 @@ abstract class AppText {
 
   // Ledgers
   static const ledgersTitle = 'Ledgers';
-  static const ledgersSubtitle = 'Organize your books by purpose';
+  static const ledgersSubtitle =
+      'Pro khata books — udhar, cash, expenses & projects in one place';
   static const ledgersEmptyTitle = 'No ledgers yet';
   static const ledgersEmptySubtitle =
-      'Create your first ledger to start tracking income and expenses.';
+      'Create your first pro khata book. Each type has its own smart entry method — like Easy Khata, but built for serious business.';
+  static const ledgerProBadge = 'PRO';
+  static const ledgerPartiesTitle = 'Parties';
+  static const ledgerPartiesSubtitle =
+      'Per-customer udhar balance — auto-calculated from your entries.';
+  static const ledgerPartiesEmpty =
+      'Add entries with a party name to see customer-wise balances here.';
   static const ledgersCreateTitle = 'Create Ledger';
   static const ledgersNameLabel = 'Ledger Name';
   static const ledgersNameHint = 'e.g. Main Store, Personal Budget';
@@ -205,7 +212,7 @@ abstract class AppText {
   static const ledgersDescriptionHint = 'e.g. Monthly shop records';
   static const ledgersTypeLabel = 'Ledger Type';
   static const ledgersCreateButton = 'Create Ledger';
-  static const ledgerTypeGeneral = 'General Ledger';
+  static const ledgerTypeGeneral = 'Udhar Book';
   static const ledgerTypeWholesale = 'Wholesale';
   static const ledgerTypeRetail = 'Retail';
   static const ledgerTypeCashBook = 'Cash Book';
@@ -215,7 +222,7 @@ abstract class AppText {
   // Ledger detail
   static const ledgerDetailIncome = 'Income';
   static const ledgerDetailOutgoing = 'Outgoing';
-  static const ledgerDetailSubtotal = 'Subtotal';
+  static const ledgerDetailBalance = 'Balance';
   static const ledgerDetailHistory = 'History';
   static const ledgerDetailEmptyHistory =
       'No transactions yet. Use the buttons below to add income or outgoing.';
@@ -227,4 +234,87 @@ abstract class AppText {
   static const ledgerDetailAmountInvalid =
       'Enter a valid amount greater than zero';
   static const ledgerDetailAddButton = 'Add';
+
+  // Ledger entry labels — Udhar
+  static const ledgerEntryGiven = 'Given';
+  static const ledgerEntryReceived = 'Received';
+  static const ledgerAddGiven = 'Add Given (Udhaar)';
+  static const ledgerAddReceived = 'Add Received (Wasooli)';
+  static const ledgerPartyLabel = 'Party Name';
+  static const ledgerPartyHint = 'Customer or supplier name';
+  static const ledgerNoteLabel = 'Note (Optional)';
+  static const ledgerNoteHint = 'Add a short note';
+  static const ledgerEmptyUdhar =
+      'No entries yet. Add Given when you give credit, Received when payment comes back.';
+
+  // Wholesale
+  static const ledgerEntryCreditSale = 'Credit Sale';
+  static const ledgerEntryPayment = 'Payment';
+  static const ledgerAddCreditSale = 'Add Credit Sale';
+  static const ledgerAddPayment = 'Add Payment';
+  static const ledgerWholesalePartyLabel = 'Party Name';
+  static const ledgerWholesalePartyHint = 'Wholesaler or buyer name';
+  static const ledgerBillLabel = 'Bill / Invoice (Optional)';
+  static const ledgerBillHint = 'e.g. Invoice #1042';
+  static const ledgerEmptyWholesale =
+      'No wholesale entries yet. Record credit sales and payments received.';
+
+  // Retail
+  static const ledgerEntryUdhaar = 'Udhaar';
+  static const ledgerEntryWasooli = 'Wasooli';
+  static const ledgerAddUdhaar = 'Add Udhaar';
+  static const ledgerAddWasooli = 'Add Wasooli';
+  static const ledgerCustomerLabel = 'Customer Name';
+  static const ledgerCustomerHint = 'e.g. Ali Ahmed';
+  static const ledgerEmptyRetail =
+      'No retail khata yet. Record udhaar given and wasooli received.';
+
+  // Cash book
+  static const ledgerEntryCashIn = 'Cash In';
+  static const ledgerEntryCashOut = 'Cash Out';
+  static const ledgerAddCashIn = 'Add Cash In';
+  static const ledgerAddCashOut = 'Add Cash Out';
+  static const ledgerCashNoteHint = 'e.g. Daily sales, rent paid';
+  static const ledgerEmptyCashBook =
+      'No cash entries yet. Record cash in and cash out.';
+
+  // Expense tracker
+  static const ledgerEntryExpense = 'Expense';
+  static const ledgerAddExpense = 'Add Expense';
+  static const ledgerTotalSpent = 'Total Spent';
+  static const ledgerExpenseCategoryLabel = 'Category';
+  static const ledgerExpenseNoteHint = 'What was this expense for?';
+  static const ledgerExpenseCategoryRent = 'Rent';
+  static const ledgerExpenseCategoryStock = 'Stock';
+  static const ledgerExpenseCategorySalary = 'Salary';
+  static const ledgerExpenseCategoryUtilities = 'Utilities';
+  static const ledgerExpenseCategoryOther = 'Other';
+  static const ledgerEmptyExpense =
+      'No expenses yet. Tap + to record your first expense.';
+
+  // Project
+  static const ledgerEntryProjectIncome = 'Income';
+  static const ledgerEntryProjectCost = 'Cost';
+  static const ledgerAddProjectIncome = 'Add Project Income';
+  static const ledgerAddProjectCost = 'Add Project Cost';
+  static const ledgerMilestoneLabel = 'Milestone (Optional)';
+  static const ledgerMilestoneHint = 'e.g. Phase 1, Material purchase';
+  static const ledgerEmptyProject =
+      'No project entries yet. Track income and costs for this project.';
+
+  static const ledgerPartyRequired = 'Party name is required';
+  static const ledgerCategoryRequired = 'Please select a category';
+
+  static const ledgerTypeDescUdhar =
+      'Customer udhar khata — record Given and Received with party name.';
+  static const ledgerTypeDescWholesale =
+      'B2B credit sales — track credit sales and payments with bill details.';
+  static const ledgerTypeDescRetail =
+      'Shop udhar khata — record udhaar and wasooli per customer.';
+  static const ledgerTypeDescCashBook =
+      'Daily cash flow — record cash in and cash out.';
+  static const ledgerTypeDescExpense =
+      'Expense only — track spending by category.';
+  static const ledgerTypeDescProject =
+      'Project budget — track income and costs with milestones.';
 }

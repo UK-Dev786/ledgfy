@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_sizes.dart';
-import '../../../core/constants/app_text.dart';
-import '../../../core/widgets/my_card.dart';
-import '../../../core/widgets/my_text.dart';
-import '../../../core/widgets/shared_entrance_animation.dart';
-import '../models/ledger_entry.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/constants/app_text.dart';
+import '../../../../core/widgets/my_card.dart';
+import '../../../../core/widgets/my_text.dart';
+import '../../../../core/widgets/shared_entrance_animation.dart';
+import '../../models/ledger_entry.dart';
+import '../../models/ledger_type_config.dart';
 import 'ledger_history_tile.dart';
 
 class LedgerHistoryList extends StatelessWidget {
   final List<LedgerEntry> entries;
+  final LedgerTypeConfig config;
 
-  const LedgerHistoryList({super.key, required this.entries});
+  const LedgerHistoryList({
+    super.key,
+    required this.entries,
+    required this.config,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +42,7 @@ class LedgerHistoryList extends StatelessWidget {
             child: MyCard(
               borderRadius: AppSizes.radiusMd,
               child: MyText(
-                AppText.ledgerDetailEmptyHistory,
+                config.emptyHistoryMessage,
                 font: AppFont.sourceSans,
                 size: AppSizes.subtitle,
                 color: AppColors.textHint,
@@ -54,7 +60,10 @@ class LedgerHistoryList extends StatelessWidget {
             itemBuilder: (context, index) {
               return SharedEntranceAnimation(
                 delay: Duration(milliseconds: 60 * index.clamp(0, 4)),
-                child: LedgerHistoryTile(entry: sorted[index]),
+                child: LedgerHistoryTile(
+                  entry: sorted[index],
+                  config: config,
+                ),
               );
             },
           ),

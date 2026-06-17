@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_sizes.dart';
-import '../models/ledger_item.dart';
+import '../../../../core/constants/app_sizes.dart';
+import '../../models/ledger_item.dart';
 import 'ledger_tile.dart';
 
 class LedgerListView extends StatelessWidget {

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:ledgify/core/extensions/context_extensions.dart';
 
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_sizes.dart';
-import '../../../core/constants/app_text.dart';
-import '../../../core/widgets/my_button.dart';
-import '../../../core/widgets/my_text.dart';
-import '../../../core/widgets/my_text_field.dart';
-import '../../../core/widgets/shared_bottom_sheet.dart';
-import '../models/ledger_type.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/constants/app_text.dart';
+import '../../../../core/widgets/my_button.dart';
+import '../../../../core/widgets/my_text.dart';
+import '../../../../core/widgets/my_text_field.dart';
+import '../../../../core/widgets/shared_bottom_sheet.dart';
+import '../../models/ledger_type.dart';
+import '../../models/ledger_type_config.dart';
 import 'ledger_type_picker.dart';
 
 typedef OnLedgerCreated = void Function(
@@ -127,6 +128,14 @@ class _CreateLedgerSheetState extends State<CreateLedgerSheet> {
             LedgerTypePicker(
               selected: _selectedType,
               onSelected: (type) => setState(() => _selectedType = type),
+            ),
+            SizedBox(height: context.h * 1.2),
+            MyText(
+              LedgerTypeConfig.forType(_selectedType).typeDescription,
+              font: AppFont.sourceSans,
+              size: AppSizes.caption,
+              color: AppColors.textHint,
+              height: 1.4,
             ),
             SizedBox(height: context.h * 3),
             MyButton(

@@ -7,7 +7,7 @@ import '../../../../core/widgets/my_card.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/themed_gradient_bg.dart';
 import '../../home_screen.dart';
-import '../../../ledger/ledger_screen.dart';
+import '../../../ledger/list/ledger_screen.dart';
 import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {

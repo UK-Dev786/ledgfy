@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_sizes.dart';
-import '../../../core/constants/app_text.dart';
-import '../../../core/utils/currency_formatter.dart';
-import '../../../core/widgets/my_card.dart';
-import '../../../core/widgets/my_text.dart';
-import '../models/ledger_entry.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/my_card.dart';
+import '../../../../core/widgets/my_text.dart';
+import '../../models/ledger_entry.dart';
+import '../../models/ledger_type_config.dart';
 
 class LedgerHistoryTile extends StatelessWidget {
   final LedgerEntry entry;
+  final LedgerTypeConfig config;
 
-  const LedgerHistoryTile({super.key, required this.entry});
+  const LedgerHistoryTile({
+    super.key,
+    required this.entry,
+    required this.config,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isIncome = entry.type == LedgerEntryType.income;
-    final color = isIncome ? AppColors.success : AppColors.error;
-    final icon = isIncome
-        ? Icons.arrow_upward_rounded
-        : Icons.arrow_downward_rounded;
-    final label = isIncome
-        ? AppText.ledgerDetailIncome
-        : AppText.ledgerDetailOutgoing;
+    final color = config.colorForEntry(entry.type);
+    final icon = config.iconForEntry(entry.type);
+    final label = config.labelForEntry(entry.type);
     final timeLabel = DateFormat('MMM d, h:mm a').format(entry.createdAt);
+    final subtitle = _buildSubtitle();
 
     return MyCard(
       borderRadius: AppSizes.radiusMd,
@@ -56,12 +57,23 @@ class LedgerHistoryTile extends StatelessWidget {
                   color: AppColors.white,
                   weight: FontWeight.w600,
                 ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  MyText(
+                    subtitle,
+                    font: AppFont.sourceSans,
+                    size: AppSizes.caption,
+                    color: AppColors.textHint,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
                 const SizedBox(height: 2),
                 MyText(
                   timeLabel,
                   font: AppFont.sourceSans,
                   size: AppSizes.caption,
-                  color: AppColors.textHint,
+                  color: AppColors.textHint.withValues(alpha: 0.8),
                 ),
               ],
             ),
@@ -71,7 +83,7 @@ class LedgerHistoryTile extends StatelessWidget {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerRight,
               child: MyText(
-                CurrencyFormatter.format(entry.amount, compact: true),
+                CurrencyFormatter.format(entry.amount),
                 font: AppFont.inter,
                 size: AppSizes.subtitle,
                 color: color,
@@ -83,5 +95,16 @@ class LedgerHistoryTile extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String? _buildSubtitle() {
+    final parts = <String>[
+      if (entry.partyName != null && entry.partyName!.isNotEmpty)
+        entry.partyName!,
+      if (entry.category != null && entry.category!.isNotEmpty) entry.category!,
+      if (entry.note != null && entry.note!.isNotEmpty) entry.note!,
+    ];
+    if (parts.isEmpty) return null;
+    return parts.join(' · ');
   }
 }

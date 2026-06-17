@@ -1,10 +1,10 @@
 import 'package:bounce/bounce.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_sizes.dart';
-import '../../../core/widgets/my_text.dart';
-import '../models/ledger_type.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_sizes.dart';
+import '../../../../core/widgets/my_text.dart';
+import '../../models/ledger_type.dart';
 
 class LedgerTypePicker extends StatelessWidget {
   final LedgerType selected;
