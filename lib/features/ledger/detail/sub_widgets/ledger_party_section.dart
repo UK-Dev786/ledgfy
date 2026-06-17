@@ -8,12 +8,15 @@ import '../../../../core/widgets/my_text.dart';
 import '../../models/ledger_type_config.dart';
 import '../../models/party_balance.dart';
 import '../../shared/sub_widgets/ledger_simple_amount.dart';
+import 'ledger_delete_dialog.dart';
 
 class LedgerPartySection extends StatefulWidget {
   final List<PartyBalance> parties;
   final LedgerTypeConfig config;
   final bool showFullAmounts;
   final ValueChanged<String> onPartyTap;
+  final ValueChanged<PartyBalance>? onPartyEdit;
+  final ValueChanged<PartyBalance>? onPartyDelete;
 
   const LedgerPartySection({
     super.key,
@@ -21,6 +24,8 @@ class LedgerPartySection extends StatefulWidget {
     required this.config,
     required this.showFullAmounts,
     required this.onPartyTap,
+    this.onPartyEdit,
+    this.onPartyDelete,
   });
 
   @override
@@ -164,6 +169,10 @@ class _LedgerPartySectionState extends State<LedgerPartySection> {
                 config: widget.config,
                 showFullAmounts: widget.showFullAmounts,
                 onTap: () => widget.onPartyTap(party.name),
+                onEdit: widget.onPartyEdit == null
+                    ? null
+                    : () => widget.onPartyEdit!(party),
+                onDelete: widget.onPartyDelete,
               );
             },
           ),
@@ -177,6 +186,8 @@ class _PartyTile extends StatelessWidget {
   final LedgerTypeConfig config;
   final bool showFullAmounts;
   final VoidCallback onTap;
+  final VoidCallback? onEdit;
+  final ValueChanged<PartyBalance>? onDelete;
 
   const _PartyTile({
     super.key,
@@ -184,7 +195,17 @@ class _PartyTile extends StatelessWidget {
     required this.config,
     required this.showFullAmounts,
     required this.onTap,
+    this.onEdit,
+    this.onDelete,
   });
+
+  Future<bool> _confirmDelete(BuildContext context) {
+    return LedgerDeleteDialog.show(
+      context,
+      title: config.deleteSubLedgerTitle,
+      message: config.deleteSubLedgerMessage,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -194,100 +215,154 @@ class _PartyTile extends StatelessWidget {
         ? AppColors.error
         : AppColors.textTertiary;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-        child: MyCard(
-          borderRadius: AppSizes.radiusMd,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.md,
-            vertical: AppSizes.sm + 2,
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                ),
-                child: Icon(
-                  config.subLedgerIcon,
+    final card = MyCard(
+      cutTopRightCorner: onEdit != null,
+      cornerCutSize: 44,
+      topRightCorner: onEdit == null
+          ? null
+          : Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onEdit,
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                child: const Icon(
+                  Icons.edit_outlined,
                   color: AppColors.primary,
-                  size: AppSizes.iconSm,
+                  size: 15,
                 ),
               ),
-              const SizedBox(width: AppSizes.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    MyText(
-                      party.name,
-                      font: AppFont.inter,
-                      size: AppSizes.subtitle,
-                      color: AppColors.white,
-                      weight: FontWeight.w600,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+            ),
+      borderRadius: AppSizes.radiusMd,
+      padding: EdgeInsets.fromLTRB(
+        AppSizes.md,
+        AppSizes.sm + 2,
+        onEdit != null ? AppSizes.lg : AppSizes.md,
+        AppSizes.sm + 2,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
-                    if (party.description != null &&
-                        party.description!.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      MyText(
-                        party.description!,
-                        font: AppFont.sourceSans,
-                        size: AppSizes.caption,
-                        color: AppColors.textHint,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    const SizedBox(height: AppSizes.xs),
-                    Row(
+                    child: Icon(
+                      config.subLedgerIcon,
+                      color: AppColors.primary,
+                      size: AppSizes.iconSm,
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        LedgerSimpleAmount(
-                          icon: config.creditIcon,
-                          color: config.creditColor,
-                          amount: party.given,
-                          abbreviate: !showFullAmounts,
-                          iconSize: 12,
+                        MyText(
+                          party.name,
+                          font: AppFont.inter,
+                          size: AppSizes.subtitle,
+                          color: AppColors.white,
+                          weight: FontWeight.w600,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(width: AppSizes.sm),
-                        Expanded(
-                          child: LedgerSimpleAmount(
-                            icon: config.debitIcon,
-                            color: config.debitColor,
-                            amount: party.received,
-                            abbreviate: !showFullAmounts,
-                            iconSize: 12,
+                        if (party.description != null &&
+                            party.description!.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          MyText(
+                            party.description!,
+                            font: AppFont.sourceSans,
+                            size: AppSizes.caption,
+                            color: AppColors.textHint,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
+                        ],
+                        const SizedBox(height: AppSizes.xs),
+                        Row(
+                          children: [
+                            LedgerSimpleAmount(
+                              icon: config.creditIcon,
+                              color: config.creditColor,
+                              amount: party.given,
+                              abbreviate: !showFullAmounts,
+                              iconSize: 12,
+                            ),
+                            const SizedBox(width: AppSizes.sm),
+                            Expanded(
+                              child: LedgerSimpleAmount(
+                                icon: config.debitIcon,
+                                color: config.debitColor,
+                                amount: party.received,
+                                abbreviate: !showFullAmounts,
+                                iconSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(width: AppSizes.sm),
-              LedgerSimpleAmount(
-                icon: Icons.account_balance_wallet_outlined,
-                color: balanceColor,
-                amount: party.balance,
-                abbreviate: !showFullAmounts,
-              ),
-              const SizedBox(width: AppSizes.xs),
-              const Icon(
+            ),
+          ),
+          const SizedBox(width: AppSizes.sm),
+          LedgerSimpleAmount(
+            icon: Icons.account_balance_wallet_outlined,
+            color: balanceColor,
+            amount: party.balance,
+            abbreviate: !showFullAmounts,
+          ),
+          const SizedBox(width: AppSizes.xs),
+          InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+            child: const Padding(
+              padding: EdgeInsets.all(AppSizes.xs),
+              child: Icon(
                 Icons.chevron_right_rounded,
                 color: AppColors.textHint,
                 size: AppSizes.iconSm + 2,
               ),
-            ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (onDelete == null) return card;
+
+    return Dismissible(
+      key: ValueKey(party.name),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (_) => _confirmDelete(context),
+      onDismissed: (_) => onDelete!(party),
+      background: ClipPath(
+        clipper: MyCardCornerCutClipper(
+          radius: AppSizes.radiusMd,
+          cutSize: 44,
+        ),
+        child: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: AppSizes.lg),
+          color: AppColors.error.withValues(alpha: 0.92),
+          child: const Icon(
+            Icons.delete_outline_rounded,
+            color: AppColors.white,
+            size: AppSizes.iconMd,
           ),
         ),
       ),
+      child: card,
     );
   }
 }

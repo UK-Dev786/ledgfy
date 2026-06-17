@@ -21,6 +21,7 @@ class AddLedgerEntrySheet extends StatefulWidget {
   final LedgerEntryType type;
   final OnLedgerEntryAdded onAdd;
   final String? partyName;
+  final LedgerEntry? entry;
 
   const AddLedgerEntrySheet({
     super.key,
@@ -28,6 +29,7 @@ class AddLedgerEntrySheet extends StatefulWidget {
     required this.type,
     required this.onAdd,
     this.partyName,
+    this.entry,
   });
 
   static Future<void> show(
@@ -36,6 +38,7 @@ class AddLedgerEntrySheet extends StatefulWidget {
     required LedgerEntryType type,
     required OnLedgerEntryAdded onAdd,
     String? partyName,
+    LedgerEntry? entry,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -47,9 +50,12 @@ class AddLedgerEntrySheet extends StatefulWidget {
         type: type,
         onAdd: onAdd,
         partyName: partyName,
+        entry: entry,
       ),
     );
   }
+
+  bool get _isEditing => entry != null;
 
   bool get _isCredit => config.creditTypes.contains(type);
 
@@ -59,6 +65,7 @@ class AddLedgerEntrySheet extends StatefulWidget {
   IconData get _icon => config.iconForEntry(type);
 
   String get _title {
+    if (_isEditing) return AppText.ledgerEditEntryTitle;
     if (config.isExpenseOnly) return config.addDebitTitle;
     return _isCredit ? config.addCreditTitle : config.addDebitTitle;
   }
@@ -82,6 +89,41 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
       !_config.requiresParty &&
       !_config.isExpenseOnly &&
       _config.mode != LedgerAccountingMode.cashBook;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.entry;
+    if (existing == null) return;
+
+    _amountController.text = _formatAmount(existing.amount);
+    _selectedCategory = existing.category;
+    if (existing.partyName != null) {
+      _partyController.text = existing.partyName!;
+    }
+    _prefillNote(existing.note);
+  }
+
+  String _formatAmount(double amount) {
+    if (amount == amount.roundToDouble()) {
+      return amount.toInt().toString();
+    }
+    return amount.toString();
+  }
+
+  void _prefillNote(String? note) {
+    if (note == null || note.trim().isEmpty) return;
+
+    final trimmed = note.trim();
+    if (_showNameField && trimmed.contains(' · ')) {
+      final separator = trimmed.indexOf(' · ');
+      _nameController.text = trimmed.substring(0, separator);
+      _noteController.text = trimmed.substring(separator + 3);
+      return;
+    }
+
+    _noteController.text = trimmed;
+  }
 
   @override
   void dispose() {
@@ -240,7 +282,9 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
             ),
             SizedBox(height: context.h * 3),
             MyButton(
-              text: AppText.ledgerDetailAddButton,
+              text: widget._isEditing
+                  ? AppText.ledgersSaveButton
+                  : AppText.ledgerDetailAddButton,
               color: widget._accentColor,
               onTap: () {
                 if (_config.requiresCategory && _selectedCategory == null) {

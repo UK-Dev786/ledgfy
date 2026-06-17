@@ -17,6 +17,8 @@ class AddPartyNameSheet extends StatefulWidget {
   final String hint;
   final IconData nameIcon;
   final OnPartyAdded onAdd;
+  final String? initialName;
+  final String? initialDescription;
 
   const AddPartyNameSheet({
     super.key,
@@ -25,7 +27,11 @@ class AddPartyNameSheet extends StatefulWidget {
     required this.hint,
     this.nameIcon = Icons.person_outline_rounded,
     required this.onAdd,
+    this.initialName,
+    this.initialDescription,
   });
+
+  bool get _isEditing => initialName != null;
 
   static Future<void> show(
     BuildContext context, {
@@ -34,6 +40,8 @@ class AddPartyNameSheet extends StatefulWidget {
     required String hint,
     IconData nameIcon = Icons.person_outline_rounded,
     required OnPartyAdded onAdd,
+    String? initialName,
+    String? initialDescription,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -46,6 +54,8 @@ class AddPartyNameSheet extends StatefulWidget {
         hint: hint,
         nameIcon: nameIcon,
         onAdd: onAdd,
+        initialName: initialName,
+        initialDescription: initialDescription,
       ),
     );
   }
@@ -56,8 +66,17 @@ class AddPartyNameSheet extends StatefulWidget {
 
 class _AddPartyNameSheetState extends State<AddPartyNameSheet> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName ?? '');
+    _descriptionController = TextEditingController(
+      text: widget.initialDescription ?? '',
+    );
+  }
 
   @override
   void dispose() {
@@ -121,7 +140,9 @@ class _AddPartyNameSheetState extends State<AddPartyNameSheet> {
             ),
             SizedBox(height: context.h * 3),
             MyButton(
-              text: AppText.ledgerDetailAddButton,
+              text: widget._isEditing
+                  ? AppText.ledgersSaveButton
+                  : AppText.ledgerDetailAddButton,
               onTap: _submit,
             ),
           ],

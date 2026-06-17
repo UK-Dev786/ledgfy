@@ -134,6 +134,31 @@ class LedgerController {
     );
   }
 
+  Future<void> updateParty({
+    required String ledgerId,
+    required String currentName,
+    required String name,
+    String? description,
+  }) async {
+    final userId = _userId;
+    if (userId == null) return;
+
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return;
+
+    await _repository.updateParty(
+      userId: userId,
+      ledgerId: ledgerId,
+      currentName: currentName,
+      party: LedgerParty(
+        name: trimmed,
+        description: description?.trim().isEmpty == true
+            ? null
+            : description?.trim(),
+      ),
+    );
+  }
+
   Future<void> removeParty({
     required String ledgerId,
     required String partyName,
@@ -168,6 +193,44 @@ class LedgerController {
         note: draft.note,
         category: draft.category,
       ),
+    );
+  }
+
+  Future<void> updateEntry({
+    required String ledgerId,
+    required LedgerEntry entry,
+    required LedgerEntryDraft draft,
+    String? partyName,
+  }) async {
+    final userId = _userId;
+    if (userId == null) return;
+
+    await _repository.updateEntry(
+      userId: userId,
+      ledgerId: ledgerId,
+      entry: LedgerEntry(
+        id: entry.id,
+        amount: draft.amount,
+        type: entry.type,
+        createdAt: entry.createdAt,
+        partyName: partyName ?? draft.partyName ?? entry.partyName,
+        note: draft.note,
+        category: draft.category,
+      ),
+    );
+  }
+
+  Future<void> deleteEntry({
+    required String ledgerId,
+    required String entryId,
+  }) async {
+    final userId = _userId;
+    if (userId == null) return;
+
+    await _repository.deleteEntry(
+      userId: userId,
+      ledgerId: ledgerId,
+      entryId: entryId,
     );
   }
 }

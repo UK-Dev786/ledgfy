@@ -37,6 +37,13 @@ abstract class ILedgerRepository {
     required LedgerParty party,
   });
 
+  Future<void> updateParty({
+    required String userId,
+    required String ledgerId,
+    required String currentName,
+    required LedgerParty party,
+  });
+
   Future<void> removeParty({
     required String userId,
     required String ledgerId,
@@ -47,5 +54,15 @@ abstract class ILedgerRepository {
     required String userId,
     required String ledgerId,
     required LedgerEntry entry,
+  });
+  Future<void> updateEntry({
+    required String userId,
+    required String ledgerId,
+    required LedgerEntry entry,
+  });
+  Future<void> deleteEntry({
+    required String userId,
+    required String ledgerId,
+    required String entryId,
   });
 }

@@ -7,6 +7,7 @@ import '../../../core/widgets/themed_gradient_bg.dart';
 import '../../../di/ledger_providers.dart';
 import '../models/ledger_entry.dart';
 import '../shared/khata_report/khata_report_page.dart';
+import 'sub_widgets/add_ledger_entry_sheet.dart';
 import 'sub_widgets/ledger_detail_app_bar.dart';
 import 'sub_widgets/ledger_history_list.dart';
 
@@ -37,6 +38,38 @@ class LedgerHistoryPage extends ConsumerWidget {
               entry.partyName!.trim().toLowerCase() == key,
         )
         .toList();
+  }
+
+  void _openEditEntrySheet(
+    BuildContext context,
+    WidgetRef ref,
+    LedgerEntry entry,
+  ) {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+
+    AddLedgerEntrySheet.show(
+      context,
+      config: ledger.config,
+      type: entry.type,
+      entry: entry,
+      partyName: partyName ?? entry.partyName,
+      onAdd: (draft) {
+        ref.read(ledgerControllerProvider).updateEntry(
+              ledgerId: ledgerId,
+              entry: entry,
+              draft: draft,
+              partyName: partyName,
+            );
+      },
+    );
+  }
+
+  void _deleteEntry(WidgetRef ref, LedgerEntry entry) {
+    ref.read(ledgerControllerProvider).deleteEntry(
+          ledgerId: ledgerId,
+          entryId: entry.id,
+        );
   }
 
   @override
@@ -81,6 +114,9 @@ class LedgerHistoryPage extends ConsumerWidget {
                     showFullAmounts: false,
                     preferDescriptionAsTitle: preferDescriptionAsTitle,
                     showHeader: false,
+                    onEntryEdit: (entry) =>
+                        _openEditEntrySheet(context, ref, entry),
+                    onEntryDelete: (entry) => _deleteEntry(ref, entry),
                   ),
                 ),
               ),

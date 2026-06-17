@@ -9,6 +9,7 @@ import '../../../core/widgets/themed_gradient_bg.dart';
 import '../../../di/ledger_providers.dart';
 import '../models/ledger_entry.dart';
 import '../models/ledger_type_config.dart';
+import '../models/party_balance.dart';
 import '../shared/khata_report/khata_report_page.dart';
 import '../shared/ledger_page_route.dart';
 import 'ledger_history_page.dart';
@@ -94,6 +95,48 @@ class _LedgerDetailBody extends ConsumerWidget {
     );
   }
 
+  void _openEditPartySheet(
+    BuildContext context,
+    WidgetRef ref,
+    PartyBalance party,
+  ) {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+
+    final config = ledger.config;
+    AddPartyNameSheet.show(
+      context,
+      title: AppText.ledgerEditPartyTitle,
+      label: config.partyLabel,
+      hint: config.partyHint,
+      nameIcon: config.subLedgerIcon,
+      initialName: party.name,
+      initialDescription: party.description,
+      onAdd: (name, description) {
+        ref.read(ledgerControllerProvider).updateParty(
+              ledgerId: ledgerId,
+              currentName: party.name,
+              name: name,
+              description: description,
+            );
+      },
+    );
+  }
+
+  Future<void> _deleteParty(
+    BuildContext context,
+    WidgetRef ref,
+    PartyBalance party,
+  ) async {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+
+    await ref.read(ledgerControllerProvider).removeParty(
+          ledgerId: ledgerId,
+          partyName: party.name,
+        );
+  }
+
   void _openEntrySheet(
     BuildContext context,
     WidgetRef ref,
@@ -113,6 +156,37 @@ class _LedgerDetailBody extends ConsumerWidget {
             );
       },
     );
+  }
+
+  void _openEditEntrySheet(
+    BuildContext context,
+    WidgetRef ref,
+    LedgerEntry entry,
+  ) {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+
+    AddLedgerEntrySheet.show(
+      context,
+      config: ledger.config,
+      type: entry.type,
+      entry: entry,
+      partyName: entry.partyName,
+      onAdd: (draft) {
+        ref.read(ledgerControllerProvider).updateEntry(
+              ledgerId: ledgerId,
+              entry: entry,
+              draft: draft,
+            );
+      },
+    );
+  }
+
+  void _deleteEntry(WidgetRef ref, LedgerEntry entry) {
+    ref.read(ledgerControllerProvider).deleteEntry(
+          ledgerId: ledgerId,
+          entryId: entry.id,
+        );
   }
 
   void _openReport(BuildContext context, WidgetRef ref) {
@@ -230,6 +304,10 @@ class _LedgerDetailBody extends ConsumerWidget {
                           showFullAmounts: false,
                           onPartyTap: (partyName) =>
                               _openPartyDetail(context, partyName),
+                          onPartyEdit: (party) =>
+                              _openEditPartySheet(context, ref, party),
+                          onPartyDelete: (party) =>
+                              _deleteParty(context, ref, party),
                         ),
                       ],
                       if (showInlineHistory) ...[
@@ -238,6 +316,9 @@ class _LedgerDetailBody extends ConsumerWidget {
                           entries: ledger.entries,
                           config: config,
                           showFullAmounts: showFullAmounts,
+                          onEntryEdit: (entry) =>
+                              _openEditEntrySheet(context, ref, entry),
+                          onEntryDelete: (entry) => _deleteEntry(ref, entry),
                         ),
                       ],
                     ],

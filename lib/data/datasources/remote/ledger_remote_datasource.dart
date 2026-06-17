@@ -198,6 +198,63 @@ class LedgerRemoteDataSource {
     });
   }
 
+  Future<void> updateParty({
+    required String userId,
+    required String ledgerId,
+    required String currentName,
+    required LedgerParty party,
+  }) async {
+    await _ensureAuthReady();
+    final ledgerRef = _ledgerRef(userId, ledgerId);
+    final currentKey = currentName.trim().toLowerCase();
+    final newName = party.name.trim();
+    final renamed = newName.toLowerCase() != currentKey;
+
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(ledgerRef);
+      final data = snapshot.data() ?? {};
+      final parties = (data['parties'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(LedgerPartyModel.fromMap)
+          .toList();
+
+      final index = parties.indexWhere(
+        (item) => item.name.toLowerCase() == currentKey,
+      );
+      if (index < 0) return;
+
+      if (renamed &&
+          parties.any(
+            (item) => item.name.toLowerCase() == newName.toLowerCase(),
+          )) {
+        return;
+      }
+
+      parties[index] = LedgerPartyModel.fromEntity(party);
+      transaction.update(ledgerRef, {
+        'parties': parties.map((item) => item.toMap()).toList(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+
+    if (!renamed) return;
+
+    final entries = await ledgerRef.collection('entries').get();
+    final matching = entries.docs.where((doc) {
+      final name = doc.data()['partyName'] as String?;
+      return name != null && name.trim().toLowerCase() == currentKey;
+    }).toList();
+
+    for (var index = 0; index < matching.length; index += 450) {
+      final batch = _firestore.batch();
+      final chunk = matching.skip(index).take(450);
+      for (final doc in chunk) {
+        batch.update(doc.reference, {'partyName': newName});
+      }
+      await batch.commit();
+    }
+  }
+
   Future<void> removeParty({
     required String userId,
     required String ledgerId,
@@ -241,6 +298,32 @@ class LedgerRemoteDataSource {
     final model = LedgerEntryModel.fromEntity(entry);
     final ledgerRef = _ledgerRef(userId, ledgerId);
     await ledgerRef.collection('entries').doc(entry.id).set(model.toFirestore());
+    await ledgerRef.update({'updatedAt': FieldValue.serverTimestamp()});
+  }
+
+  Future<void> updateEntry({
+    required String userId,
+    required String ledgerId,
+    required LedgerEntry entry,
+  }) async {
+    await _ensureAuthReady();
+    final model = LedgerEntryModel.fromEntity(entry);
+    final ledgerRef = _ledgerRef(userId, ledgerId);
+    await ledgerRef
+        .collection('entries')
+        .doc(entry.id)
+        .update(model.toFirestore());
+    await ledgerRef.update({'updatedAt': FieldValue.serverTimestamp()});
+  }
+
+  Future<void> deleteEntry({
+    required String userId,
+    required String ledgerId,
+    required String entryId,
+  }) async {
+    await _ensureAuthReady();
+    final ledgerRef = _ledgerRef(userId, ledgerId);
+    await ledgerRef.collection('entries').doc(entryId).delete();
     await ledgerRef.update({'updatedAt': FieldValue.serverTimestamp()});
   }
 

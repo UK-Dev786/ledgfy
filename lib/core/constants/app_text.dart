@@ -265,6 +265,11 @@ abstract class AppText {
   static const ledgerDetailAmountInvalid =
       'Enter a valid amount greater than zero';
   static const ledgerDetailAddButton = 'Add';
+  static const ledgerEditEntryTitle = 'Edit Entry';
+  static const ledgerEditPartyTitle = 'Edit Party';
+  static const ledgerDeleteEntryTitle = 'Delete this entry?';
+  static const ledgerDeleteEntryMessage =
+      'This transaction will be permanently removed from your ledger.';
 
   // Ledger entry labels — Udhar
   static const ledgerEntryGiven = 'Given';

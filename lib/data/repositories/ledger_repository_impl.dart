@@ -83,6 +83,21 @@ class LedgerRepositoryImpl implements ILedgerRepository {
   }
 
   @override
+  Future<void> updateParty({
+    required String userId,
+    required String ledgerId,
+    required String currentName,
+    required LedgerParty party,
+  }) {
+    return _remoteDataSource.updateParty(
+      userId: userId,
+      ledgerId: ledgerId,
+      currentName: currentName,
+      party: party,
+    );
+  }
+
+  @override
   Future<void> removeParty({
     required String userId,
     required String ledgerId,
@@ -105,6 +120,32 @@ class LedgerRepositoryImpl implements ILedgerRepository {
       userId: userId,
       ledgerId: ledgerId,
       entry: entry,
+    );
+  }
+
+  @override
+  Future<void> updateEntry({
+    required String userId,
+    required String ledgerId,
+    required LedgerEntry entry,
+  }) {
+    return _remoteDataSource.updateEntry(
+      userId: userId,
+      ledgerId: ledgerId,
+      entry: entry,
+    );
+  }
+
+  @override
+  Future<void> deleteEntry({
+    required String userId,
+    required String ledgerId,
+    required String entryId,
+  }) {
+    return _remoteDataSource.deleteEntry(
+      userId: userId,
+      ledgerId: ledgerId,
+      entryId: entryId,
     );
   }
 }

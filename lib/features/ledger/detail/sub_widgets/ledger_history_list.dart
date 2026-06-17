@@ -17,6 +17,8 @@ class LedgerHistoryList extends StatelessWidget {
   final bool preferDescriptionAsTitle;
   final bool showHeader;
   final bool animate;
+  final ValueChanged<LedgerEntry>? onEntryEdit;
+  final ValueChanged<LedgerEntry>? onEntryDelete;
 
   const LedgerHistoryList({
     super.key,
@@ -26,6 +28,8 @@ class LedgerHistoryList extends StatelessWidget {
     this.preferDescriptionAsTitle = false,
     this.showHeader = true,
     this.animate = false,
+    this.onEntryEdit,
+    this.onEntryDelete,
   });
 
   @override
@@ -78,6 +82,10 @@ class LedgerHistoryList extends StatelessWidget {
                   config: config,
                   showFullAmounts: showFullAmounts,
                   preferDescriptionAsTitle: preferDescriptionAsTitle,
+                  onEdit: onEntryEdit == null
+                      ? null
+                      : () => onEntryEdit!(sorted[index]),
+                  onDelete: onEntryDelete,
                 ),
               );
             },

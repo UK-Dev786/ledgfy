@@ -98,7 +98,11 @@ class LedgerPartyDetailPage extends ConsumerWidget {
     ];
   }
 
-  void _openEntrySheet(BuildContext context, WidgetRef ref, LedgerEntryType type) {
+  void _openEntrySheet(
+    BuildContext context,
+    WidgetRef ref,
+    LedgerEntryType type,
+  ) {
     final ledger = ref.read(ledgerByIdProvider(ledgerId));
     if (ledger == null) return;
 
@@ -115,6 +119,38 @@ class LedgerPartyDetailPage extends ConsumerWidget {
             );
       },
     );
+  }
+
+  void _openEditEntrySheet(
+    BuildContext context,
+    WidgetRef ref,
+    LedgerEntry entry,
+  ) {
+    final ledger = ref.read(ledgerByIdProvider(ledgerId));
+    if (ledger == null) return;
+
+    AddLedgerEntrySheet.show(
+      context,
+      config: ledger.config,
+      type: entry.type,
+      entry: entry,
+      partyName: partyName,
+      onAdd: (draft) {
+        ref.read(ledgerControllerProvider).updateEntry(
+              ledgerId: ledgerId,
+              entry: entry,
+              draft: draft,
+              partyName: partyName,
+            );
+      },
+    );
+  }
+
+  void _deleteEntry(WidgetRef ref, LedgerEntry entry) {
+    ref.read(ledgerControllerProvider).deleteEntry(
+          ledgerId: ledgerId,
+          entryId: entry.id,
+        );
   }
 
   void _openNewParty(
@@ -251,6 +287,9 @@ class LedgerPartyDetailPage extends ConsumerWidget {
                         config: config,
                         showFullAmounts: false,
                         preferDescriptionAsTitle: true,
+                        onEntryEdit: (entry) =>
+                            _openEditEntrySheet(context, ref, entry),
+                        onEntryDelete: (entry) => _deleteEntry(ref, entry),
                       ),
                     ],
                   ),

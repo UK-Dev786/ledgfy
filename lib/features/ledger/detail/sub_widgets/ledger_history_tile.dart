@@ -9,12 +9,15 @@ import '../../../../core/widgets/my_card.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../models/ledger_entry.dart';
 import '../../models/ledger_type_config.dart';
+import 'ledger_delete_dialog.dart';
 
 class LedgerHistoryTile extends StatelessWidget {
   final LedgerEntry entry;
   final LedgerTypeConfig config;
   final bool showFullAmounts;
   final bool preferDescriptionAsTitle;
+  final VoidCallback? onEdit;
+  final ValueChanged<LedgerEntry>? onDelete;
 
   const LedgerHistoryTile({
     super.key,
@@ -22,7 +25,17 @@ class LedgerHistoryTile extends StatelessWidget {
     required this.config,
     required this.showFullAmounts,
     this.preferDescriptionAsTitle = false,
+    this.onEdit,
+    this.onDelete,
   });
+
+  Future<bool> _confirmDelete(BuildContext context) {
+    return LedgerDeleteDialog.show(
+      context,
+      title: AppText.ledgerDeleteEntryTitle,
+      message: AppText.ledgerDeleteEntryMessage,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +44,29 @@ class LedgerHistoryTile extends StatelessWidget {
     final timeLabel = DateFormat('MMM d, h:mm a').format(entry.createdAt);
     final displayName = _displayName();
 
-    return MyCard(
+    final card = MyCard(
+      cutTopRightCorner: onEdit != null,
+      cornerCutSize: 44,
+      topRightCorner: onEdit == null
+          ? null
+          : Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onEdit,
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                child: const Icon(
+                  Icons.edit_outlined,
+                  color: AppColors.primary,
+                  size: 15,
+                ),
+              ),
+            ),
       borderRadius: AppSizes.radiusMd,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.md,
-        vertical: AppSizes.sm + 2,
+      padding: EdgeInsets.fromLTRB(
+        AppSizes.md,
+        AppSizes.sm + 2,
+        onEdit != null ? AppSizes.lg : AppSizes.md,
+        AppSizes.sm + 2,
       ),
       child: Row(
         children: [
@@ -91,6 +122,32 @@ class LedgerHistoryTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (onDelete == null) return card;
+
+    return Dismissible(
+      key: ValueKey(entry.id),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (_) => _confirmDelete(context),
+      onDismissed: (_) => onDelete!(entry),
+      background: ClipPath(
+        clipper: MyCardCornerCutClipper(
+          radius: AppSizes.radiusMd,
+          cutSize: 44,
+        ),
+        child: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: AppSizes.lg),
+          color: AppColors.error.withValues(alpha: 0.92),
+          child: const Icon(
+            Icons.delete_outline_rounded,
+            color: AppColors.white,
+            size: AppSizes.iconMd,
+          ),
+        ),
+      ),
+      child: card,
     );
   }
 
