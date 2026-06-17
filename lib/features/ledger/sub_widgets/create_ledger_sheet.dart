@@ -11,7 +11,11 @@ import '../../../core/widgets/shared_bottom_sheet.dart';
 import '../models/ledger_type.dart';
 import 'ledger_type_picker.dart';
 
-typedef OnLedgerCreated = void Function(String title, LedgerType type);
+typedef OnLedgerCreated = void Function(
+  String title,
+  LedgerType type,
+  String description,
+);
 
 class CreateLedgerSheet extends StatefulWidget {
   final OnLedgerCreated onCreate;
@@ -38,17 +42,23 @@ class CreateLedgerSheet extends StatefulWidget {
 class _CreateLedgerSheetState extends State<CreateLedgerSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
   LedgerType _selectedType = LedgerType.general;
 
   @override
   void dispose() {
     _titleController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-    widget.onCreate(_titleController.text.trim(), _selectedType);
+    widget.onCreate(
+      _titleController.text.trim(),
+      _selectedType,
+      _descriptionController.text.trim(),
+    );
     Navigator.of(context).pop();
   }
 
@@ -93,6 +103,17 @@ class _CreateLedgerSheetState extends State<CreateLedgerSheet> {
                 }
                 return null;
               },
+            ),
+            SizedBox(height: context.h * 2),
+            MyTextField(
+              title: AppText.ledgersDescriptionLabel,
+              hintText: AppText.ledgersDescriptionHint,
+              controller: _descriptionController,
+              keyboardType: TextInputType.text,
+              prefixIcon: const Icon(
+                Icons.notes_outlined,
+                color: AppColors.primary,
+              ),
             ),
             SizedBox(height: context.h * 2),
             MyText(

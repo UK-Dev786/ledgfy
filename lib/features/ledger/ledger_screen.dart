@@ -22,12 +22,13 @@ class _LedgerScreenState extends State<LedgerScreen> {
   void _openCreateLedgerSheet() {
     CreateLedgerSheet.show(
       context,
-      onCreate: (title, type) {
+      onCreate: (title, type, description) {
         setState(() {
           _ledgers.add(
             LedgerItem(
               id: DateTime.now().millisecondsSinceEpoch.toString(),
               title: title,
+              description: description,
               type: type,
               createdAt: DateTime.now(),
             ),

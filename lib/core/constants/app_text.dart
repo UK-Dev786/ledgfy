@@ -201,6 +201,8 @@ abstract class AppText {
   static const ledgersNameLabel = 'Ledger Name';
   static const ledgersNameHint = 'e.g. Main Store, Personal Budget';
   static const ledgersNameRequired = 'Ledger name is required';
+  static const ledgersDescriptionLabel = 'Description (Optional)';
+  static const ledgersDescriptionHint = 'e.g. Monthly shop records';
   static const ledgersTypeLabel = 'Ledger Type';
   static const ledgersCreateButton = 'Create Ledger';
   static const ledgerTypeGeneral = 'General Ledger';
