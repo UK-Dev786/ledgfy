@@ -9,7 +9,12 @@ import '../../../../core/widgets/my_card.dart';
 import '../../../../core/widgets/my_text.dart';
 
 abstract final class LedgerDeleteDialog {
-  static Future<bool> show(BuildContext context) async {
+  static Future<bool> show(
+    BuildContext context, {
+    String title = AppText.ledgerDeleteTitle,
+    String message = AppText.ledgerDeleteMessage,
+    String confirmText = AppText.ledgerDeleteConfirm,
+  }) async {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -38,8 +43,8 @@ abstract final class LedgerDeleteDialog {
                     size: AppSizes.iconXl,
                   ),
                   SizedBox(height: ctx.h * 2),
-                  const MyText(
-                    AppText.ledgerDeleteTitle,
+                  MyText(
+                    title,
                     font: AppFont.inter,
                     size: AppSizes.header3,
                     color: AppColors.white,
@@ -47,8 +52,8 @@ abstract final class LedgerDeleteDialog {
                     align: TextAlign.center,
                   ),
                   SizedBox(height: ctx.h * 1.5),
-                  const MyText(
-                    AppText.ledgerDeleteMessage,
+                  MyText(
+                    message,
                     font: AppFont.sourceSans,
                     size: AppSizes.body,
                     color: AppColors.textHint,
@@ -57,7 +62,7 @@ abstract final class LedgerDeleteDialog {
                   ),
                   SizedBox(height: ctx.h * 3),
                   MyButton(
-                    text: AppText.ledgerDeleteConfirm,
+                    text: confirmText,
                     color: AppColors.error,
                     onTap: () => Navigator.pop(ctx, true),
                   ),

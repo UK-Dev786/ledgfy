@@ -212,6 +212,17 @@ abstract class AppText {
       'This action cannot be undone and your data will never return.';
   static const ledgerDeleteConfirm = 'Delete Forever';
   static const ledgerDeleteCancel = 'Cancel';
+  static const ledgerDeleteParty = 'Delete Party';
+  static const ledgerDeletePartyTitle = 'Delete this party?';
+  static const ledgerDeletePartyMessage =
+      'This will permanently delete all entries for this party. '
+      'This action cannot be undone and your data will never return.';
+  static const ledgerAddOpponent = 'Add Opponent';
+  static const ledgerAddTeam = 'Add Team';
+  static const ledgerOpponentNameLabel = 'Opponent Name';
+  static const ledgerOpponentNameHint = 'e.g. Ahmed Traders';
+  static const ledgerTeamNameLabel = 'Team Member Name';
+  static const ledgerTeamNameHint = 'e.g. Sales team lead';
   static const ledgerHistoryPartyEmpty = 'No entries for this party yet.';
   static const ledgerDefaultEntryName = 'Entry';
   static const ledgerPartiesTitle = 'Parties';
