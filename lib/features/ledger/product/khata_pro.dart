@@ -27,10 +27,8 @@ abstract final class KhataPro {
   static const List<String> roadmapCapabilities = [
     'Cloud sync & multi-device backup',
     'SMS / WhatsApp payment reminders',
-    'Wholesale & retail ledger types',
     'Supplier vs customer role tags on parties',
-    'Bill photo attachments',
-    'Multi-business / multi-shop',
-    'Staff roles & audit trail',
+    'Multiple shops or businesses under one account',
+    'Staff logins with roles and full activity history',
   ];
 }

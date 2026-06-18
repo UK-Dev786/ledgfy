@@ -6,7 +6,7 @@ import '../../../../core/widgets/my_card.dart';
 import '../../home_screen.dart';
 import '../../../ledger/list/ledger_screen.dart';
 import '../../../reports/reports_screen.dart';
-import 'profile_page.dart';
+import '../../../profile/profile_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
           ),
           const LedgerScreen(),
           const ReportsScreen(),
-          const ProfilePage(),
+          const ProfileScreen(),
         ],
       ),
       bottomNavigationBar: SafeArea(

@@ -208,6 +208,43 @@ abstract class AppText {
   static const profileUpgrade = 'Upgrade';
   static const profileCurrentPlan = 'Current plan';
   static const profileComingSoon = 'Coming soon';
+  static const profileLanguageTitle = 'Language';
+  static const profileLanguageSubtitle =
+      'Choose the language you want to use across Ledgify.';
+  static const profileLanguageEnglishNative = 'English';
+  static const profileLanguageUrduNative = 'اردو';
+  static const profileSubscriptionTitle = 'Subscription';
+  static const profileSubscriptionSubtitle =
+      'Compare plans and unlock business-grade khata tools.';
+  static const profileProBenefitsTitle = 'Everything in Pro';
+  static const profileFreeIncludesTitle = 'Included in Free';
+  static const profileProPriceLabel = 'PKR 499';
+  static const profileProPricePeriod = '/ month';
+  static const profileAccountTypeIndividualHint =
+      'Personal khata, cash book & expense tracking.';
+  static const profileAccountTypeOrganizationHint =
+      'Shops, teams & businesses with multiple books.';
+  static const profileSecurityTitle = 'Security';
+  static const profileChangePassword = 'Change password';
+  static const profileChangePasswordSubtitle =
+      'Use a strong password to protect your ledger data.';
+  static const profileCurrentPassword = 'Current password';
+  static const profileCurrentPasswordHint = 'Enter your current password';
+  static const profileNewPassword = 'New password';
+  static const profileNewPasswordHint = 'Enter a new password';
+  static const profileConfirmNewPassword = 'Confirm new password';
+  static const profileConfirmNewPasswordHint = 'Re-enter your new password';
+  static const profilePasswordUpdated = 'Password updated successfully.';
+  static const profilePasswordStepCurrent = 'Verify your current password';
+  static const profilePasswordStepNew = 'Choose a new password';
+  static const profilePasswordStepConfirm = 'Confirm your new password';
+  static const profileContinue = 'Continue';
+  static const profileUpdatePassword = 'Update password';
+  static const profileStepLabel = 'Step';
+  static const profileViewPlan = 'View plans';
+  static const profileBack = 'Back';
+  static const profileLanguageFootnote =
+      'Language changes apply across Ledgify. Urdu layout support is rolling out.';
   static const syncLabel = 'Sync';
   static const syncSynced = 'Synced';
   static const syncSyncing = 'Syncing…';
