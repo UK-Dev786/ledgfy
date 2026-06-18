@@ -6,8 +6,9 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_text.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
-import '../../../di/auth_providers.dart';
 import '../../../di/ledger_providers.dart';
+import '../../../di/profile_providers.dart';
+import '../../../domain/entities/user.dart';
 import '../ledger/detail/ledger_detail_page.dart';
 import 'services/home_dashboard_analytics.dart';
 import 'sub_widgets/home_empty_state.dart';
@@ -26,8 +27,7 @@ class HomeScreen extends ConsumerWidget {
     this.onLedgerTap,
   });
 
-  String _userName(WidgetRef ref) {
-    final user = ref.watch(authStateChangesProvider).valueOrNull;
+  String _userName(User? user) {
     if (user?.displayName?.trim().isNotEmpty == true) {
       return user!.displayName!.trim();
     }
@@ -37,12 +37,16 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ledgersAsync = ref.watch(ledgersStreamProvider);
-    final userName = _userName(ref);
+    final ledgers = ref.watch(scopedLedgersProvider);
+    final isStaff = ref.watch(isStaffUserProvider);
+    final user = ref.watch(profileUserStreamProvider).valueOrNull;
+    final userName = _userName(user);
 
     return ThemedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: ledgersAsync.when(
+          skipLoadingOnReload: true,
           loading: () => SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
               AppSizes.lg,
@@ -79,8 +83,11 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
           ),
-          data: (ledgers) {
-            final dashboard = HomeDashboardAnalytics.build(ledgers: ledgers);
+          data: (_) {
+            final dashboard = HomeDashboardAnalytics.build(
+              ledgers: ledgers,
+              actorUserId: isStaff ? user?.id : null,
+            );
 
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(
@@ -116,7 +123,9 @@ class HomeScreen extends ConsumerWidget {
                       },
                     )
                   else
-                    HomeEmptyState(onAddTap: onLedgerTap),
+                    HomeEmptyState(
+                      onAddTap: isStaff ? null : onLedgerTap,
+                    ),
                   if (dashboard.hasRecords) ...[
                     const SizedBox(height: AppSizes.xs),
                     HomeTopLedgers(ledgerGroups: dashboard.topLedgers),

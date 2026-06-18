@@ -9,9 +9,13 @@ import '../../../core/widgets/my_button.dart';
 import '../../../core/widgets/my_text.dart';
 import '../../../core/widgets/my_text_field.dart';
 import '../../../core/widgets/shared_bottom_sheet.dart';
-import '../models/staff_member.dart';
 
-typedef OnStaffCreated = void Function(StaffMember member);
+typedef OnStaffCreated = Future<void> Function({
+  required String name,
+  required String username,
+  required String loginEmail,
+  required String password,
+});
 
 class InviteStaffSheet extends StatefulWidget {
   final OnStaffCreated onCreate;
@@ -21,17 +25,17 @@ class InviteStaffSheet extends StatefulWidget {
     required this.onCreate,
   });
 
-  static Future<void> show(
+  static Future<bool> show(
     BuildContext context, {
     required OnStaffCreated onCreate,
   }) {
-    return showModalBottomSheet<void>(
+    return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => InviteStaffSheet(onCreate: onCreate),
-    );
+    ).then((value) => value ?? false);
   }
 
   @override
@@ -45,6 +49,7 @@ class _InviteStaffSheetState extends State<InviteStaffSheet> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool _submitting = false;
 
   @override
   void dispose() {
@@ -63,20 +68,25 @@ class _InviteStaffSheetState extends State<InviteStaffSheet> {
     return null;
   }
 
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _submit() async {
+    if (_submitting || !_formKey.currentState!.validate()) return;
 
-    final member = StaffMember(
-      id: 'staff-${DateTime.now().millisecondsSinceEpoch}',
-      name: _nameController.text.trim(),
-      username: _usernameController.text.trim(),
-      loginEmail: _emailController.text.trim().toLowerCase(),
-      status: StaffMemberStatus.active,
-      joinedAt: DateTime.now(),
-    );
+    setState(() => _submitting = true);
+    final navigator = Navigator.of(context);
+    try {
+      await widget.onCreate(
+        name: _nameController.text.trim(),
+        username: _usernameController.text.trim(),
+        loginEmail: _emailController.text.trim().toLowerCase(),
+        password: _passwordController.text,
+      );
+    } catch (_) {
+      if (mounted) setState(() => _submitting = false);
+      return;
+    }
 
-    widget.onCreate(member);
-    Navigator.of(context).pop();
+    if (!mounted) return;
+    navigator.pop(true);
   }
 
   @override
@@ -180,7 +190,8 @@ class _InviteStaffSheetState extends State<InviteStaffSheet> {
             SizedBox(height: context.h * 2),
             MyButton(
               text: AppText.staffInviteCreate,
-              onTap: _submit,
+              loading: _submitting,
+              onTap: _submitting ? () {} : _submit,
             ),
           ],
         ),

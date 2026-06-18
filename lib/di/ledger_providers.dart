@@ -7,7 +7,11 @@ import '../features/ledger/models/ledger_entry.dart';
 import '../features/ledger/models/ledger_item.dart';
 import '../features/ledger/models/ledger_party.dart';
 import '../features/ledger/models/ledger_type.dart';
+import '../features/profile/models/ledger_staff_assignment.dart';
+import '../features/profile/services/staff_ledger_permissions.dart';
 import 'auth_providers.dart';
+import 'profile_providers.dart';
+import 'organization_providers.dart';
 
 final ledgerRemoteDataSourceProvider = Provider<LedgerRemoteDataSource>((ref) {
   return LedgerRemoteDataSource(
@@ -20,38 +24,14 @@ final ledgerRepositoryProvider = Provider<ILedgerRepository>((ref) {
   return LedgerRepositoryImpl(ref.watch(ledgerRemoteDataSourceProvider));
 });
 
-final currentUserIdProvider = Provider<String?>((ref) {
-  return ref.watch(authStateChangesProvider).valueOrNull?.id;
-});
-
 final ledgersStreamProvider = StreamProvider<List<LedgerItem>>((ref) {
-  final authAsync = ref.watch(authStateChangesProvider);
-  final repository = ref.watch(ledgerRepositoryProvider);
+  final ownerId = ref.watch(ledgerOwnerIdProvider);
   final cachedUid = ref.watch(firebaseAuthProvider).currentUser?.uid;
-
-  if (authAsync.isLoading) {
-    if (cachedUid != null) {
-      return repository.watchLedgers(cachedUid);
-    }
+  final userId = ownerId ?? cachedUid;
+  if (userId == null) {
     return const Stream<List<LedgerItem>>.empty();
   }
-
-  if (authAsync.hasError) {
-    if (cachedUid != null) {
-      return repository.watchLedgers(cachedUid);
-    }
-    return Stream<List<LedgerItem>>.error(
-      authAsync.error!,
-      authAsync.stackTrace,
-    );
-  }
-
-  final userId = authAsync.valueOrNull?.id;
-  if (userId == null) {
-    return Stream.value(const []);
-  }
-
-  return repository.watchLedgers(userId);
+  return ref.watch(ledgerRepositoryProvider).watchLedgers(userId);
 });
 
 final ledgersProvider = Provider<List<LedgerItem>>((ref) {
@@ -61,8 +41,53 @@ final ledgersProvider = Provider<List<LedgerItem>>((ref) {
       );
 });
 
-final ledgerByIdProvider = Provider.family<LedgerItem?, String>((ref, ledgerId) {
+final staffLedgerPermissionsProvider = Provider<StaffLedgerPermissions>((ref) {
+  final user = ref.watch(profileUserStreamProvider).valueOrNull;
+  final grants = ref.watch(staffGrantsStreamProvider).valueOrNull ?? const {};
+  return StaffLedgerPermissions(user: user, grants: grants);
+});
+
+/// True when signed-in user is organization staff (`memberKind: staff`).
+final isStaffUserProvider = Provider<bool>((ref) {
+  return ref.watch(profileUserStreamProvider).valueOrNull?.isOrganizationStaff ??
+      false;
+});
+
+final isStaffViewerForLedgerProvider = Provider.family<bool, String>((
+  ref,
+  ledgerId,
+) {
+  if (!ref.watch(isStaffUserProvider)) return false;
+  final grant = ref.watch(staffGrantsStreamProvider).valueOrNull?[ledgerId];
+  return grant?.access == LedgerStaffAccess.viewer;
+});
+
+final isStaffEditorForLedgerProvider = Provider.family<bool, String>((
+  ref,
+  ledgerId,
+) {
+  if (!ref.watch(isStaffUserProvider)) return false;
+  final grant = ref.watch(staffGrantsStreamProvider).valueOrNull?[ledgerId];
+  return grant?.access == LedgerStaffAccess.editor;
+});
+
+final scopedLedgersProvider = Provider<List<LedgerItem>>((ref) {
   final ledgers = ref.watch(ledgersProvider);
+  final permissions = ref.watch(staffLedgerPermissionsProvider);
+  if (!permissions.isStaff) {
+    return ledgers;
+  }
+  if (permissions.grants.isEmpty) {
+    return const [];
+  }
+  final grantedLedgers = ledgers
+      .where((ledger) => permissions.grants.containsKey(ledger.id))
+      .toList();
+  return permissions.scopeLedgers(grantedLedgers);
+});
+
+final ledgerByIdProvider = Provider.family<LedgerItem?, String>((ref, ledgerId) {
+  final ledgers = ref.watch(scopedLedgersProvider);
   for (final ledger in ledgers) {
     if (ledger.id == ledgerId) return ledger;
   }
@@ -76,14 +101,21 @@ class LedgerController {
 
   ILedgerRepository get _repository => _ref.read(ledgerRepositoryProvider);
 
-  String? get _userId => _ref.read(currentUserIdProvider);
+  String? get _ledgerOwnerId => _ref.read(ledgerOwnerIdProvider);
+
+  String? get _actorUserId => _ref.read(currentUserIdProvider);
+
+  StaffLedgerPermissions get _permissions =>
+      _ref.read(staffLedgerPermissionsProvider);
 
   Future<void> createLedger({
     required String title,
     required String description,
     required LedgerType type,
   }) async {
-    final userId = _userId;
+    if (!_permissions.canCreateLedger) return;
+
+    final userId = _ledgerOwnerId;
     if (userId == null) return;
 
     await _repository.createLedger(
@@ -95,7 +127,9 @@ class LedgerController {
   }
 
   Future<void> deleteLedger(String ledgerId) async {
-    final userId = _userId;
+    if (!_permissions.canManageLedger(ledgerId)) return;
+
+    final userId = _ledgerOwnerId;
     if (userId == null) return;
 
     await _repository.deleteLedger(userId: userId, ledgerId: ledgerId);
@@ -106,7 +140,9 @@ class LedgerController {
     required String title,
     required String description,
   }) async {
-    final userId = _userId;
+    if (!_permissions.canManageLedger(ledgerId)) return;
+
+    final userId = _ledgerOwnerId;
     if (userId == null) return;
 
     await _repository.updateLedger(
@@ -121,7 +157,9 @@ class LedgerController {
     required String ledgerId,
     required double openingBalance,
   }) async {
-    final userId = _userId;
+    if (!_permissions.canManageLedger(ledgerId)) return;
+
+    final userId = _ledgerOwnerId;
     if (userId == null) return;
 
     await _repository.updateOpeningBalance(
@@ -136,7 +174,9 @@ class LedgerController {
     required String name,
     String? description,
   }) async {
-    final userId = _userId;
+    if (!_permissions.canManageParties(ledgerId)) return;
+
+    final userId = _ledgerOwnerId;
     if (userId == null) return;
 
     final trimmed = name.trim();
@@ -160,7 +200,9 @@ class LedgerController {
     required String name,
     String? description,
   }) async {
-    final userId = _userId;
+    if (!_permissions.canManageParties(ledgerId)) return;
+
+    final userId = _ledgerOwnerId;
     if (userId == null) return;
 
     final trimmed = name.trim();
@@ -183,7 +225,9 @@ class LedgerController {
     required String ledgerId,
     required String partyName,
   }) async {
-    final userId = _userId;
+    if (!_permissions.canManageParties(ledgerId)) return;
+
+    final userId = _ledgerOwnerId;
     if (userId == null) return;
 
     await _repository.removeParty(
@@ -198,7 +242,9 @@ class LedgerController {
     required LedgerEntryDraft draft,
     String? partyName,
   }) async {
-    final userId = _userId;
+    if (!_permissions.canAddEntry(ledgerId)) return;
+
+    final userId = _ledgerOwnerId;
     if (userId == null) return;
 
     final now = DateTime.now();
@@ -224,6 +270,7 @@ class LedgerController {
         partyName: partyName ?? draft.partyName,
         note: draft.note,
         category: draft.category,
+        createdByUserId: _actorUserId,
       ),
     );
   }
@@ -234,7 +281,9 @@ class LedgerController {
     required LedgerEntryDraft draft,
     String? partyName,
   }) async {
-    final userId = _userId;
+    if (!_permissions.canEditEntry(entry, ledgerId)) return;
+
+    final userId = _ledgerOwnerId;
     if (userId == null) return;
 
     final date = draft.occurredAt ?? entry.occurredAt;
@@ -259,6 +308,7 @@ class LedgerController {
         partyName: partyName ?? draft.partyName ?? entry.partyName,
         note: draft.note,
         category: draft.category,
+        createdByUserId: entry.createdByUserId,
       ),
     );
   }
@@ -267,7 +317,11 @@ class LedgerController {
     required String ledgerId,
     required String entryId,
   }) async {
-    final userId = _userId;
+    final ledger = _ref.read(ledgerByIdProvider(ledgerId));
+    final entry = ledger?.entries.where((item) => item.id == entryId).firstOrNull;
+    if (entry == null || !_permissions.canDeleteEntry(entry, ledgerId)) return;
+
+    final userId = _ledgerOwnerId;
     if (userId == null) return;
 
     await _repository.deleteEntry(

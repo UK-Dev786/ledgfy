@@ -76,14 +76,18 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
   @override
   Widget build(BuildContext context) {
     final ledgersAsync = ref.watch(ledgersStreamProvider);
+    final ledgers = ref.watch(scopedLedgersProvider);
+    final isStaff = ref.watch(isStaffUserProvider);
 
     return ThemedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        floatingActionButton: LedgerFab(onTap: _openCreateLedgerSheet),
+        floatingActionButton:
+            isStaff ? null : LedgerFab(onTap: _openCreateLedgerSheet),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SafeArea(
           child: ledgersAsync.when(
+            skipLoadingOnReload: true,
             loading: () => const Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(AppColors.primary),
@@ -102,7 +106,7 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
                 ),
               ),
             ),
-            data: (ledgers) {
+            data: (_) {
               final filtered = _filteredLedgers(ledgers);
               final hasLedgers = ledgers.isNotEmpty;
 
@@ -143,8 +147,9 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
                           : LedgerListView(
                               ledgers: filtered,
                               onLedgerTap: _openLedgerDetail,
-                              onLedgerEdit: _openEditLedgerSheet,
-                              onLedgerDelete: _deleteLedger,
+                              onLedgerEdit:
+                                  isStaff ? null : _openEditLedgerSheet,
+                              onLedgerDelete: isStaff ? null : _deleteLedger,
                             )
                     else
                       const LedgerEmptyState(),

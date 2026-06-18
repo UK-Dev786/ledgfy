@@ -47,55 +47,33 @@ class _LedgerTileState extends State<LedgerTile> {
   @override
   Widget build(BuildContext context) {
     final config = widget.ledger.config;
+    final canEdit = widget.onEdit != null;
 
-    return SharedEntranceAnimation(
-      delay: Duration(milliseconds: 80 * widget.index.clamp(0, 4)),
-      child: Dismissible(
-        key: ValueKey(widget.ledger.id),
-        direction: DismissDirection.endToStart,
-        confirmDismiss: (_) => _confirmDelete(),
-        onDismissed: (_) => widget.onDelete?.call(widget.ledger),
-        background: ClipPath(
-          clipper: MyCardCornerCutClipper(
-            radius: AppSizes.radiusLg,
-            cutSize: 44,
-          ),
-          child: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: AppSizes.lg),
-            color: AppColors.error.withValues(alpha: 0.92),
-            child: const Icon(
-              Icons.delete_outline_rounded,
-              color: AppColors.white,
-              size: AppSizes.iconMd,
-            ),
-          ),
-        ),
-        child: MyCard(
-          cutTopRightCorner: true,
-          cornerCutSize: 44,
-          topRightCorner: widget.onEdit == null
-              ? null
-              : Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: widget.onEdit,
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                    child: const Icon(
-                      Icons.edit_outlined,
-                      color: AppColors.primary,
-                      size: 15,
-                    ),
-                  ),
+    final card = MyCard(
+      cutTopRightCorner: canEdit,
+      cornerCutSize: 44,
+      topRightCorner: canEdit
+          ? Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: widget.onEdit,
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+                child: const Icon(
+                  Icons.edit_outlined,
+                  color: AppColors.primary,
+                  size: 15,
                 ),
-          borderRadius: AppSizes.radiusLg,
-          padding: const EdgeInsets.fromLTRB(
-            AppSizes.md,
-            AppSizes.sm + 2,
-            AppSizes.md,
-            AppSizes.sm + 2,
-          ),
-          child: Row(
+              ),
+            )
+          : null,
+      borderRadius: AppSizes.radiusLg,
+      padding: EdgeInsets.fromLTRB(
+        AppSizes.md,
+        AppSizes.sm + 2,
+        canEdit ? AppSizes.lg : AppSizes.md,
+        AppSizes.sm + 2,
+      ),
+      child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
@@ -182,8 +160,37 @@ class _LedgerTileState extends State<LedgerTile> {
               ),
             ],
           ),
-        ),
-      ),
+    );
+
+    final tile = widget.onDelete == null
+        ? card
+        : Dismissible(
+            key: ValueKey(widget.ledger.id),
+            direction: DismissDirection.endToStart,
+            confirmDismiss: (_) => _confirmDelete(),
+            onDismissed: (_) => widget.onDelete?.call(widget.ledger),
+            background: ClipPath(
+              clipper: MyCardCornerCutClipper(
+                radius: AppSizes.radiusLg,
+                cutSize: 44,
+              ),
+              child: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: AppSizes.lg),
+                color: AppColors.error.withValues(alpha: 0.92),
+                child: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: AppColors.white,
+                  size: AppSizes.iconMd,
+                ),
+              ),
+            ),
+            child: card,
+          );
+
+    return SharedEntranceAnimation(
+      delay: Duration(milliseconds: 80 * widget.index.clamp(0, 4)),
+      child: tile,
     );
   }
 }

@@ -19,6 +19,7 @@ class LedgerHistoryList extends StatelessWidget {
   final bool animate;
   final ValueChanged<LedgerEntry>? onEntryEdit;
   final ValueChanged<LedgerEntry>? onEntryDelete;
+  final bool Function(LedgerEntry entry)? entryCanMutate;
 
   const LedgerHistoryList({
     super.key,
@@ -30,6 +31,7 @@ class LedgerHistoryList extends StatelessWidget {
     this.animate = false,
     this.onEntryEdit,
     this.onEntryDelete,
+    this.entryCanMutate,
   });
 
   @override
@@ -75,17 +77,20 @@ class LedgerHistoryList extends StatelessWidget {
             itemCount: sorted.length,
             separatorBuilder: (_, __) => const SizedBox(height: AppSizes.sm),
             itemBuilder: (context, index) {
+              final entry = sorted[index];
+              final canEdit = onEntryEdit != null &&
+                  (entryCanMutate?.call(entry) ?? true);
+              final canDelete = onEntryDelete != null &&
+                  (entryCanMutate?.call(entry) ?? true);
               return _maybeAnimate(
                 delay: Duration(milliseconds: 60 * index.clamp(0, 4)),
                 child: LedgerHistoryTile(
-                  entry: sorted[index],
+                  entry: entry,
                   config: config,
                   showFullAmounts: showFullAmounts,
                   preferDescriptionAsTitle: preferDescriptionAsTitle,
-                  onEdit: onEntryEdit == null
-                      ? null
-                      : () => onEntryEdit!(sorted[index]),
-                  onDelete: onEntryDelete,
+                  onEdit: canEdit ? () => onEntryEdit!(entry) : null,
+                  onDelete: canDelete ? onEntryDelete : null,
                 ),
               );
             },

@@ -6,6 +6,7 @@ abstract final class HomeDashboardAnalytics {
   static HomeDashboardData build({
     required List<LedgerItem> ledgers,
     DateTime? now,
+    String? actorUserId,
   }) {
     final reference = now ?? DateTime.now();
     final monthStart = DateTime(reference.year, reference.month, 1);
@@ -22,6 +23,10 @@ abstract final class HomeDashboardAnalytics {
       var ledgerTxnCount = 0;
 
       for (final entry in ledger.entries) {
+        if (actorUserId != null && entry.createdByUserId != actorUserId) {
+          continue;
+        }
+
         if (entry.occurredAt.isBefore(monthStart) ||
             !entry.occurredAt.isBefore(monthEnd)) {
           continue;

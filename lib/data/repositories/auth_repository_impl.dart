@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../../../core/constants/app_text.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../core/utils/auth_debug_log.dart';
+import '../../../domain/entities/organization_member_kind.dart';
 import '../../../domain/entities/sign_up_params.dart';
 import '../../../domain/entities/user.dart';
 import '../../../domain/repositories/i_auth_repository.dart';
@@ -193,15 +194,17 @@ class AuthRepositoryImpl implements IAuthRepository {
     final authVerified = refreshed.emailVerified;
     AuthDebugLog.step('_resolveUserAfterAuth: emailVerified=$authVerified');
 
-    if (requireVerified && !authVerified) {
+    var profile = await _firestoreService.getUserProfile(refreshed.uid);
+    final isStaff =
+        profile?.memberKind == OrganizationMemberKind.staff;
+
+    if (requireVerified && !authVerified && !isStaff) {
       await _remoteDataSource.signOut();
       throw const ValidationException(AppText.authEmailNotVerified);
     }
 
-    var profile = await _firestoreService.getUserProfile(refreshed.uid);
-
     if (profile != null) {
-      if (authVerified && !profile.isVerified) {
+      if ((authVerified || isStaff) && !profile.isVerified) {
         await _firestoreService.updateIsVerified(refreshed.uid, true);
         profile = profile.copyWith(isVerified: true);
       }
@@ -212,10 +215,10 @@ class AuthRepositoryImpl implements IAuthRepository {
       uid: refreshed.uid,
       email: refreshed.email,
       displayName: refreshed.displayName,
-      isVerified: authVerified,
+      isVerified: authVerified || isStaff,
     );
 
-    if (authVerified) {
+    if (authVerified || isStaff) {
       await _firestoreService.createUserProfile(fallback);
     }
 
@@ -229,12 +232,14 @@ class AuthRepositoryImpl implements IAuthRepository {
     await _remoteDataSource.reloadUser();
     final refreshed = _remoteDataSource.currentUser ?? firebaseUser;
 
-    if (!refreshed.emailVerified) {
+    final profile = await _firestoreService.getUserProfile(refreshed.uid);
+    final isStaff =
+        profile?.memberKind == OrganizationMemberKind.staff;
+
+    if (!refreshed.emailVerified && !isStaff) {
       AuthDebugLog.step('_mapFirebaseUser: not verified — treating as signed out');
       return null;
     }
-
-    final profile = await _firestoreService.getUserProfile(refreshed.uid);
 
     if (profile != null) {
       var resolved = profile;
@@ -251,7 +256,7 @@ class AuthRepositoryImpl implements IAuthRepository {
       uid: refreshed.uid,
       email: refreshed.email,
       displayName: refreshed.displayName,
-      isVerified: true,
+      isVerified: refreshed.emailVerified || isStaff,
     ).toEntity();
   }
 }

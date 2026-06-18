@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/app_text.dart';
 import '../../ledger/models/ledger_entry.dart';
 import '../../ledger/models/ledger_item.dart';
+import '../../ledger/models/party_balance.dart';
 import '../../ledger/shared/khata_report/khata_report_data.dart';
 import '../models/reports_chart_data.dart';
 
@@ -11,6 +12,7 @@ abstract final class LedgerReportsAnalytics {
     required List<LedgerItem> ledgers,
     required ReportsPeriod period,
     DateTime? now,
+    String? actorUserId,
   }) {
     final reference = now ?? DateTime.now();
     final range = _rangeFor(period, reference);
@@ -22,6 +24,10 @@ abstract final class LedgerReportsAnalytics {
     for (final ledger in ledgers) {
       final config = ledger.config;
       for (final entry in ledger.entries) {
+        if (actorUserId != null && entry.createdByUserId != actorUserId) {
+          continue;
+        }
+
         final when = entry.occurredAt;
         if (!range.contains(when)) continue;
 
@@ -46,7 +52,11 @@ abstract final class LedgerReportsAnalytics {
     return ReportsSnapshot(
       period: period,
       plPoints: buckets,
-      partyRoles: _partyRoleSlices(ledgers),
+      partyRoles: _partyRoleSlices(
+        ledgers,
+        range: range,
+        actorUserId: actorUserId,
+      ),
       totalIncome: totalIncome,
       totalExpense: totalExpense,
       netPl: totalIncome - totalExpense,
@@ -178,13 +188,32 @@ abstract final class LedgerReportsAnalytics {
     };
   }
 
-  static List<PartyRoleSlice> _partyRoleSlices(List<LedgerItem> ledgers) {
+  static List<PartyRoleSlice> _partyRoleSlices(
+    List<LedgerItem> ledgers, {
+    required ReportsDateRange range,
+    String? actorUserId,
+  }) {
     var customerTotal = 0.0;
     var supplierTotal = 0.0;
 
     for (final ledger in ledgers) {
-      if (!ledger.config.supportsSubLedgers) continue;
-      for (final party in ledger.partyBalances) {
+      final config = ledger.config;
+      if (!config.supportsSubLedgers) continue;
+
+      final entries = ledger.entries.where((entry) {
+        if (actorUserId != null && entry.createdByUserId != actorUserId) {
+          return false;
+        }
+        return range.contains(entry.occurredAt);
+      }).toList();
+
+      final parties = PartyBalanceCalculator.calculate(
+        entries: entries,
+        config: config,
+        parties: ledger.parties,
+      );
+
+      for (final party in parties) {
         if (party.balance > 0) {
           customerTotal += party.balance;
         } else if (party.balance < 0) {

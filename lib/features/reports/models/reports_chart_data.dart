@@ -79,4 +79,7 @@ class ReportsSnapshot {
 
   bool get hasPlData =>
       plPoints.any((point) => point.income > 0 || point.expense > 0);
+
+  bool get hasPartyRoleData =>
+      partyRoles.any((slice) => slice.amount > 0);
 }

@@ -14,7 +14,7 @@ import '../../core/widgets/my_button.dart';
 import '../../core/widgets/my_card.dart';
 import '../../core/widgets/my_text.dart';
 import '../../core/widgets/themed_gradient_bg.dart';
-import '../../di/auth_providers.dart';
+import '../../di/profile_providers.dart';
 import '../../di/sync_providers.dart';
 import '../../domain/entities/user.dart';
 import 'pages/profile_language_page.dart';
@@ -41,11 +41,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   File? _avatarFile;
   String _language = AppText.profileLanguageEnglish;
   bool _notificationsEnabled = true;
-  String? _boundUserId;
 
   void _bindUser(User user) {
-    if (_boundUserId == user.id) return;
-    _boundUserId = user.id;
     _displayName = user.displayName;
     _username = user.username;
     _accountType = user.accountType ?? AppText.accountTypeIndividual;
@@ -67,7 +64,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authStateChangesProvider);
+    final authState = ref.watch(profileUserStreamProvider);
     final signOutState = ref.watch(profileViewModelProvider);
     final syncStatus = ref.watch(appSyncStatusProvider);
     final isSigningOut = signOutState.isLoading;
@@ -214,8 +211,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             context,
                             field: ProfileEditField.name,
                             initialValue: displayName,
-                            onSave: (value) {
-                              setState(() => _displayName = value);
+                            onSave: (value) async {
+                              await ref
+                                  .read(profileControllerProvider)
+                                  .updateDisplayName(value);
                             },
                           ),
                         ),
@@ -227,8 +226,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             context,
                             field: ProfileEditField.username,
                             initialValue: username,
-                            onSave: (value) {
-                              setState(() => _username = value);
+                            onSave: (value) async {
+                              await ref
+                                  .read(profileControllerProvider)
+                                  .updateUsername(value);
                             },
                           ),
                         ),
@@ -240,7 +241,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             context,
                             field: ProfileEditField.accountType,
                             initialValue: _accountType,
-                            onSave: (value) {
+                            onSave: (value) async {
+                              await ref
+                                  .read(profileControllerProvider)
+                                  .updateAccountType(value);
                               setState(() => _accountType = value);
                             },
                           ),

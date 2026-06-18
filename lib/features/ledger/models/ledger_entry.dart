@@ -15,6 +15,7 @@ class LedgerEntry {
   final String? partyName;
   final String? note;
   final String? category;
+  final String? createdByUserId;
 
   const LedgerEntry({
     required this.id,
@@ -25,6 +26,7 @@ class LedgerEntry {
     this.partyName,
     this.note,
     this.category,
+    this.createdByUserId,
   });
 }
 

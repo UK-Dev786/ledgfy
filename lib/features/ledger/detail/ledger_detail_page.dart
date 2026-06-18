@@ -6,8 +6,8 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/my_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
-import '../../../di/auth_providers.dart';
 import '../../../di/ledger_providers.dart';
+import '../../../di/profile_providers.dart';
 import '../models/ledger_entry.dart';
 import '../models/ledger_type_config.dart';
 import '../models/party_balance.dart';
@@ -33,18 +33,17 @@ class LedgerDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ledgersAsync = ref.watch(ledgersStreamProvider);
     final ledger = ref.watch(ledgerByIdProvider(ledgerId));
 
-    return ledgersAsync.when(
+    if (ledger != null) {
+      return _LedgerDetailBody(ledgerId: ledgerId);
+    }
+
+    return ref.watch(ledgersStreamProvider).when(
+      skipLoadingOnReload: true,
       loading: () => const _LedgerDetailLoading(),
       error: (error, _) => _LedgerDetailError(message: error.toString()),
-      data: (_) {
-        if (ledger == null) {
-          return const _LedgerDetailMissing();
-        }
-        return _LedgerDetailBody(ledgerId: ledgerId);
-      },
+      data: (_) => const _LedgerDetailMissing(),
     );
   }
 }
@@ -241,7 +240,7 @@ class _LedgerDetailBody extends ConsumerWidget {
 
   bool _isOrganization(WidgetRef ref) {
     final accountType =
-        ref.watch(authStateChangesProvider).valueOrNull?.accountType;
+        ref.watch(profileUserStreamProvider).valueOrNull?.accountType;
     return accountType == AppText.accountTypeOrganization;
   }
 
@@ -249,6 +248,10 @@ class _LedgerDetailBody extends ConsumerWidget {
     WidgetRef ref,
     LedgerTypeConfig config,
   ) {
+    if (ref.watch(isStaffUserProvider)) {
+      return const [];
+    }
+
     return [
       if (_isOrganization(ref))
         const LedgerAppBarMenuOption(
@@ -282,18 +285,34 @@ class _LedgerDetailBody extends ConsumerWidget {
     final supportsSubLedgers = config.supportsSubLedgers;
     final showInlineHistory = !supportsSubLedgers;
     final showFullAmounts = config.showsFullAmountsByDefault;
+    final isStaff = ref.watch(isStaffUserProvider);
+    final isViewer = ref.watch(isStaffViewerForLedgerProvider(ledgerId));
+    final isEditor = ref.watch(isStaffEditorForLedgerProvider(ledgerId));
+    final user = ref.watch(profileUserStreamProvider).valueOrNull;
+    final showOwnerActions = !isStaff;
+    final showEntryActions = !isViewer && (!isStaff || isEditor);
+
+    bool entryIsEditable(LedgerEntry entry) {
+      if (!isStaff) return true;
+      if (!isEditor) return false;
+      final authorId = entry.createdByUserId;
+      return authorId != null && authorId.isNotEmpty && authorId == user?.id;
+    }
 
     return ThemedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        floatingActionButton: LedgerDetailFabs(
-          config: config,
-          onAddTap: supportsSubLedgers
-              ? null
-              : (type) => _openEntrySheet(context, ref, type),
-          onAddSubLedger:
-              supportsSubLedgers ? () => _openAddSubLedger(context, ref) : null,
-        ),
+        floatingActionButton: showEntryActions && !supportsSubLedgers
+            ? LedgerDetailFabs(
+                config: config,
+                onAddTap: (type) => _openEntrySheet(context, ref, type),
+              )
+            : showOwnerActions && supportsSubLedgers
+                ? LedgerDetailFabs(
+                    config: config,
+                    onAddSubLedger: () => _openAddSubLedger(context, ref),
+                  )
+                : null,
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SafeArea(
           child: Column(
@@ -329,10 +348,13 @@ class _LedgerDetailBody extends ConsumerWidget {
                           showFullAmounts: false,
                           onPartyTap: (partyName) =>
                               _openPartyDetail(context, partyName),
-                          onPartyEdit: (party) =>
-                              _openEditPartySheet(context, ref, party),
-                          onPartyDelete: (party) =>
-                              _deleteParty(context, ref, party),
+                          onPartyEdit: showOwnerActions
+                              ? (party) =>
+                                  _openEditPartySheet(context, ref, party)
+                              : null,
+                          onPartyDelete: showOwnerActions
+                              ? (party) => _deleteParty(context, ref, party)
+                              : null,
                         ),
                       ],
                       if (showInlineHistory) ...[
@@ -341,9 +363,14 @@ class _LedgerDetailBody extends ConsumerWidget {
                           entries: ledger.entries,
                           config: config,
                           showFullAmounts: showFullAmounts,
-                          onEntryEdit: (entry) =>
-                              _openEditEntrySheet(context, ref, entry),
-                          onEntryDelete: (entry) => _deleteEntry(ref, entry),
+                          entryCanMutate: entryIsEditable,
+                          onEntryEdit: showEntryActions
+                              ? (entry) =>
+                                  _openEditEntrySheet(context, ref, entry)
+                              : null,
+                          onEntryDelete: showEntryActions
+                              ? (entry) => _deleteEntry(ref, entry)
+                              : null,
                         ),
                       ],
                     ],

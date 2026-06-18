@@ -6,6 +6,7 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
 import '../../../di/ledger_providers.dart';
+import '../../../di/profile_providers.dart';
 import '../models/ledger_entry.dart';
 import '../models/party_balance.dart';
 import '../shared/khata_report/khata_report_page.dart';
@@ -56,6 +57,10 @@ class LedgerPartyDetailPage extends ConsumerWidget {
   }
 
   List<LedgerAppBarMenuOption> _menuOptions(WidgetRef ref) {
+    if (ref.watch(isStaffUserProvider)) {
+      return const [];
+    }
+
     final ledger = ref.watch(ledgerByIdProvider(ledgerId));
     if (ledger == null) return const [];
 
@@ -228,14 +233,28 @@ class LedgerPartyDetailPage extends ConsumerWidget {
     final config = ledger.config;
     final partyEntries = _partyEntries(ref);
     final partyBalance = _partyBalance(ref);
+    final isStaff = ref.watch(isStaffUserProvider);
+    final isViewer = ref.watch(isStaffViewerForLedgerProvider(ledgerId));
+    final isEditor = ref.watch(isStaffEditorForLedgerProvider(ledgerId));
+    final user = ref.watch(profileUserStreamProvider).valueOrNull;
+    final showEntryActions = !isViewer && (!isStaff || isEditor);
+
+    bool entryIsEditable(LedgerEntry entry) {
+      if (!isStaff) return true;
+      if (!isEditor) return false;
+      final authorId = entry.createdByUserId;
+      return authorId != null && authorId.isNotEmpty && authorId == user?.id;
+    }
 
     return ThemedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        floatingActionButton: LedgerDetailFabs(
-          config: config,
-          onAddTap: (type) => _openEntrySheet(context, ref, type),
-        ),
+        floatingActionButton: showEntryActions
+            ? LedgerDetailFabs(
+                config: config,
+                onAddTap: (type) => _openEntrySheet(context, ref, type),
+              )
+            : null,
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SafeArea(
           child: Column(
@@ -269,9 +288,14 @@ class LedgerPartyDetailPage extends ConsumerWidget {
                         config: config,
                         showFullAmounts: false,
                         preferDescriptionAsTitle: true,
-                        onEntryEdit: (entry) =>
-                            _openEditEntrySheet(context, ref, entry),
-                        onEntryDelete: (entry) => _deleteEntry(ref, entry),
+                        entryCanMutate: entryIsEditable,
+                        onEntryEdit: showEntryActions
+                            ? (entry) =>
+                                _openEditEntrySheet(context, ref, entry)
+                            : null,
+                        onEntryDelete: showEntryActions
+                            ? (entry) => _deleteEntry(ref, entry)
+                            : null,
                       ),
                     ],
                   ),

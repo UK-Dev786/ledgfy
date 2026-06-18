@@ -627,7 +627,7 @@ abstract class AppText {
       'Track profit or loss over time after expenses.';
   static const reportsPartyRoleChartTitle = 'Customer vs Supplier';
   static const reportsPartyRoleChartSubtitle =
-      'Outstanding udhar balances by party role — positive balance means customer owes you.';
+      'Udhar movement in the selected period by party role — positive balance means customer owes you.';
   static const reportsPartyRoleEmpty =
       'Add parties in your Udhar or Project ledgers to see role breakdown.';
   static const reportsCustomerRole = 'Customers';

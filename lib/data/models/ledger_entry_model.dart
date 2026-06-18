@@ -11,6 +11,7 @@ class LedgerEntryModel {
   final String? partyName;
   final String? note;
   final String? category;
+  final String? createdByUserId;
 
   const LedgerEntryModel({
     required this.id,
@@ -21,6 +22,7 @@ class LedgerEntryModel {
     this.partyName,
     this.note,
     this.category,
+    this.createdByUserId,
   });
 
   factory LedgerEntryModel.fromFirestore(
@@ -42,6 +44,7 @@ class LedgerEntryModel {
       partyName: data['partyName'] as String?,
       note: data['note'] as String?,
       category: data['category'] as String?,
+      createdByUserId: data['createdByUserId'] as String?,
     );
   }
 
@@ -55,6 +58,7 @@ class LedgerEntryModel {
       partyName: entry.partyName,
       note: entry.note,
       category: entry.category,
+      createdByUserId: entry.createdByUserId,
     );
   }
 
@@ -67,6 +71,8 @@ class LedgerEntryModel {
       if (partyName != null && partyName!.isNotEmpty) 'partyName': partyName,
       if (note != null && note!.isNotEmpty) 'note': note,
       if (category != null && category!.isNotEmpty) 'category': category,
+      if (createdByUserId != null && createdByUserId!.isNotEmpty)
+        'createdByUserId': createdByUserId,
     };
   }
 
@@ -80,6 +86,7 @@ class LedgerEntryModel {
       partyName: partyName,
       note: note,
       category: category,
+      createdByUserId: createdByUserId,
     );
   }
 

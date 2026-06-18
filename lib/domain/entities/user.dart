@@ -7,6 +7,7 @@ class User {
   final String? username;
   final String? accountType;
   final OrganizationMemberKind memberKind;
+  final String? organizationId;
   final bool isVerified;
 
   const User({
@@ -16,9 +17,14 @@ class User {
     this.username,
     this.accountType,
     this.memberKind = OrganizationMemberKind.owner,
+    this.organizationId,
     this.isVerified = false,
   });
 
   bool get isOrganizationStaff =>
       memberKind == OrganizationMemberKind.staff;
+
+  /// Ledger and team data live under the organization owner uid.
+  String? get ledgerOwnerId =>
+      isOrganizationStaff ? organizationId : id;
 }

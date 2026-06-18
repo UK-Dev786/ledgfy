@@ -236,6 +236,28 @@ class FirestoreService {
     });
   }
 
+  Future<void> updateUserProfile(
+    String uid,
+    Map<String, dynamic> fields,
+  ) async {
+    if (fields.isEmpty) return;
+    AuthDebugLog.step('updateUserProfile: uid=$uid fields=${fields.keys}');
+    await _runAuthenticatedWrite('updateUserProfile', () async {
+      await _users.doc(uid).set({
+        ...fields,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      AuthDebugLog.step('updateUserProfile: success');
+    });
+  }
+
+  Stream<UserModel?> watchUserProfile(String uid) {
+    return _users.doc(uid).snapshots(includeMetadataChanges: true).map((doc) {
+      if (!doc.exists || doc.data() == null) return null;
+      return UserModel.fromFirestore(doc.data()!, doc.id);
+    });
+  }
+
   Future<UserModel?> getUserProfile(String uid) async {
     AuthDebugLog.step('getUserProfile: uid=$uid');
     try {

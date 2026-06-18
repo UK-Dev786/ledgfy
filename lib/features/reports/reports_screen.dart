@@ -11,6 +11,7 @@ import '../../../core/widgets/rounded_button.dart';
 import '../../../core/widgets/shared_entrance_animation.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
 import '../../../di/ledger_providers.dart';
+import '../../../di/profile_providers.dart';
 import '../ledger/models/ledger_item.dart';
 import '../ledger/shared/khata_report/khata_report_page.dart';
 import 'models/reports_chart_data.dart';
@@ -58,10 +59,13 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
   @override
   Widget build(BuildContext context) {
     final ledgersAsync = ref.watch(ledgersStreamProvider);
-    final ledgers = ref.watch(ledgersProvider);
+    final ledgers = ref.watch(scopedLedgersProvider);
+    final isStaff = ref.watch(isStaffUserProvider);
+    final user = ref.watch(profileUserStreamProvider).valueOrNull;
     final snapshot = LedgerReportsAnalytics.build(
       ledgers: ledgers,
       period: _period,
+      actorUserId: isStaff ? user?.id : null,
     );
     final hasLedgers = ledgers.isNotEmpty;
     final hasAnyEntries = ledgers.any((ledger) => ledger.entries.isNotEmpty);
@@ -72,6 +76,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
         backgroundColor: Colors.transparent,
         body: SafeArea(
           child: ledgersAsync.when(
+            skipLoadingOnReload: true,
             loading: () => const Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(AppColors.primary),

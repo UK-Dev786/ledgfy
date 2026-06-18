@@ -9,6 +9,7 @@ import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/my_button.dart';
 import '../../../core/widgets/my_card.dart';
 import '../../../core/widgets/my_text.dart';
+import '../../../di/organization_providers.dart';
 import '../models/organization_team_state.dart';
 import '../models/staff_member.dart';
 import '../pages/profile_staff_activity_page.dart';
@@ -17,7 +18,6 @@ import '../sub_widgets/profile_section.dart';
 import '../sub_widgets/profile_sub_page_scaffold.dart';
 import '../sub_widgets/staff_assign_ledgers_sheet.dart';
 import '../sub_widgets/staff_manage_sheet.dart';
-import '../viewmodels/organization_team_provider.dart';
 
 class ProfileTeamPage extends ConsumerWidget {
   final String ownerName;
@@ -39,7 +39,50 @@ class ProfileTeamPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final team = ref.watch(organizationTeamProvider);
+    final teamAsync = ref.watch(organizationTeamStreamProvider);
+
+    return teamAsync.when(
+      loading: () => ProfileSubPageScaffold(
+        title: AppText.profileTeamTitle,
+        subtitle: AppText.profileTeamSubtitle,
+        child: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(AppColors.primary),
+            strokeWidth: 2,
+          ),
+        ),
+      ),
+      error: (_, __) => ProfileSubPageScaffold(
+        title: AppText.profileTeamTitle,
+        subtitle: AppText.profileTeamSubtitle,
+        child: Center(
+          child: MyText(
+            AppText.homeErrorGeneric,
+            font: AppFont.sourceSans,
+            size: AppSizes.body,
+            color: AppColors.textHint,
+          ),
+        ),
+      ),
+      data: (team) => _TeamContent(
+        ownerName: ownerName,
+        team: team,
+      ),
+    );
+  }
+}
+
+class _TeamContent extends ConsumerWidget {
+  final String ownerName;
+  final OrganizationTeamState team;
+
+  const _TeamContent({
+    required this.ownerName,
+    required this.team,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final summary = AppText.staffTeamSummary.replaceAll(
       '{count}',
       '${team.members.length}',
@@ -154,10 +197,17 @@ class ProfileTeamPage extends ConsumerWidget {
                       team: team,
                       onAssign: member.isOwner
                           ? null
-                          : () => StaffAssignLedgersSheet.show(
+                          : () async {
+                              final saved = await StaffAssignLedgersSheet.show(
                                 context,
                                 member: member,
-                              ),
+                              );
+                              if (!saved || !context.mounted) return;
+                              context.popMsg(
+                                AppText.staffAssignLedgersSaved,
+                                icon: Icons.check_circle_outline_rounded,
+                              );
+                            },
                       onDelete: member.isOwner
                           ? null
                           : () => StaffManageSheet.show(
@@ -165,10 +215,11 @@ class ProfileTeamPage extends ConsumerWidget {
                                 member: member,
                                 assignedLedgerCount:
                                     team.assignedLedgerCount(member.id),
-                                onDelete: (staffId) {
-                                  ref
-                                      .read(organizationTeamProvider.notifier)
+                                onDelete: (staffId) async {
+                                  await ref
+                                      .read(organizationControllerProvider)
                                       .removeStaff(staffId);
+                                  if (!context.mounted) return;
                                   context.popMsg(
                                     AppText.staffDeleted,
                                     icon: Icons.delete_outline_rounded,
@@ -190,16 +241,29 @@ class ProfileTeamPage extends ConsumerWidget {
             ),
             child: MyButton(
               text: AppText.profileInviteStaff,
-              onTap: () => InviteStaffSheet.show(
-                context,
-                onCreate: (member) {
-                  ref.read(organizationTeamProvider.notifier).addStaff(member);
-                  context.popMsg(
-                    AppText.profileInviteStaffSent,
-                    icon: Icons.person_add_alt_1_outlined,
-                  );
-                },
-              ),
+              onTap: () async {
+                final created = await InviteStaffSheet.show(
+                  context,
+                  onCreate: ({
+                    required String name,
+                    required String username,
+                    required String loginEmail,
+                    required String password,
+                  }) {
+                    return ref.read(organizationControllerProvider).createStaff(
+                          name: name,
+                          username: username,
+                          loginEmail: loginEmail,
+                          password: password,
+                        );
+                  },
+                );
+                if (!created || !context.mounted) return;
+                context.popMsg(
+                  AppText.profileInviteStaffSent,
+                  icon: Icons.person_add_alt_1_outlined,
+                );
+              },
             ),
           ),
         ],

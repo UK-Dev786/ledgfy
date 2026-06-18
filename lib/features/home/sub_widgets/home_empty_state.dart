@@ -44,10 +44,11 @@ class HomeEmptyState extends StatelessWidget {
               align: TextAlign.center,
             ),
             const SizedBox(height: AppSizes.lg),
-            MyButton(
-              text: AppText.homeAddFirstRecord,
-              onTap: onAddTap ?? () {},
-            ),
+            if (onAddTap != null)
+              MyButton(
+                text: AppText.homeAddFirstRecord,
+                onTap: onAddTap!,
+              ),
           ],
         ),
       ),

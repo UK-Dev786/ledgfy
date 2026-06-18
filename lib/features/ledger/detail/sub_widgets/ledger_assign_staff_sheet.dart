@@ -11,12 +11,12 @@ import '../../../../core/widgets/my_card.dart';
 import '../../../../core/widgets/my_text.dart';
 import '../../../../core/widgets/shared_bottom_sheet.dart';
 import '../../../../di/ledger_providers.dart';
+import '../../../../di/organization_providers.dart';
 import '../../../profile/models/ledger_staff_assignment.dart';
 import '../../../profile/models/staff_member.dart';
-import '../../models/ledger_item.dart';
 import '../../../profile/sub_widgets/staff_access_level_switch.dart';
 import '../../../profile/sub_widgets/staff_ledger_scope_panel.dart';
-import '../../../profile/viewmodels/organization_team_provider.dart';
+import '../../models/ledger_item.dart';
 
 class LedgerAssignStaffSheet extends ConsumerStatefulWidget {
   final String ledgerId;
@@ -55,14 +55,14 @@ class _LedgerAssignStaffSheetState extends ConsumerState<LedgerAssignStaffSheet>
   LedgerStaffAccess _newAccess = LedgerStaffAccess.editor;
   Set<String> _newPartyNames = {};
 
-  void _saveAssignment(LedgerStaffAssignment assignment) {
-    ref.read(organizationTeamProvider.notifier).updateLedgerAssignment(
+  Future<void> _saveAssignment(LedgerStaffAssignment assignment) async {
+    await ref.read(organizationControllerProvider).updateLedgerAssignment(
           ledgerId: widget.ledgerId,
           assignment: assignment,
         );
   }
 
-  void _addStaff(StaffMember staff) {
+  Future<void> _addStaff(StaffMember staff) async {
     final ledger = ref.read(ledgerByIdProvider(widget.ledgerId));
     if (ledger == null) return;
 
@@ -86,7 +86,8 @@ class _LedgerAssignStaffSheetState extends ConsumerState<LedgerAssignStaffSheet>
       return;
     }
 
-    _saveAssignment(assignment);
+    await _saveAssignment(assignment);
+    if (!mounted) return;
     setState(() {
       _addingStaffId = null;
       _newAccess = LedgerStaffAccess.editor;
@@ -98,8 +99,8 @@ class _LedgerAssignStaffSheetState extends ConsumerState<LedgerAssignStaffSheet>
     );
   }
 
-  void _removeAssignment(String staffId) {
-    ref.read(organizationTeamProvider.notifier).removeLedgerAssignment(
+  Future<void> _removeAssignment(String staffId) async {
+    await ref.read(organizationControllerProvider).removeLedgerAssignment(
           ledgerId: widget.ledgerId,
           staffId: staffId,
         );
@@ -107,7 +108,19 @@ class _LedgerAssignStaffSheetState extends ConsumerState<LedgerAssignStaffSheet>
 
   @override
   Widget build(BuildContext context) {
-    final team = ref.watch(organizationTeamProvider);
+    final teamAsync = ref.watch(organizationTeamStreamProvider);
+    final team = teamAsync.valueOrNull;
+    if (team == null) {
+      return const SharedBottomSheet(
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(AppColors.primary),
+            strokeWidth: 2,
+          ),
+        ),
+      );
+    }
+
     final ledger = ref.watch(ledgerByIdProvider(widget.ledgerId));
     final assignments = team.assignmentsForLedger(widget.ledgerId);
     final assignedIds = assignments.map((item) => item.staffId).toSet();
@@ -174,7 +187,7 @@ class _LedgerAssignStaffSheetState extends ConsumerState<LedgerAssignStaffSheet>
                   ledger: ledger,
                   member: member,
                   assignment: assignment,
-                  onChanged: _saveAssignment,
+                  onChanged: (next) => _saveAssignment(next),
                   onRemove: () => _removeAssignment(member.id),
                 ),
               );
@@ -229,9 +242,9 @@ class _LedgerAssignStaffSheetState extends ConsumerState<LedgerAssignStaffSheet>
                   Expanded(
                     child: MyButton(
                       text: AppText.ledgerAssignStaffConfirm,
-                      onTap: () {
+                      onTap: () async {
                         final staff = team.memberById(_addingStaffId!);
-                        if (staff != null) _addStaff(staff);
+                        if (staff != null) await _addStaff(staff);
                       },
                     ),
                   ),

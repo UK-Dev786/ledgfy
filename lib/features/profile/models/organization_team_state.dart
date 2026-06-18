@@ -10,11 +10,8 @@ class OrganizationTeamState {
     this.ledgerAssignments = const {},
   });
 
-  factory OrganizationTeamState.fromMock(String ownerName) {
-    return OrganizationTeamState(
-      members: StaffTeamMockData.sampleMembers(ownerName),
-    );
-  }
+  factory OrganizationTeamState.empty() =>
+      const OrganizationTeamState(members: []);
 
   List<StaffMember> get staffAccounts =>
       members.where((member) => !member.isOwner).toList();

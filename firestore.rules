@@ -1,27 +1,60 @@
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-
-    // `users` collection — auto-created on first signup write.
-    // Each user may only read/write their own document (doc id = auth uid).
-    match /users/{userId} {
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow read, update: if request.auth != null && request.auth.uid == userId;
-      allow delete: if false;
-
-      match /ledgers/{ledgerId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-
-        match /entries/{entryId} {
-          allow read, write: if request.auth != null && request.auth.uid == userId;
-        }
-      }
-    }
-
-    // Deny everything else by default.
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
-}
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isStaffOf(ownerId) {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(ownerId)/staff/$(request.auth.uid));
+    }
+
+    match /users/{userId} {
+      allow create: if request.auth != null && (
+        request.auth.uid == userId
+        || (
+          request.resource.data.memberKind == 'staff'
+          && request.resource.data.organizationId == request.auth.uid
+        )
+      );
+
+      allow read: if request.auth != null && (
+        request.auth.uid == userId
+        || resource.data.organizationId == request.auth.uid
+        || isStaffOf(userId)
+      );
+
+      allow update: if request.auth != null && (
+        request.auth.uid == userId
+        || (
+          resource.data.memberKind == 'staff'
+          && resource.data.organizationId == request.auth.uid
+        )
+      );
+
+      allow delete: if false;
+
+      match /ledgers/{ledgerId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read: if isStaffOf(userId);
+
+        match /entries/{entryId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+          allow read, write: if isStaffOf(userId);
+        }
+      }
+
+      match /staff/{staffId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read: if request.auth != null && request.auth.uid == staffId;
+      }
+
+      match /ledgerGrants/{grantId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read: if request.auth != null && resource.data.staffId == request.auth.uid;
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

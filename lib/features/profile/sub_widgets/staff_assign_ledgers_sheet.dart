@@ -11,12 +11,12 @@ import '../../../core/widgets/my_card.dart';
 import '../../../core/widgets/my_text.dart';
 import '../../../core/widgets/shared_bottom_sheet.dart';
 import '../../../di/ledger_providers.dart';
+import '../../../di/organization_providers.dart';
 import '../../ledger/models/ledger_item.dart';
 import '../models/ledger_staff_assignment.dart';
 import '../models/staff_member.dart';
 import '../sub_widgets/staff_access_level_switch.dart';
 import '../sub_widgets/staff_ledger_scope_panel.dart';
-import '../viewmodels/organization_team_provider.dart';
 
 class StaffAssignLedgersSheet extends ConsumerStatefulWidget {
   final StaffMember member;
@@ -26,17 +26,17 @@ class StaffAssignLedgersSheet extends ConsumerStatefulWidget {
     required this.member,
   });
 
-  static Future<void> show(
+  static Future<bool> show(
     BuildContext context, {
     required StaffMember member,
   }) {
-    return showModalBottomSheet<void>(
+    return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => StaffAssignLedgersSheet(member: member),
-    );
+    ).then((value) => value ?? false);
   }
 
   @override
@@ -47,6 +47,7 @@ class StaffAssignLedgersSheet extends ConsumerStatefulWidget {
 class _StaffAssignLedgersSheetState
     extends ConsumerState<StaffAssignLedgersSheet> {
   late Map<String, StaffLedgerGrantDraft> _drafts;
+  bool _saving = false;
 
   @override
   void initState() {
@@ -56,7 +57,8 @@ class _StaffAssignLedgersSheetState
 
   void _seedDrafts(List<LedgerItem> ledgers) {
     if (_drafts.isNotEmpty) return;
-    final team = ref.read(organizationTeamProvider);
+    final team = ref.read(organizationTeamStreamProvider).valueOrNull;
+    if (team == null) return;
     _drafts = {
       for (final ledger in ledgers)
         ledger.id: () {
@@ -78,7 +80,9 @@ class _StaffAssignLedgersSheetState
     };
   }
 
-  void _save(List<LedgerItem> ledgers) {
+  Future<void> _save(List<LedgerItem> ledgers) async {
+    if (_saving) return;
+
     final grants = <String, LedgerStaffAssignment>{};
 
     for (final ledger in ledgers) {
@@ -103,22 +107,25 @@ class _StaffAssignLedgersSheetState
       grants[ledger.id] = assignment;
     }
 
-    ref.read(organizationTeamProvider.notifier).syncStaffLedgerGrants(
-          staffId: widget.member.id,
-          grantsByLedgerId: grants,
-        );
+    setState(() => _saving = true);
+    final navigator = Navigator.of(context);
+    try {
+      await ref.read(organizationControllerProvider).syncStaffLedgerGrants(
+            staffId: widget.member.id,
+            grantsByLedgerId: grants,
+          );
+    } catch (_) {
+      if (mounted) setState(() => _saving = false);
+      return;
+    }
 
-    Navigator.of(context).pop();
-    context.popMsg(
-      AppText.staffAssignLedgersSaved,
-      icon: Icons.check_circle_outline_rounded,
-    );
+    if (!mounted) return;
+    navigator.pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final ledgersAsync = ref.watch(ledgersStreamProvider);
-    final ledgers = ledgersAsync.valueOrNull ?? const <LedgerItem>[];
+    final ledgers = ref.watch(scopedLedgersProvider);
     _seedDrafts(ledgers);
 
     return SharedBottomSheet(
@@ -175,7 +182,8 @@ class _StaffAssignLedgersSheetState
           SizedBox(height: context.h * 2),
           MyButton(
             text: AppText.profileSave,
-            onTap: () => _save(ledgers),
+            loading: _saving,
+            onTap: _saving ? () {} : () => _save(ledgers),
           ),
         ],
       ),

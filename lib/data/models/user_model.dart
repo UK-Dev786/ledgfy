@@ -10,6 +10,7 @@ class UserModel {
   final String? username;
   final String? accountType;
   final OrganizationMemberKind memberKind;
+  final String? organizationId;
   final bool isVerified;
   final DateTime? createdAt;
 
@@ -20,6 +21,7 @@ class UserModel {
     this.username,
     this.accountType,
     this.memberKind = OrganizationMemberKind.owner,
+    this.organizationId,
     this.isVerified = false,
     this.createdAt,
   });
@@ -31,6 +33,7 @@ class UserModel {
     String? username,
     String? accountType,
     OrganizationMemberKind? memberKind,
+    String? organizationId,
     bool? isVerified,
     DateTime? createdAt,
   }) {
@@ -41,6 +44,7 @@ class UserModel {
       username: username ?? this.username,
       accountType: accountType ?? this.accountType,
       memberKind: memberKind ?? this.memberKind,
+      organizationId: organizationId ?? this.organizationId,
       isVerified: isVerified ?? this.isVerified,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -71,6 +75,7 @@ class UserModel {
             data['memberKind'] as String?,
           ) ??
           OrganizationMemberKind.owner,
+      organizationId: data['organizationId'] as String?,
       isVerified:
           data['isVerified'] as bool? ??
           data['emailVerified'] as bool? ??
@@ -86,6 +91,7 @@ class UserModel {
       'username': username,
       'accountType': accountType,
       'memberKind': memberKind.firestoreValue,
+      if (organizationId != null) 'organizationId': organizationId,
       'isVerified': isVerified,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
@@ -100,6 +106,7 @@ class UserModel {
       username: username,
       accountType: accountType,
       memberKind: memberKind,
+      organizationId: organizationId,
       isVerified: isVerified,
     );
   }
