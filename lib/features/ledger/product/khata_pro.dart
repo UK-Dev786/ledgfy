@@ -28,7 +28,6 @@ abstract final class KhataPro {
     'Cloud sync & multi-device backup',
     'SMS / WhatsApp payment reminders',
     'Supplier vs customer role tags on parties',
-    'Multiple shops or businesses under one account',
     'Staff logins with roles and full activity history',
   ];
 }

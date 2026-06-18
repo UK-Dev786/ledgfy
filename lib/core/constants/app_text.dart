@@ -62,8 +62,7 @@ abstract class AppText {
   static const signUpVerifyPopupTitle = 'Check Your Email';
   static const signUpVerifyPopupMessage =
       'We sent a verification email to you. Open the link to verify your account, then sign in.';
-  static const verificationNotReceived =
-      "Don't received a verification email?";
+  static const verificationNotReceived = "Don't received a verification email?";
   static const resendHere = 'Resend here';
   static const verificationResent =
       'Verification email sent again. Check your inbox.';
@@ -244,7 +243,7 @@ abstract class AppText {
   static const profileAccountTypeIndividualHint =
       'Personal khata, cash book & expense tracking.';
   static const profileAccountTypeOrganizationHint =
-      'Shops, teams & businesses with multiple books.';
+      'Teams, staff roles & business ledgers.';
   static const profileSecurityTitle = 'Security';
   static const profileChangePassword = 'Change password';
   static const profileChangePasswordSubtitle =
@@ -266,6 +265,120 @@ abstract class AppText {
   static const profileBack = 'Back';
   static const profileLanguageFootnote =
       'Language changes apply across Ledgify. Urdu layout support is rolling out.';
+
+  // Team & staff (organization)
+  static const profileSectionTeam = 'Team & staff';
+  static const profileTeamTitle = 'Team members';
+  static const profileTeamSubtitle =
+      'Create staff logins here. Tap a member to assign ledgers, or use ⋮ on each ledger.';
+  static const profileTeamMembers = 'Team members';
+  static const profileTeamMembersSubtitle = 'Add, edit & remove staff accounts';
+  static const profileStaffActivity = 'Activity & audit';
+  static const profileStaffActivitySubtitle = 'Who changed entries and when';
+  static const profileInviteStaff = 'Add staff member';
+  static const profileInviteStaffSent =
+      'Staff account saved locally. Firebase login will be created when backend is connected.';
+  static const staffRoleOwner = 'Owner';
+  static const staffRoleEditor = 'Editor';
+  static const staffRoleViewer = 'Viewer';
+  static const staffStatusActive = 'Active';
+  static const staffStatusDisabled = 'Disabled';
+  static const staffOwnerLoginLabel = 'Owner account';
+  static const staffInviteTitle = 'Add staff account';
+  static const staffInviteNameLabel = 'Full name';
+  static const staffInviteNameHint = 'e.g. Sara Ahmed';
+  static const staffInviteUsernameLabel = 'Username';
+  static const staffInviteUsernameHint = 'e.g. sara_cashier';
+  static const staffInviteEmailLabel = 'Login email';
+  static const staffInviteEmailHint =
+      'e.g. sara@mainstore (does not need to be real)';
+  static const staffInviteEmailNote =
+      'This is the staff login ID. It can be a shop-made address — no inbox required.';
+  static const staffInvitePasswordLabel = 'Password';
+  static const staffInvitePasswordHint = 'Staff will use this to sign in';
+  static const staffInviteConfirmPasswordLabel = 'Confirm password';
+  static const staffInviteConfirmPasswordHint = 'Re-enter the password';
+  static const staffInviteRoleLabel = 'Access level';
+  static const staffInviteCreate = 'Create staff account';
+  static const staffInviteLedgerNote =
+      'Assign this staff to ledgers later from the ledger ⋮ menu.';
+  static const staffRoleEditorHint =
+      'Add entries · edit or delete only their own entries';
+  static const staffRoleViewerHint =
+      'View assigned ledgers · no adding or editing';
+  static const staffAccessEditor = 'Editor';
+  static const staffAccessViewer = 'Viewer';
+  static const staffTeamEmptyTitle = 'No staff yet';
+  static const staffTeamEmptySubtitle =
+      'Create a staff login, then open any ledger → ⋮ → Assign staff.';
+  static const staffTeamSummary =
+      '{count} members · Assign access from each ledger ⋮ menu.';
+  static const staffAccountLabel = 'Staff';
+  static const staffManageLedgerHint =
+      'Open a ledger → ⋮ → Assign staff to set Editor or Viewer for that book.';
+  static const staffDeleteTitle = 'Remove staff account?';
+  static const staffDeleteMessage =
+      'This removes the login and their access from all ledgers. This cannot be undone.';
+  static const staffDeleteConfirm = 'Remove staff';
+  static const staffDeleted = 'Staff account removed.';
+  static const ledgerAssignStaff = 'Assign staff';
+  static const ledgerAssignStaffTitle = 'Ledger staff access';
+  static const ledgerAssignStaffSubtitle =
+      'Choose who can work on this ledger and set Editor or Viewer.';
+  static const ledgerAssignStaffScopedSubtitle =
+      'Pick staff, then choose specific parties or projects — not the whole udhar/project book.';
+  static const ledgerAssignStaffEmpty = 'No staff assigned to this ledger yet.';
+  static const ledgerAssignStaffAdd = 'Add staff to this ledger';
+  static const ledgerAssignStaffConfirm = 'Add to ledger';
+  static const ledgerStaffAssigned = 'Staff added to this ledger.';
+  static const staffSubscriptionExpiredTitle =
+      'Organization subscription expired';
+  static const staffSubscriptionExpiredMessage =
+      'Your organization plan is not active. Please contact your owner to renew the subscription.';
+  static const staffLoginRequired = 'Login email is required';
+  static const staffUsernameRequired = 'Username is required';
+  static const staffAssignLedgersTitle = 'Assign ledgers';
+  static const staffAssignLedgersSubtitle =
+      'Staff only see home, reports, and entries for the ledgers you select.';
+  static const staffAssignLedgersEmpty =
+      'Create a ledger first, then assign it to this staff member.';
+  static const staffAssignLedgersNone = 'No ledgers assigned';
+  static const staffAssignLedgersCount = '{count} ledgers assigned';
+  static const staffAssignLedgersSaved = 'Ledger access updated.';
+  static const staffLedgerScopeWhole = 'Whole ledger';
+  static const staffLedgerScopeNone = 'No parties selected';
+  static const staffLedgerScopeParties = '{count} parties';
+  static const staffLedgerScopeProjects = '{count} projects';
+  static const staffLedgerPickParties = 'Select parties';
+  static const staffLedgerPickProjects = 'Select projects';
+  static const staffLedgerNoParties = 'Add parties to this udhar ledger first.';
+  static const staffLedgerNoProjects = 'Add projects to this ledger first.';
+  static const staffLedgerScopePartiesRequired =
+      'Select at least one party for this udhar ledger.';
+  static const staffLedgerScopeProjectsRequired =
+      'Select at least one project for this ledger.';
+  static const staffAssignLedgersUpdated = 'Ledger access updated.';
+  static const staffAssignLedgersSection = 'Ledger access';
+  static const profileStaffOrgBadge = 'Staff account';
+  static const profileStaffOrgNote =
+      'Your organization manages the subscription. Contact your owner if access stops.';
+  static const profileStaffSectionAccount = 'My account';
+  static const staffActivityTitle = 'Activity & audit';
+  static const staffActivitySubtitle =
+      'A record of staff actions across your ledgers.';
+  static const staffActivityEmpty = 'No activity recorded yet.';
+  static const staffAuditFilterAll = 'All';
+  static const staffAuditFilterEntries = 'Entries';
+  static const staffAuditFilterTeam = 'Team';
+  static const staffAuditFilterSecurity = 'Security';
+  static const staffAuditEntryAdded = 'Entry added';
+  static const staffAuditEntryEdited = 'Entry edited';
+  static const staffAuditEntryDeleted = 'Entry deleted';
+  static const staffAuditStaffInvited = 'Staff invited';
+  static const staffAuditRoleChanged = 'Role updated';
+  static const staffAuditSignIn = 'Signed in';
+  static const staffAuditBackendNote =
+      'Live audit sync will connect when organization backend is enabled.';
   static const syncLabel = 'Sync';
   static const syncSynced = 'Synced';
   static const syncSyncing = 'Syncing…';
@@ -527,8 +640,7 @@ abstract class AppText {
   static const reportsPrintOutstanding = 'Outstanding udhar (as of today)';
   static const reportsPrintColLedger = 'Ledger';
   static const reportsPrintColNet = 'Net';
-  static const reportsPrintNoTransactions =
-      'No transactions in this period.';
+  static const reportsPrintNoTransactions = 'No transactions in this period.';
   static const reportsPrintNothingToPrint =
       'No data to print for the selected period.';
 }

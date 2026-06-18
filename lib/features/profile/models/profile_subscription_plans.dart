@@ -40,9 +40,9 @@ abstract final class ProfileSubscriptionPlans {
   ];
 
   static const organizationPaidFeatures = [
-    'Invite team members with roles',
+    'Staff logins (email & password)',
+    'Per-ledger Editor or Viewer access',
     'Staff activity & audit history',
-    'Multiple shops under one account',
   ];
 
   static const paidUnlockFeatures = [

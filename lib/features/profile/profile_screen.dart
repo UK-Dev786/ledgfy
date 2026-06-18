@@ -20,6 +20,8 @@ import '../../domain/entities/user.dart';
 import 'pages/profile_language_page.dart';
 import 'pages/profile_security_page.dart';
 import 'pages/profile_subscription_page.dart';
+import 'pages/profile_team_page.dart';
+import 'profile_staff_screen.dart';
 import 'sub_widgets/profile_avatar.dart';
 import 'sub_widgets/profile_edit_sheet.dart';
 import 'sub_widgets/profile_section.dart';
@@ -107,6 +109,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               _bindUser(user);
               final displayName = _resolvedName(user);
               final username = _resolvedUsername(user);
+
+              if (user.isOrganizationStaff) {
+                return ProfileStaffScreen(user: user);
+              }
 
               return SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
@@ -278,6 +284,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ],
                     ),
                     SizedBox(height: context.h * 2),
+                    if (_accountType == AppText.accountTypeOrganization)
+                      ProfileSection(
+                        title: AppText.profileSectionTeam,
+                        children: [
+                          ProfileTile(
+                            icon: Icons.groups_outlined,
+                            title: AppText.profileTeamMembers,
+                            subtitle: AppText.profileTeamMembersSubtitle,
+                            onTap: () => ProfileTeamPage.open(
+                              context,
+                              ownerName: displayName,
+                            ),
+                          ),
+                        ],
+                      ),
+                    if (_accountType == AppText.accountTypeOrganization)
+                      SizedBox(height: context.h * 2),
                     ProfileSection(
                       title: AppText.profileSectionSubscription,
                       children: [

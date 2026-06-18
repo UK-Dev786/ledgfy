@@ -5,7 +5,6 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
-import '../../../di/auth_providers.dart';
 import '../../../di/ledger_providers.dart';
 import '../models/ledger_entry.dart';
 import '../models/party_balance.dart';
@@ -56,12 +55,6 @@ class LedgerPartyDetailPage extends ConsumerWidget {
     return PartyBalance(name: partyName, given: 0, received: 0);
   }
 
-  bool _isOrganization(WidgetRef ref) {
-    final accountType =
-        ref.watch(authStateChangesProvider).valueOrNull?.accountType;
-    return accountType == AppText.accountTypeOrganization;
-  }
-
   List<LedgerAppBarMenuOption> _menuOptions(WidgetRef ref) {
     final ledger = ref.watch(ledgerByIdProvider(ledgerId));
     if (ledger == null) return const [];
@@ -83,12 +76,6 @@ class LedgerPartyDetailPage extends ConsumerWidget {
         label: AppText.ledgerAddOpponent,
         icon: Icons.person_add_outlined,
       ),
-      if (_isOrganization(ref))
-        const LedgerAppBarMenuOption(
-          id: 'add_team',
-          label: AppText.ledgerAddTeam,
-          icon: Icons.groups_outlined,
-        ),
       const LedgerAppBarMenuOption(
         id: 'delete',
         label: AppText.ledgerDeleteParty,
@@ -155,16 +142,13 @@ class LedgerPartyDetailPage extends ConsumerWidget {
 
   void _openNewParty(
     BuildContext context,
-    WidgetRef ref, {
-    required bool isTeam,
-  }) {
+    WidgetRef ref,
+  ) {
     AddPartyNameSheet.show(
       context,
-      title: isTeam ? AppText.ledgerAddTeam : AppText.ledgerAddOpponent,
-      label: isTeam
-          ? AppText.ledgerTeamNameLabel
-          : AppText.ledgerOpponentNameLabel,
-      hint: isTeam ? AppText.ledgerTeamNameHint : AppText.ledgerOpponentNameHint,
+      title: AppText.ledgerAddOpponent,
+      label: AppText.ledgerOpponentNameLabel,
+      hint: AppText.ledgerOpponentNameHint,
       onAdd: (name, description) async {
         await ref.read(ledgerControllerProvider).addParty(
               ledgerId: ledgerId,
@@ -220,9 +204,7 @@ class LedgerPartyDetailPage extends ConsumerWidget {
       case 'delete':
         _deleteSubLedger(context, ref);
       case 'add_opponent':
-        _openNewParty(context, ref, isTeam: false);
-      case 'add_team':
-        _openNewParty(context, ref, isTeam: true);
+        _openNewParty(context, ref);
     }
   }
 

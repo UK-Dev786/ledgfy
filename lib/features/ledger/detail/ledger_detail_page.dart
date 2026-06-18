@@ -6,6 +6,7 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/my_text.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
+import '../../../di/auth_providers.dart';
 import '../../../di/ledger_providers.dart';
 import '../models/ledger_entry.dart';
 import '../models/ledger_type_config.dart';
@@ -18,6 +19,7 @@ import 'sub_widgets/add_ledger_entry_sheet.dart';
 import 'sub_widgets/add_party_name_sheet.dart';
 import 'sub_widgets/ledger_history_list.dart';
 import 'sub_widgets/ledger_party_section.dart';
+import 'sub_widgets/ledger_assign_staff_sheet.dart';
 import 'sub_widgets/ledger_detail_app_bar.dart';
 import 'sub_widgets/ledger_detail_fabs.dart';
 import 'sub_widgets/ledger_detail_summary.dart';
@@ -226,11 +228,34 @@ class _LedgerDetailBody extends ConsumerWidget {
         _handleDelete(context, ref);
       case 'opening_balance':
         _openOpeningBalance(context, ref);
+      case 'assign_staff':
+        final ledger = ref.read(ledgerByIdProvider(ledgerId));
+        if (ledger == null) return;
+        LedgerAssignStaffSheet.show(
+          context,
+          ledgerId: ledgerId,
+          ledgerTitle: ledger.title,
+        );
     }
   }
 
-  List<LedgerAppBarMenuOption> _menuOptions(LedgerTypeConfig config) {
+  bool _isOrganization(WidgetRef ref) {
+    final accountType =
+        ref.watch(authStateChangesProvider).valueOrNull?.accountType;
+    return accountType == AppText.accountTypeOrganization;
+  }
+
+  List<LedgerAppBarMenuOption> _menuOptions(
+    WidgetRef ref,
+    LedgerTypeConfig config,
+  ) {
     return [
+      if (_isOrganization(ref))
+        const LedgerAppBarMenuOption(
+          id: 'assign_staff',
+          label: AppText.ledgerAssignStaff,
+          icon: Icons.groups_outlined,
+        ),
       if (!config.isExpenseOnly)
         const LedgerAppBarMenuOption(
           id: 'opening_balance',
@@ -281,7 +306,7 @@ class _LedgerDetailBody extends ConsumerWidget {
                 onHistoryTap:
                     supportsSubLedgers ? () => _openHistory(context, ref) : null,
                 onReportTap: () => _openReport(context, ref),
-                menuOptions: _menuOptions(config),
+                menuOptions: _menuOptions(ref, config),
                 onMenuSelected: (value) => _handleMenu(context, ref, value),
               ),
               Expanded(

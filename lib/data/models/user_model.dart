@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../domain/entities/organization_member_kind.dart';
 import '../../../domain/entities/user.dart';
 
 class UserModel {
@@ -8,6 +9,7 @@ class UserModel {
   final String? displayName;
   final String? username;
   final String? accountType;
+  final OrganizationMemberKind memberKind;
   final bool isVerified;
   final DateTime? createdAt;
 
@@ -17,6 +19,7 @@ class UserModel {
     this.displayName,
     this.username,
     this.accountType,
+    this.memberKind = OrganizationMemberKind.owner,
     this.isVerified = false,
     this.createdAt,
   });
@@ -27,6 +30,7 @@ class UserModel {
     String? displayName,
     String? username,
     String? accountType,
+    OrganizationMemberKind? memberKind,
     bool? isVerified,
     DateTime? createdAt,
   }) {
@@ -36,6 +40,7 @@ class UserModel {
       displayName: displayName ?? this.displayName,
       username: username ?? this.username,
       accountType: accountType ?? this.accountType,
+      memberKind: memberKind ?? this.memberKind,
       isVerified: isVerified ?? this.isVerified,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -62,6 +67,10 @@ class UserModel {
       displayName: data['displayName'] as String?,
       username: data['username'] as String?,
       accountType: data['accountType'] as String?,
+      memberKind: OrganizationMemberKindParsing.fromFirestore(
+            data['memberKind'] as String?,
+          ) ??
+          OrganizationMemberKind.owner,
       isVerified:
           data['isVerified'] as bool? ??
           data['emailVerified'] as bool? ??
@@ -76,6 +85,7 @@ class UserModel {
       'displayName': displayName,
       'username': username,
       'accountType': accountType,
+      'memberKind': memberKind.firestoreValue,
       'isVerified': isVerified,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
@@ -89,6 +99,7 @@ class UserModel {
       displayName: displayName,
       username: username,
       accountType: accountType,
+      memberKind: memberKind,
       isVerified: isVerified,
     );
   }
