@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ledgify/core/extensions/popup_extensions.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_text.dart';
 import '../../../core/widgets/my_card.dart';
 import '../../../core/widgets/my_text.dart';
+import '../../../core/widgets/rounded_button.dart';
 import '../../../core/widgets/shared_entrance_animation.dart';
 import '../../../core/widgets/themed_gradient_bg.dart';
 import '../../../di/ledger_providers.dart';
+import '../ledger/models/ledger_item.dart';
+import '../ledger/shared/khata_report/khata_report_page.dart';
 import 'models/reports_chart_data.dart';
 import 'services/ledger_reports_analytics.dart';
 import 'sub_widgets/reports_net_pl_line_chart.dart';
@@ -28,6 +32,29 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
   ReportsPeriod _period = ReportsPeriod.thisWeek;
   bool _showFullAmounts = false;
 
+  void _openReport({
+    required List<LedgerItem> ledgers,
+    required ReportsSnapshot snapshot,
+  }) {
+    if (!snapshot.hasPlData) {
+      context.popMsg(
+        AppText.reportsPrintNothingToPrint,
+        color: AppColors.warning,
+        icon: Icons.info_outline_rounded,
+      );
+      return;
+    }
+
+    KhataReportPage.openWithData(
+      context,
+      data: LedgerReportsAnalytics.buildKhataReport(
+        ledgers: ledgers,
+        snapshot: snapshot,
+        period: _period,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ledgersAsync = ref.watch(ledgersStreamProvider);
@@ -38,6 +65,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     );
     final hasLedgers = ledgers.isNotEmpty;
     final hasAnyEntries = ledgers.any((ledger) => ledger.entries.isNotEmpty);
+    final canPrint = hasLedgers && hasAnyEntries && snapshot.hasPlData;
 
     return ThemedGradientBackground(
       child: Scaffold(
@@ -72,8 +100,14 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SharedEntranceAnimation(
-                    child: _ReportsHeader(),
+                  SharedEntranceAnimation(
+                    child: _ReportsHeader(
+                      canPrint: canPrint,
+                      onReportTap: () => _openReport(
+                        ledgers: ledgers,
+                        snapshot: snapshot,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: AppSizes.lg),
                   if (!hasLedgers || !hasAnyEntries) ...[
@@ -153,27 +187,50 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 }
 
 class _ReportsHeader extends StatelessWidget {
-  const _ReportsHeader();
+  final bool canPrint;
+  final VoidCallback onReportTap;
+
+  const _ReportsHeader({
+    required this.canPrint,
+    required this.onReportTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        MyText(
-          AppText.reportsTitle,
-          font: AppFont.inter,
-          size: AppSizes.header2,
-          color: AppColors.white,
-          weight: FontWeight.w800,
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MyText(
+                AppText.reportsTitle,
+                font: AppFont.inter,
+                size: AppSizes.header2,
+                color: AppColors.white,
+                weight: FontWeight.w800,
+              ),
+              SizedBox(height: AppSizes.xs),
+              MyText(
+                '${AppText.appName} · ${AppText.reportsSubtitle}',
+                font: AppFont.sourceSans,
+                size: AppSizes.subtitle,
+                color: AppColors.textHint,
+                height: 1.4,
+              ),
+            ],
+          ),
         ),
-        SizedBox(height: AppSizes.xs),
-        MyText(
-          '${AppText.appName} · ${AppText.reportsSubtitle}',
-          font: AppFont.sourceSans,
-          size: AppSizes.subtitle,
-          color: AppColors.textHint,
-          height: 1.4,
+        const SizedBox(width: AppSizes.sm),
+        Tooltip(
+          message: AppText.ledgerReportTitle,
+          child: RoundedButton(
+            onTap: onReportTap,
+            icon: Icons.picture_as_pdf_outlined,
+            iconColor: canPrint ? AppColors.primary : AppColors.textHint,
+            size: 44,
+          ),
         ),
       ],
     );

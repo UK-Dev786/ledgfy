@@ -14,12 +14,14 @@ class KhataReportBottomBar extends StatelessWidget {
 
   const KhataReportBottomBar({super.key, required this.data});
 
-  Future<void> _print() async {
-    await Printing.layoutPdf(
+  static Future<void> printPdf(KhataReportData data) {
+    return Printing.layoutPdf(
       onLayout: (_) => KhataReportPdf.build(data),
       name: data.pdfFileName,
     );
   }
+
+  Future<void> _print() => printPdf(data);
 
   Future<void> _share() async {
     await Printing.sharePdf(

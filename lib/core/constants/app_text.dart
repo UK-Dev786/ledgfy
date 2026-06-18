@@ -433,4 +433,16 @@ abstract class AppText {
       'Add parties in your Udhar or Project ledgers to see role breakdown.';
   static const reportsCustomerRole = 'Customers';
   static const reportsSupplierRole = 'Suppliers';
+  static const reportsPrint = 'Print report';
+  static const reportsPrintTitle = 'Analytics Report';
+  static const reportsPrintPeriod = 'Period';
+  static const reportsPrintBreakdown = 'Period breakdown';
+  static const reportsPrintTransactions = 'Transactions';
+  static const reportsPrintOutstanding = 'Outstanding udhar (as of today)';
+  static const reportsPrintColLedger = 'Ledger';
+  static const reportsPrintColNet = 'Net';
+  static const reportsPrintNoTransactions =
+      'No transactions in this period.';
+  static const reportsPrintNothingToPrint =
+      'No data to print for the selected period.';
 }

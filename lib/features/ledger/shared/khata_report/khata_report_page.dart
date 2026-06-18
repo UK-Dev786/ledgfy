@@ -25,12 +25,18 @@ class KhataReportPage extends StatelessWidget {
     required LedgerItem ledger,
     String? partyName,
   }) {
+    openWithData(
+      context,
+      data: KhataReportBuilder.fromLedger(ledger, partyName: partyName),
+    );
+  }
+
+  static void openWithData(
+    BuildContext context, {
+    required KhataReportData data,
+  }) {
     Navigator.of(context).push<void>(
-      ledgerPageRoute(
-        KhataReportPage(
-          data: KhataReportBuilder.fromLedger(ledger, partyName: partyName),
-        ),
-      ),
+      ledgerPageRoute(KhataReportPage(data: data)),
     );
   }
 
@@ -43,7 +49,7 @@ class KhataReportPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _KhataReportAppBar(title: data.reportTitle),
+              _KhataReportAppBar(data: data),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
@@ -105,12 +111,18 @@ class KhataReportPage extends StatelessWidget {
 }
 
 class _KhataReportAppBar extends StatelessWidget {
-  final String title;
+  final KhataReportData data;
 
-  const _KhataReportAppBar({required this.title});
+  const _KhataReportAppBar({required this.data});
 
   @override
   Widget build(BuildContext context) {
+    final headerTitle =
+        data.isAnalytics ? AppText.reportsPrintTitle : AppText.ledgerReportTitle;
+    final subtitle = data.isAnalytics
+        ? '${data.periodLabel} · ${data.periodRangeLabel}'
+        : data.reportTitle;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSizes.md,
@@ -131,7 +143,7 @@ class _KhataReportAppBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 MyText(
-                  AppText.ledgerReportTitle,
+                  headerTitle,
                   font: AppFont.inter,
                   size: AppSizes.title,
                   color: AppColors.white,
@@ -141,7 +153,7 @@ class _KhataReportAppBar extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 MyText(
-                  title,
+                  subtitle,
                   font: AppFont.sourceSans,
                   size: AppSizes.caption,
                   color: AppColors.textHint,

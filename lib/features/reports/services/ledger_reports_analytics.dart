@@ -1,7 +1,9 @@
 import 'package:intl/intl.dart';
 
 import '../../../core/constants/app_text.dart';
+import '../../ledger/models/ledger_entry.dart';
 import '../../ledger/models/ledger_item.dart';
+import '../../ledger/shared/khata_report/khata_report_data.dart';
 import '../models/reports_chart_data.dart';
 
 abstract final class LedgerReportsAnalytics {
@@ -49,6 +51,33 @@ abstract final class LedgerReportsAnalytics {
       totalExpense: totalExpense,
       netPl: totalIncome - totalExpense,
     );
+  }
+
+  static String periodLabel(ReportsPeriod period) {
+    return switch (period) {
+      ReportsPeriod.today => AppText.reportsPeriodToday,
+      ReportsPeriod.thisWeek => AppText.reportsPeriodThisWeek,
+      ReportsPeriod.thisMonth => AppText.reportsPeriodThisMonth,
+      ReportsPeriod.thisYear => AppText.reportsPeriodThisYear,
+    };
+  }
+
+  static String periodRangeLabel(ReportsPeriod period, DateTime now) {
+    final range = rangeFor(period, now);
+    final dayFormat = DateFormat('d MMM yyyy');
+    final monthFormat = DateFormat('MMMM yyyy');
+
+    return switch (period) {
+      ReportsPeriod.today => dayFormat.format(range.start),
+      ReportsPeriod.thisWeek =>
+        '${dayFormat.format(range.start)} – ${dayFormat.format(range.end.subtract(const Duration(days: 1)))}',
+      ReportsPeriod.thisMonth => monthFormat.format(range.start),
+      ReportsPeriod.thisYear => '${range.start.year}',
+    };
+  }
+
+  static ReportsDateRange rangeFor(ReportsPeriod period, DateTime now) {
+    return _rangeFor(period, now);
   }
 
   static DateTime _localDate(DateTime date) {
@@ -168,5 +197,103 @@ abstract final class LedgerReportsAnalytics {
       PartyRoleSlice(role: AppText.reportsCustomerRole, amount: customerTotal),
       PartyRoleSlice(role: AppText.reportsSupplierRole, amount: supplierTotal),
     ];
+  }
+
+  static KhataReportData buildKhataReport({
+    required List<LedgerItem> ledgers,
+    required ReportsSnapshot snapshot,
+    required ReportsPeriod period,
+    DateTime? now,
+  }) {
+    final reference = now ?? DateTime.now();
+    final range = rangeFor(period, reference);
+    final entries = <KhataReportEntryRow>[];
+
+    for (final ledger in ledgers) {
+      final config = ledger.config;
+      for (final entry in ledger.entries) {
+        if (!range.contains(entry.occurredAt)) continue;
+
+        final isCredit = config.creditTypes.contains(entry.type);
+        final isDebit = config.debitTypes.contains(entry.type);
+        if (!isCredit && !isDebit) continue;
+
+        entries.add(
+          KhataReportEntryRow(
+            date: entry.occurredAt,
+            ledgerName: ledger.title,
+            title: _entryTitle(entry, config.labelForEntry(entry.type)),
+            typeLabel: config.labelForEntry(entry.type),
+            amount: entry.amount,
+            isIncome: isCredit,
+          ),
+        );
+      }
+    }
+
+    entries.sort((a, b) => b.date.compareTo(a.date));
+
+    final breakdownRows = snapshot.plPoints
+        .where((point) => point.income > 0 || point.expense > 0)
+        .map(
+          (point) => KhataReportBreakdownRow(
+            label: point.label,
+            income: point.income,
+            expense: point.expense,
+          ),
+        )
+        .toList();
+
+    final partyRoleRows = snapshot.partyRoles
+        .where((slice) => slice.amount > 0)
+        .map(
+          (slice) => KhataReportSummaryRow(
+            label: slice.role,
+            amount: slice.amount,
+          ),
+        )
+        .toList();
+
+    return KhataReportData(
+      kind: KhataReportKind.analytics,
+      ledgerTitle: AppText.reportsPrintTitle,
+      ledgerTypeLabel:
+          '${AppText.reportsPrintPeriod}: ${periodLabel(period)} (${periodRangeLabel(period, reference)})',
+      periodLabel: periodLabel(period),
+      periodRangeLabel: periodRangeLabel(period, reference),
+      summaryRows: [
+        KhataReportSummaryRow(
+          label: AppText.reportsIncome,
+          amount: snapshot.totalIncome,
+        ),
+        KhataReportSummaryRow(
+          label: AppText.reportsExpense,
+          amount: snapshot.totalExpense,
+        ),
+        KhataReportSummaryRow(
+          label: AppText.reportsNetPl,
+          amount: snapshot.netPl,
+        ),
+      ],
+      breakdownRows: breakdownRows,
+      partyRoleRows: partyRoleRows,
+      balance: snapshot.netPl,
+      balanceLabel: AppText.reportsNetPl,
+      entries: entries,
+      generatedAt: reference,
+    );
+  }
+
+  static String _entryTitle(LedgerEntry entry, String fallback) {
+    final note = entry.note?.trim();
+    if (note != null && note.isNotEmpty) return note;
+
+    final category = entry.category?.trim();
+    if (category != null && category.isNotEmpty) return category;
+
+    final party = entry.partyName?.trim();
+    if (party != null && party.isNotEmpty) return party;
+
+    return fallback;
   }
 }
