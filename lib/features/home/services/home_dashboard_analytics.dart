@@ -22,8 +22,8 @@ abstract final class HomeDashboardAnalytics {
       var ledgerTxnCount = 0;
 
       for (final entry in ledger.entries) {
-        if (entry.createdAt.isBefore(monthStart) ||
-            !entry.createdAt.isBefore(monthEnd)) {
+        if (entry.occurredAt.isBefore(monthStart) ||
+            !entry.occurredAt.isBefore(monthEnd)) {
           continue;
         }
 
@@ -47,7 +47,7 @@ abstract final class HomeDashboardAnalytics {
             category: entry.category,
             amount: entry.amount,
             isIncome: isCredit,
-            date: entry.createdAt,
+            date: entry.occurredAt,
             icon: ledger.type.icon,
             ledgerId: ledger.id,
           ),

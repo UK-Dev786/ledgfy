@@ -41,7 +41,7 @@ class LedgerHistoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = config.colorForEntry(entry.type);
     final icon = config.iconForEntry(entry.type);
-    final timeLabel = DateFormat('MMM d, h:mm a').format(entry.createdAt);
+    final timeLabel = DateFormat('MMM d, h:mm a').format(entry.occurredAt);
     final displayName = _displayName();
 
     final card = MyCard(

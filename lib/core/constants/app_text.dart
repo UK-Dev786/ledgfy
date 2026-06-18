@@ -270,6 +270,7 @@ abstract class AppText {
   static const ledgerDetailAmountInvalid =
       'Enter a valid amount greater than zero';
   static const ledgerDetailAddButton = 'Add';
+  static const ledgerEntryDateLabel = 'Date';
   static const ledgerEditEntryTitle = 'Edit Entry';
   static const ledgerEditPartyTitle = 'Edit Party';
   static const ledgerDeleteEntryTitle = 'Delete this entry?';

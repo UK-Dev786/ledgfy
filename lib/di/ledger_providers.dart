@@ -201,6 +201,17 @@ class LedgerController {
     final userId = _userId;
     if (userId == null) return;
 
+    final now = DateTime.now();
+    final date = draft.occurredAt ?? now;
+    final occurredAt = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      now.hour,
+      now.minute,
+      now.second,
+    );
+
     await _repository.addEntry(
       userId: userId,
       ledgerId: ledgerId,
@@ -208,7 +219,8 @@ class LedgerController {
         id: DateTime.now().microsecondsSinceEpoch.toString(),
         amount: draft.amount,
         type: draft.type,
-        createdAt: DateTime.now(),
+        createdAt: now,
+        occurredAt: occurredAt,
         partyName: partyName ?? draft.partyName,
         note: draft.note,
         category: draft.category,
@@ -225,6 +237,16 @@ class LedgerController {
     final userId = _userId;
     if (userId == null) return;
 
+    final date = draft.occurredAt ?? entry.occurredAt;
+    final occurredAt = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      entry.occurredAt.hour,
+      entry.occurredAt.minute,
+      entry.occurredAt.second,
+    );
+
     await _repository.updateEntry(
       userId: userId,
       ledgerId: ledgerId,
@@ -233,6 +255,7 @@ class LedgerController {
         amount: draft.amount,
         type: entry.type,
         createdAt: entry.createdAt,
+        occurredAt: occurredAt,
         partyName: partyName ?? draft.partyName ?? entry.partyName,
         note: draft.note,
         category: draft.category,

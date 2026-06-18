@@ -15,7 +15,10 @@ class ReportsDateRange {
   });
 
   bool contains(DateTime date) {
-    return !date.isBefore(start) && date.isBefore(end);
+    final day = DateTime(date.year, date.month, date.day);
+    final startDay = DateTime(start.year, start.month, start.day);
+    final endDay = DateTime(end.year, end.month, end.day);
+    return !day.isBefore(startDay) && day.isBefore(endDay);
   }
 }
 

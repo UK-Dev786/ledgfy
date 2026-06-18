@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:ledgify/core/extensions/context_extensions.dart';
 import 'package:ledgify/core/extensions/popup_extensions.dart';
 
@@ -81,6 +82,7 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
   final _nameController = TextEditingController();
   final _noteController = TextEditingController();
   String? _selectedCategory;
+  late DateTime _selectedDate;
 
   LedgerTypeConfig get _config => widget.config;
   bool get _inPartyContext => widget.partyName != null;
@@ -93,6 +95,9 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
   @override
   void initState() {
     super.initState();
+    final source = widget.entry?.occurredAt ?? DateTime.now();
+    _selectedDate = DateTime(source.year, source.month, source.day);
+
     final existing = widget.entry;
     if (existing == null) return;
 
@@ -145,6 +150,18 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
     return null;
   }
 
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
+    }
+  }
+
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
@@ -158,6 +175,7 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
       LedgerEntryDraft(
         amount: double.parse(_amountController.text.trim()),
         type: widget.type,
+        occurredAt: _selectedDate,
         partyName: party,
         note: _buildNote(),
         category: _selectedCategory,
@@ -202,6 +220,51 @@ class _AddLedgerEntrySheetState extends State<AddLedgerEntrySheet> {
               ),
             ],
             SizedBox(height: context.h * 2.5),
+            MyText(
+              AppText.ledgerEntryDateLabel,
+              font: AppFont.inter,
+              size: AppSizes.body,
+              color: AppColors.white,
+              weight: FontWeight.w600,
+            ),
+            SizedBox(height: context.h * 1.2),
+            Material(
+              color: AppColors.surface.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+              child: InkWell(
+                onTap: _pickDate,
+                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.w * 4,
+                    vertical: context.h * 1.6,
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        color: AppColors.primary,
+                        size: AppSizes.iconSm,
+                      ),
+                      SizedBox(width: context.w * 3),
+                      Expanded(
+                        child: MyText(
+                          DateFormat('EEE, MMM d, yyyy').format(_selectedDate),
+                          font: AppFont.sourceSans,
+                          size: AppSizes.subtitle,
+                          color: AppColors.white,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppColors.textHint,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: context.h * 2),
             if (!_inPartyContext && _config.requiresParty) ...[
               MyTextField(
                 title: _config.partyLabel,

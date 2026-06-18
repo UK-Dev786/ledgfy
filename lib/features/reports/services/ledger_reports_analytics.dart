@@ -20,9 +20,10 @@ abstract final class LedgerReportsAnalytics {
     for (final ledger in ledgers) {
       final config = ledger.config;
       for (final entry in ledger.entries) {
-        if (!range.contains(entry.createdAt)) continue;
+        final when = entry.occurredAt;
+        if (!range.contains(when)) continue;
 
-        final index = _bucketIndex(entry.createdAt, period, range);
+        final index = _bucketIndex(when, period, range);
         if (index == null || index < 0 || index >= buckets.length) continue;
 
         final current = buckets[index];
@@ -48,6 +49,11 @@ abstract final class LedgerReportsAnalytics {
       totalExpense: totalExpense,
       netPl: totalIncome - totalExpense,
     );
+  }
+
+  static DateTime _localDate(DateTime date) {
+    final local = date.toLocal();
+    return DateTime(local.year, local.month, local.day);
   }
 
   static ReportsDateRange _rangeFor(ReportsPeriod period, DateTime now) {
@@ -132,12 +138,14 @@ abstract final class LedgerReportsAnalytics {
   ) {
     if (!range.contains(date)) return null;
 
+    final local = date.toLocal();
+    final day = _localDate(local);
+
     return switch (period) {
-      ReportsPeriod.today => date.hour,
-      ReportsPeriod.thisWeek =>
-        date.difference(DateTime(range.start.year, range.start.month, range.start.day)).inDays,
-      ReportsPeriod.thisMonth => date.day - 1,
-      ReportsPeriod.thisYear => date.month - 1,
+      ReportsPeriod.today => local.hour,
+      ReportsPeriod.thisWeek => day.difference(_localDate(range.start)).inDays,
+      ReportsPeriod.thisMonth => day.day - 1,
+      ReportsPeriod.thisYear => day.month - 1,
     };
   }
 

@@ -15,12 +15,12 @@ abstract final class KhataReportBuilder {
 
     final entries = _entriesForScope(ledger, partyName: subName);
     final sorted = [...entries]
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      ..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
 
     final entryRows = sorted
         .map(
           (entry) => KhataReportEntryRow(
-            date: entry.createdAt,
+            date: entry.occurredAt,
             title: _entryTitle(entry, ledger, preferNote: hasSubLedger),
             typeLabel: config.labelForEntry(entry.type),
             amount: entry.amount,

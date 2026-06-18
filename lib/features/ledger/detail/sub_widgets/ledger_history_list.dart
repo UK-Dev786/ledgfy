@@ -35,7 +35,7 @@ class LedgerHistoryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sorted = [...entries]
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      ..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
 
     final emptyMessage = preferDescriptionAsTitle
         ? config.subLedgerHistoryEmpty

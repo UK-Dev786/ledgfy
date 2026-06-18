@@ -7,6 +7,7 @@ class LedgerEntryModel {
   final double amount;
   final LedgerEntryType type;
   final DateTime createdAt;
+  final DateTime occurredAt;
   final String? partyName;
   final String? note;
   final String? category;
@@ -16,6 +17,7 @@ class LedgerEntryModel {
     required this.amount,
     required this.type,
     required this.createdAt,
+    required this.occurredAt,
     this.partyName,
     this.note,
     this.category,
@@ -25,6 +27,7 @@ class LedgerEntryModel {
     DocumentSnapshot<Map<String, dynamic>> doc,
   ) {
     final data = doc.data() ?? {};
+    final createdAt = _readDate(data['createdAt']);
     return LedgerEntryModel(
       id: doc.id,
       amount: (data['amount'] as num?)?.toDouble() ?? 0,
@@ -32,7 +35,10 @@ class LedgerEntryModel {
         (value) => value.name == data['type'],
         orElse: () => LedgerEntryType.expense,
       ),
-      createdAt: _readDate(data['createdAt']),
+      createdAt: createdAt,
+      occurredAt: data['occurredAt'] != null
+          ? _readDate(data['occurredAt'])
+          : createdAt,
       partyName: data['partyName'] as String?,
       note: data['note'] as String?,
       category: data['category'] as String?,
@@ -45,6 +51,7 @@ class LedgerEntryModel {
       amount: entry.amount,
       type: entry.type,
       createdAt: entry.createdAt,
+      occurredAt: entry.occurredAt,
       partyName: entry.partyName,
       note: entry.note,
       category: entry.category,
@@ -56,6 +63,7 @@ class LedgerEntryModel {
       'amount': amount,
       'type': type.name,
       'createdAt': Timestamp.fromDate(createdAt),
+      'occurredAt': Timestamp.fromDate(occurredAt),
       if (partyName != null && partyName!.isNotEmpty) 'partyName': partyName,
       if (note != null && note!.isNotEmpty) 'note': note,
       if (category != null && category!.isNotEmpty) 'category': category,
@@ -68,6 +76,7 @@ class LedgerEntryModel {
       amount: amount,
       type: type,
       createdAt: createdAt,
+      occurredAt: occurredAt,
       partyName: partyName,
       note: note,
       category: category,
