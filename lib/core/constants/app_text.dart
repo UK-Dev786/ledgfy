@@ -215,7 +215,28 @@ abstract class AppText {
   static const profileLanguageUrduNative = 'اردو';
   static const profileSubscriptionTitle = 'Subscription';
   static const profileSubscriptionSubtitle =
-      'Compare plans and unlock business-grade khata tools.';
+      'Your plan, pricing, and what is included today.';
+  static const profileCurrentPlanTitle = 'Your current plan';
+  static const profileTrialBadge = 'Free · {months}-month trial';
+  static const profileTrialNote =
+      'Add entries freely for 2 months. After that, subscribe to keep recording transactions on this account.';
+  static const profileFreemiumFeaturesTitle = 'Included now';
+  static const profileTeamOrgOnlyTitle = 'Organization only';
+  static const profileTeamOrgOnlyNote =
+      'Team members are available on Organization accounts. Switch account type in Profile to unlock.';
+  static const profilePaidUnlockTitle = 'Unlocked with subscription';
+  static const profileChoosePlan = 'Choose your plan';
+  static const profileBillingMonthly = 'Monthly';
+  static const profileBillingSixMonths = '6 Months';
+  static const profileBillingYearly = 'Yearly';
+  static const profileBillingPerMonth = '/ month';
+  static const profileBillingPerSixMonths = '/ 6 months';
+  static const profileBillingPerYear = '/ year';
+  static const profileBillingSaveSixMonths = 'Save 17%';
+  static const profileBillingSaveYearly = 'Save 25%';
+  static const profileSubscribe = 'Subscribe';
+  static const profilePlanIndividual = 'Individual plan';
+  static const profilePlanOrganization = 'Organization plan';
   static const profileProBenefitsTitle = 'Everything in Pro';
   static const profileFreeIncludesTitle = 'Included in Free';
   static const profileProPriceLabel = 'PKR 499';
