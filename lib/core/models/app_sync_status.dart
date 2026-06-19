@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_text.dart';
 
-/// Combines network + Firestore local-write state for profile UI.
+/// Combines network + Firestore local-write state for sync UI.
 class AppSyncStatus {
   final bool isOnline;
   final bool hasPendingWrites;

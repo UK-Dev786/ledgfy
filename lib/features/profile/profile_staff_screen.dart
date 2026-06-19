@@ -9,11 +9,9 @@ import 'package:ledgify/core/extensions/popup_extensions.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/constants/app_text.dart';
-import '../../core/models/app_sync_status.dart';
 import '../../core/widgets/my_button.dart';
 import '../../core/widgets/my_card.dart';
 import '../../core/widgets/my_text.dart';
-import '../../di/sync_providers.dart';
 import '../../domain/entities/user.dart';
 import 'pages/profile_language_page.dart';
 import 'sub_widgets/profile_avatar.dart';
@@ -51,7 +49,6 @@ class _ProfileStaffScreenState extends ConsumerState<ProfileStaffScreen> {
   @override
   Widget build(BuildContext context) {
     final signOutState = ref.watch(profileViewModelProvider);
-    final syncStatus = ref.watch(appSyncStatusProvider);
     final isSigningOut = signOutState.isLoading;
 
     ref.listen(profileViewModelProvider, (previous, next) {
@@ -124,22 +121,6 @@ class _ProfileStaffScreenState extends ConsumerState<ProfileStaffScreen> {
                 ),
                 SizedBox(height: context.h * 1.2),
                 _StaffBadge(),
-                SizedBox(height: context.h * 1),
-                syncStatus.when(
-                  data: (status) => _SyncStatusBadge(status: status),
-                  loading: () => const _SyncStatusBadge(
-                    status: AppSyncStatus(
-                      isOnline: true,
-                      hasPendingWrites: false,
-                    ),
-                  ),
-                  error: (_, __) => const _SyncStatusBadge(
-                    status: AppSyncStatus(
-                      isOnline: true,
-                      hasPendingWrites: false,
-                    ),
-                  ),
-                ),
                 SizedBox(height: context.h * 1.2),
                 const MyText(
                   AppText.profileStaffOrgNote,
@@ -266,41 +247,6 @@ class _StaffBadge extends StatelessWidget {
             font: AppFont.sourceSans,
             size: AppSizes.caption,
             color: AppColors.secondary,
-            weight: FontWeight.w600,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SyncStatusBadge extends StatelessWidget {
-  final AppSyncStatus status;
-
-  const _SyncStatusBadge({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.md,
-        vertical: AppSizes.xs,
-      ),
-      decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-        border: Border.all(color: status.color.withValues(alpha: 0.35)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(status.icon, size: AppSizes.iconSm, color: status.color),
-          const SizedBox(width: AppSizes.xs),
-          MyText(
-            status.label,
-            font: AppFont.sourceSans,
-            size: AppSizes.caption,
-            color: status.color,
             weight: FontWeight.w600,
           ),
         ],

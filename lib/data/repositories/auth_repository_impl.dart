@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../../../core/constants/app_text.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../core/utils/auth_debug_log.dart';
+import '../../../core/utils/auth_token_helper.dart';
 import '../../../domain/entities/organization_member_kind.dart';
 import '../../../domain/entities/sign_up_params.dart';
 import '../../../domain/entities/user.dart';
@@ -232,6 +233,7 @@ class AuthRepositoryImpl implements IAuthRepository {
     await _remoteDataSource.reloadUser();
     final refreshed = _remoteDataSource.currentUser ?? firebaseUser;
 
+    await ensureAuthToken(refreshed);
     final profile = await _firestoreService.getUserProfile(refreshed.uid);
     final isStaff =
         profile?.memberKind == OrganizationMemberKind.staff;

@@ -60,9 +60,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
+  void _goHomeIfAuthenticated() {
+    final user = ref.read(authStateChangesProvider).valueOrNull;
+    if (user != null && mounted) {
+      context.go('/home');
+      ref.read(loginViewModelProvider.notifier).reset();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final loginState = ref.watch(loginViewModelProvider);
+
+    ref.listen(authStateChangesProvider, (previous, next) {
+      next.whenData((user) {
+        if (user != null) _goHomeIfAuthenticated();
+      });
+    });
 
     ref.listen(loginViewModelProvider, (previous, next) async {
       if (next.status.hasError) {
@@ -85,8 +99,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       } else if (!next.status.isLoading &&
           next.status.hasValue &&
           previous?.status.isLoading == true) {
-        context.go('/home');
-        ref.read(loginViewModelProvider.notifier).reset();
+        _goHomeIfAuthenticated();
       }
     });
 

@@ -1,41 +1,55 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/datasources/remote/auth_remote_datasource.dart';
+import '../data/models/user_model.dart';
 import '../domain/entities/user.dart';
 import 'auth_providers.dart';
 
 final profileUserStreamProvider = StreamProvider<User?>((ref) {
   final authAsync = ref.watch(authStateChangesProvider);
   final firestore = ref.watch(firestoreServiceProvider);
-  final cachedUid = ref.watch(firebaseAuthProvider).currentUser?.uid;
+  final firebaseAuth = ref.watch(firebaseAuthProvider);
+  final cachedUid = firebaseAuth.currentUser?.uid;
+  final authUser = authAsync.valueOrNull;
 
-  if (authAsync.isLoading) {
-    if (cachedUid != null) {
-      return firestore.watchUserProfile(cachedUid).map(
-            (model) => model?.toEntity(),
-          );
-    }
-    return const Stream<User?>.empty();
+  User? firebaseFallback() {
+    final firebaseUser = firebaseAuth.currentUser;
+    if (firebaseUser == null) return null;
+    return UserModel.fromFirebaseUser(
+      uid: firebaseUser.uid,
+      email: firebaseUser.email,
+      displayName: firebaseUser.displayName,
+      isVerified: firebaseUser.emailVerified,
+    ).toEntity();
+  }
+
+  Stream<User?> watchProfileForUid(String uid, {User? fallback}) {
+    return firestore.watchUserProfile(uid).map((model) {
+      if (model != null) return model.toEntity();
+      return fallback;
+    });
+  }
+
+  // Firebase session exists but mapped auth user is still resolving.
+  final resolvingSession =
+      cachedUid != null && (authAsync.isLoading || authUser == null);
+
+  if (resolvingSession) {
+    return watchProfileForUid(cachedUid, fallback: firebaseFallback());
   }
 
   if (authAsync.hasError) {
     if (cachedUid != null) {
-      return firestore.watchUserProfile(cachedUid).map(
-            (model) => model?.toEntity(),
-          );
+      return watchProfileForUid(cachedUid, fallback: firebaseFallback());
     }
     return Stream<User?>.error(authAsync.error!, authAsync.stackTrace);
   }
 
-  final user = authAsync.valueOrNull;
-  if (user == null) {
+  if (authUser == null) {
     return Stream.value(null);
   }
 
-  return firestore.watchUserProfile(user.id).map((model) {
-    if (model == null) return user;
-    return model.toEntity();
-  });
+  return watchProfileForUid(authUser.id, fallback: authUser);
 });
 
 class ProfileController {

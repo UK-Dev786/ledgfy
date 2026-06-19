@@ -9,13 +9,12 @@ import 'package:ledgify/core/extensions/popup_extensions.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/constants/app_text.dart';
-import '../../core/models/app_sync_status.dart';
 import '../../core/widgets/my_button.dart';
 import '../../core/widgets/my_card.dart';
 import '../../core/widgets/my_text.dart';
 import '../../core/widgets/themed_gradient_bg.dart';
+import '../../di/auth_providers.dart';
 import '../../di/profile_providers.dart';
-import '../../di/sync_providers.dart';
 import '../../domain/entities/user.dart';
 import 'pages/profile_language_page.dart';
 import 'pages/profile_security_page.dart';
@@ -25,6 +24,7 @@ import 'profile_staff_screen.dart';
 import 'sub_widgets/profile_avatar.dart';
 import 'sub_widgets/profile_edit_sheet.dart';
 import 'sub_widgets/profile_section.dart';
+import '../auth/presentation/viewmodels/login_viewmodel.dart';
 import 'viewmodels/profile_viewmodel.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -66,11 +66,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(profileUserStreamProvider);
     final signOutState = ref.watch(profileViewModelProvider);
-    final syncStatus = ref.watch(appSyncStatusProvider);
     final isSigningOut = signOutState.isLoading;
 
     ref.listen(profileViewModelProvider, (previous, next) {
       if (!next.isLoading && next.hasValue && previous?.isLoading == true) {
+        ref.read(loginViewModelProvider.notifier).reset();
         context.go('/login');
         ref.read(profileViewModelProvider.notifier).reset();
       }
@@ -97,6 +97,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             data: (user) {
               if (user == null) {
+                if (ref.read(firebaseAuthProvider).currentUser != null) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                      strokeWidth: 2,
+                    ),
+                  );
+                }
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (context.mounted) context.go('/login');
                 });
@@ -174,22 +182,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                           SizedBox(height: context.h * 1.2),
                           _VerifiedBadge(isVerified: user.isVerified),
-                          SizedBox(height: context.h * 1),
-                          syncStatus.when(
-                            data: (status) => _SyncStatusBadge(status: status),
-                            loading: () => const _SyncStatusBadge(
-                              status: AppSyncStatus(
-                                isOnline: true,
-                                hasPendingWrites: false,
-                              ),
-                            ),
-                            error: (_, __) => const _SyncStatusBadge(
-                              status: AppSyncStatus(
-                                isOnline: true,
-                                hasPendingWrites: false,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -370,41 +362,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             },
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SyncStatusBadge extends StatelessWidget {
-  final AppSyncStatus status;
-
-  const _SyncStatusBadge({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.md,
-        vertical: AppSizes.xs,
-      ),
-      decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-        border: Border.all(color: status.color.withValues(alpha: 0.35)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(status.icon, size: AppSizes.iconSm, color: status.color),
-          const SizedBox(width: AppSizes.xs),
-          MyText(
-            status.label,
-            font: AppFont.sourceSans,
-            size: AppSizes.caption,
-            color: status.color,
-            weight: FontWeight.w600,
-          ),
-        ],
       ),
     );
   }
