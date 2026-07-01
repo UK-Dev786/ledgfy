@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/widgets/my_card.dart';
+import '../../../../core/widgets/themed_gradient_bg.dart';
 import '../../home_screen.dart';
 import '../../../ledger/list/ledger_screen.dart';
 import '../../../reports/reports_screen.dart';
@@ -20,57 +21,61 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          HomeScreen(
-            onProfileTap: () => setState(() => _currentIndex = 3),
-            onLedgerTap: () => setState(() => _currentIndex = 1),
-          ),
-          const LedgerScreen(),
-          const ReportsScreen(),
-          const ProfileScreen(),
-        ],
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSizes.md,
-            0,
-            AppSizes.md,
-            AppSizes.md,
-          ),
-          child: MyCard(
-            tint: MyCardTint.dark,
-            borderRadius: AppSizes.radiusFull,
-            blur: 30,
-            padding: const EdgeInsets.all(AppSizes.xs + 1),
-            child: Row(
-              children: [
-                _NavItem(
-                  icon: Icons.home_rounded,
-                  selected: _currentIndex == 0,
-                  onTap: () => setState(() => _currentIndex = 0),
-                ),
-                _NavItem(
-                  icon: Icons.menu_book_rounded,
-                  selected: _currentIndex == 1,
-                  onTap: () => setState(() => _currentIndex = 1),
-                ),
-                _NavItem(
-                  icon: Icons.insert_chart_outlined_rounded,
-                  selected: _currentIndex == 2,
-                  onTap: () => setState(() => _currentIndex = 2),
-                ),
-                _NavItem(
-                  icon: Icons.person_rounded,
-                  selected: _currentIndex == 3,
-                  onTap: () => setState(() => _currentIndex = 3),
-                ),
-              ],
+    return ThemedGradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        extendBody: true,
+        body: IndexedStack(
+          index: _currentIndex,
+          children: [
+            HomeScreen(
+              onProfileTap: () => setState(() => _currentIndex = 3),
+              onLedgerTap: () => setState(() => _currentIndex = 1),
+            ),
+            const LedgerScreen(),
+            const ReportsScreen(),
+            const ProfileScreen(),
+          ],
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.md,
+              0,
+              AppSizes.md,
+              AppSizes.md,
+            ),
+            child: MyCard(
+              tint: MyCardTint.dark,
+              borderRadius: AppSizes.radiusFull,
+              blur: 30,
+              border: false,
+              padding: const EdgeInsets.all(AppSizes.xs + 1),
+              child: Row(
+                children: [
+                  _NavItem(
+                    icon: Icons.home_rounded,
+                    selected: _currentIndex == 0,
+                    onTap: () => setState(() => _currentIndex = 0),
+                  ),
+                  _NavItem(
+                    icon: Icons.menu_book_rounded,
+                    selected: _currentIndex == 1,
+                    onTap: () => setState(() => _currentIndex = 1),
+                  ),
+                  _NavItem(
+                    icon: Icons.insert_chart_outlined_rounded,
+                    selected: _currentIndex == 2,
+                    onTap: () => setState(() => _currentIndex = 2),
+                  ),
+                  _NavItem(
+                    icon: Icons.person_rounded,
+                    selected: _currentIndex == 3,
+                    onTap: () => setState(() => _currentIndex = 3),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
