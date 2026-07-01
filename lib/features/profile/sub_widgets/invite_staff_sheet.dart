@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:ledgify/core/extensions/context_extensions.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/extensions/popup_extensions.dart';
 import '../../../core/constants/app_sizes.dart';
 import '../../../core/constants/app_text.dart';
+import '../../../core/errors/auth_exception_mapper.dart';
 import '../../../core/utils/app_validators.dart';
 import '../../../core/widgets/my_button.dart';
 import '../../../core/widgets/my_text.dart';
@@ -80,8 +82,14 @@ class _InviteStaffSheetState extends State<InviteStaffSheet> {
         loginEmail: _emailController.text.trim().toLowerCase(),
         password: _passwordController.text,
       );
-    } catch (_) {
-      if (mounted) setState(() => _submitting = false);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      await context.popMsg(
+        AuthExceptionMapper.message(error),
+        color: AppColors.error,
+        icon: Icons.error_outline_rounded,
+      );
       return;
     }
 

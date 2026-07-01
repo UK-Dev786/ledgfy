@@ -132,6 +132,7 @@ class OrganizationRemoteDataSource {
       batch.delete(doc.reference);
     }
     batch.delete(_staffCol(ownerId).doc(staffId));
+    batch.delete(_firestore.collection('users').doc(staffId));
     await batch.commit();
   }
 
