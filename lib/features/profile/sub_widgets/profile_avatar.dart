@@ -12,6 +12,7 @@ import '../../../core/widgets/shared_bottom_sheet.dart';
 class ProfileAvatar extends StatelessWidget {
   final String initials;
   final File? imageFile;
+  final String? avatarUrl;
   final ValueChanged<File?> onImageChanged;
 
   const ProfileAvatar({
@@ -19,6 +20,7 @@ class ProfileAvatar extends StatelessWidget {
     required this.initials,
     required this.imageFile,
     required this.onImageChanged,
+    this.avatarUrl,
   });
 
   static String initialsFromName(String? name, {String fallback = '?'}) {
@@ -68,7 +70,7 @@ class ProfileAvatar extends StatelessWidget {
                 }
               },
             ),
-            if (imageFile != null) ...[
+            if (imageFile != null || avatarUrl != null) ...[
               const SizedBox(height: AppSizes.sm),
               _PhotoOptionTile(
                 icon: Icons.delete_outline_rounded,
@@ -116,18 +118,35 @@ class ProfileAvatar extends StatelessWidget {
                     width: 104,
                     height: 104,
                   )
-                : ColoredBox(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    child: Center(
-                      child: MyText(
-                        initials,
-                        font: AppFont.inter,
-                        size: AppSizes.header2,
-                        color: AppColors.primary,
-                        weight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                : avatarUrl != null
+                    ? Image.network(
+                        avatarUrl!,
+                        fit: BoxFit.cover,
+                        width: 104,
+                        height: 104,
+                        errorBuilder: (_, __, ___) => _InitialsBox(
+                          initials: initials,
+                        ),
+                        loadingBuilder: (_, child, progress) {
+                          if (progress == null) return child;
+                          return ColoredBox(
+                            color: AppColors.primary.withValues(alpha: 0.15),
+                            child: const Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation(
+                                    AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : _InitialsBox(initials: initials),
           ),
         ),
         Positioned(
@@ -153,6 +172,27 @@ class ProfileAvatar extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _InitialsBox extends StatelessWidget {
+  final String initials;
+  const _InitialsBox({required this.initials});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppColors.primary.withValues(alpha: 0.15),
+      child: Center(
+        child: MyText(
+          initials,
+          font: AppFont.inter,
+          size: AppSizes.header2,
+          color: AppColors.primary,
+          weight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }

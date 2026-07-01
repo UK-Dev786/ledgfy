@@ -12,6 +12,7 @@ import '../../core/constants/app_text.dart';
 import '../../core/widgets/my_button.dart';
 import '../../core/widgets/my_card.dart';
 import '../../core/widgets/my_text.dart';
+import '../../di/profile_providers.dart';
 import '../../domain/entities/user.dart';
 import 'pages/profile_language_page.dart';
 import 'sub_widgets/profile_avatar.dart';
@@ -32,7 +33,31 @@ class ProfileStaffScreen extends ConsumerStatefulWidget {
 
 class _ProfileStaffScreenState extends ConsumerState<ProfileStaffScreen> {
   File? _avatarFile;
+  String? _avatarUrl;
   String _language = AppText.profileLanguageEnglish;
+
+  @override
+  void initState() {
+    super.initState();
+    _avatarUrl = widget.user.avatarUrl;
+  }
+
+  Future<void> _onAvatarChanged(File? file) async {
+    setState(() => _avatarFile = file);
+    final controller = ref.read(profileControllerProvider);
+    if (file != null) {
+      final url = await controller.updateAvatar(file);
+      if (url != null && mounted) {
+        setState(() {
+          _avatarFile = null;
+          _avatarUrl = url;
+        });
+      }
+    } else {
+      await controller.removeAvatar();
+      if (mounted) setState(() => _avatarUrl = null);
+    }
+  }
 
   String get _displayName {
     final name = widget.user.displayName?.trim();
@@ -96,9 +121,8 @@ class _ProfileStaffScreenState extends ConsumerState<ProfileStaffScreen> {
                         : '?',
                   ),
                   imageFile: _avatarFile,
-                  onImageChanged: (file) {
-                    setState(() => _avatarFile = file);
-                  },
+                  avatarUrl: _avatarUrl,
+                  onImageChanged: _onAvatarChanged,
                 ),
                 SizedBox(height: context.h * 2),
                 MyText(

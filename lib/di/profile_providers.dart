@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/datasources/remote/auth_remote_datasource.dart';
+import '../data/datasources/remote/avatar_remote_datasource.dart';
 import '../data/models/user_model.dart';
 import '../domain/entities/user.dart';
 import 'auth_providers.dart';
@@ -83,6 +86,23 @@ class ProfileController {
     await _firestore.updateUserProfile(userId, {
       'accountType': accountType,
     });
+  }
+
+  Future<String?> updateAvatar(File imageFile) async {
+    final userId = _userId;
+    if (userId == null) return null;
+    final url = await _ref
+        .read(avatarDataSourceProvider)
+        .uploadAvatar(userId: userId, imageFile: imageFile);
+    await _firestore.updateUserProfile(userId, {'avatarUrl': url});
+    return url;
+  }
+
+  Future<void> removeAvatar() async {
+    final userId = _userId;
+    if (userId == null) return;
+    await _ref.read(avatarDataSourceProvider).deleteAvatar(userId);
+    await _firestore.updateUserProfile(userId, {'avatarUrl': null});
   }
 }
 

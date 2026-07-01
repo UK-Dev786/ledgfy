@@ -13,6 +13,7 @@ class UserModel {
   final String? organizationId;
   final bool isVerified;
   final DateTime? createdAt;
+  final String? avatarUrl;
 
   const UserModel({
     required this.id,
@@ -24,6 +25,7 @@ class UserModel {
     this.organizationId,
     this.isVerified = false,
     this.createdAt,
+    this.avatarUrl,
   });
 
   UserModel copyWith({
@@ -36,6 +38,7 @@ class UserModel {
     String? organizationId,
     bool? isVerified,
     DateTime? createdAt,
+    String? avatarUrl,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -47,6 +50,7 @@ class UserModel {
       organizationId: organizationId ?? this.organizationId,
       isVerified: isVerified ?? this.isVerified,
       createdAt: createdAt ?? this.createdAt,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
     );
   }
 
@@ -81,6 +85,7 @@ class UserModel {
           data['emailVerified'] as bool? ??
           false,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      avatarUrl: data['avatarUrl'] as String?,
     );
   }
 
@@ -93,6 +98,7 @@ class UserModel {
       'memberKind': memberKind.firestoreValue,
       if (organizationId != null) 'organizationId': organizationId,
       'isVerified': isVerified,
+      if (avatarUrl != null) 'avatarUrl': avatarUrl,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };
@@ -108,6 +114,7 @@ class UserModel {
       memberKind: memberKind,
       organizationId: organizationId,
       isVerified: isVerified,
+      avatarUrl: avatarUrl,
     );
   }
 }

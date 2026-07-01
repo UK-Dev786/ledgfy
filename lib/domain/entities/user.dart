@@ -9,6 +9,7 @@ class User {
   final OrganizationMemberKind memberKind;
   final String? organizationId;
   final bool isVerified;
+  final String? avatarUrl;
 
   const User({
     required this.id,
@@ -19,6 +20,7 @@ class User {
     this.memberKind = OrganizationMemberKind.owner,
     this.organizationId,
     this.isVerified = false,
+    this.avatarUrl,
   });
 
   bool get isOrganizationStaff =>

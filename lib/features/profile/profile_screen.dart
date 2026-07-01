@@ -38,6 +38,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String? _username;
   String _accountType = AppText.accountTypeIndividual;
   File? _avatarFile;
+  String? _avatarUrl;
   String _language = AppText.profileLanguageEnglish;
   bool _notificationsEnabled = true;
 
@@ -45,6 +46,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _displayName = user.displayName;
     _username = user.username;
     _accountType = user.accountType ?? AppText.accountTypeIndividual;
+    _avatarUrl ??= user.avatarUrl;
+  }
+
+  Future<void> _onAvatarChanged(File? file) async {
+    setState(() => _avatarFile = file);
+    final controller = ref.read(profileControllerProvider);
+    if (file != null) {
+      final url = await controller.updateAvatar(file);
+      if (url != null && mounted) {
+        setState(() {
+          _avatarFile = null;
+          _avatarUrl = url;
+        });
+      }
+    } else {
+      await controller.removeAvatar();
+      if (mounted) setState(() => _avatarUrl = null);
+    }
   }
 
   String _resolvedName(User user) => _displayName?.trim().isNotEmpty == true
@@ -140,8 +159,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       accountType: _accountType,
                       isVerified: user.isVerified,
                       avatarFile: _avatarFile,
-                      onImageChanged: (file) =>
-                          setState(() => _avatarFile = file),
+                      avatarUrl: _avatarUrl,
+                      onImageChanged: _onAvatarChanged,
                     ),
                     SizedBox(height: context.h * 2),
                     ProfileSection(
@@ -333,6 +352,7 @@ class _ProfileHeaderCard extends StatelessWidget {
   final String accountType;
   final bool isVerified;
   final File? avatarFile;
+  final String? avatarUrl;
   final ValueChanged<File?> onImageChanged;
 
   const _ProfileHeaderCard({
@@ -342,6 +362,7 @@ class _ProfileHeaderCard extends StatelessWidget {
     required this.isVerified,
     required this.avatarFile,
     required this.onImageChanged,
+    this.avatarUrl,
   });
 
   @override
@@ -486,6 +507,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                                   : '?',
                             ),
                             imageFile: avatarFile,
+                            avatarUrl: avatarUrl,
                             onImageChanged: onImageChanged,
                           ),
                         ),

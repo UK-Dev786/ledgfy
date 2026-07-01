@@ -51,8 +51,10 @@ class _HomeHeroCardState extends State<HomeHeroCard>
   void _bindAnimations({double incomeStart = 0, double expenseStart = 0}) {
     final curve = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _income = Tween(begin: incomeStart, end: widget.totalIncome).animate(curve);
-    _expense =
-        Tween(begin: expenseStart, end: widget.totalExpense).animate(curve);
+    _expense = Tween(
+      begin: expenseStart,
+      end: widget.totalExpense,
+    ).animate(curve);
     _net = Tween(
       begin: incomeStart - expenseStart,
       end: widget.totalIncome - widget.totalExpense,
@@ -70,10 +72,7 @@ class _HomeHeroCardState extends State<HomeHeroCard>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.totalIncome != widget.totalIncome ||
         oldWidget.totalExpense != widget.totalExpense) {
-      _bindAnimations(
-        incomeStart: _income.value,
-        expenseStart: _expense.value,
-      );
+      _bindAnimations(incomeStart: _income.value, expenseStart: _expense.value);
       _controller
         ..reset()
         ..forward();
