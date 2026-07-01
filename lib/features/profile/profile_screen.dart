@@ -10,7 +10,6 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/widgets/my_button.dart';
-import '../../core/widgets/my_card.dart';
 import '../../core/widgets/my_text.dart';
 import '../../core/widgets/themed_gradient_bg.dart';
 import '../../di/auth_providers.dart';
@@ -48,19 +47,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _accountType = user.accountType ?? AppText.accountTypeIndividual;
   }
 
-  String _resolvedName(User user) =>
-      _displayName?.trim().isNotEmpty == true
-          ? _displayName!.trim()
-          : (user.displayName?.trim().isNotEmpty == true
-                ? user.displayName!.trim()
-                : user.email.split('@').first);
+  String _resolvedName(User user) => _displayName?.trim().isNotEmpty == true
+      ? _displayName!.trim()
+      : (user.displayName?.trim().isNotEmpty == true
+            ? user.displayName!.trim()
+            : user.email.split('@').first);
 
-  String _resolvedUsername(User user) =>
-      _username?.trim().isNotEmpty == true
-          ? _username!.trim()
-          : (user.username?.trim().isNotEmpty == true
-                ? user.username!.trim()
-                : user.email.split('@').first);
+  String _resolvedUsername(User user) => _username?.trim().isNotEmpty == true
+      ? _username!.trim()
+      : (user.username?.trim().isNotEmpty == true
+            ? user.username!.trim()
+            : user.email.split('@').first);
 
   @override
   Widget build(BuildContext context) {
@@ -137,53 +134,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       weight: FontWeight.bold,
                     ),
                     SizedBox(height: context.h * 3),
-                    MyCard(
-                      tint: MyCardTint.dark,
-                      borderRadius: AppSizes.radiusLg,
-                      blur: 30,
-                      padding: EdgeInsets.fromLTRB(
-                        context.w * 5,
-                        context.h * 3,
-                        context.w * 5,
-                        context.h * 3,
-                      ),
-                      child: Column(
-                        children: [
-                          ProfileAvatar(
-                            initials: ProfileAvatar.initialsFromName(
-                              displayName,
-                              fallback: username.isNotEmpty
-                                  ? username[0].toUpperCase()
-                                  : '?',
-                            ),
-                            imageFile: _avatarFile,
-                            onImageChanged: (file) {
-                              setState(() => _avatarFile = file);
-                            },
-                          ),
-                          SizedBox(height: context.h * 2),
-                          MyText(
-                            displayName,
-                            font: AppFont.inter,
-                            size: AppSizes.title,
-                            color: AppColors.white,
-                            weight: FontWeight.w700,
-                            align: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: context.h * 0.4),
-                          MyText(
-                            '@$username',
-                            font: AppFont.sourceSans,
-                            size: AppSizes.subtitle,
-                            color: AppColors.textHint,
-                            align: TextAlign.center,
-                          ),
-                          SizedBox(height: context.h * 1.2),
-                          _VerifiedBadge(isVerified: user.isVerified),
-                        ],
-                      ),
+                    _ProfileHeaderCard(
+                      displayName: displayName,
+                      username: username,
+                      accountType: _accountType,
+                      isVerified: user.isVerified,
+                      avatarFile: _avatarFile,
+                      onImageChanged: (file) =>
+                          setState(() => _avatarFile = file),
                     ),
                     SizedBox(height: context.h * 2),
                     ProfileSection(
@@ -325,12 +283,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ProfileTile(
                           icon: Icons.help_outline_rounded,
                           title: AppText.profileHelp,
-                          onTap: () => context.popMsg(AppText.profileComingSoon),
+                          onTap: () =>
+                              context.popMsg(AppText.profileComingSoon),
                         ),
                         ProfileTile(
                           icon: Icons.privacy_tip_outlined,
                           title: AppText.profilePrivacy,
-                          onTap: () => context.popMsg(AppText.profileComingSoon),
+                          onTap: () =>
+                              context.popMsg(AppText.profileComingSoon),
                         ),
                         ProfileTile(
                           icon: Icons.info_outline_rounded,
@@ -367,44 +327,227 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 }
 
-class _VerifiedBadge extends StatelessWidget {
+class _ProfileHeaderCard extends StatelessWidget {
+  final String displayName;
+  final String username;
+  final String accountType;
   final bool isVerified;
+  final File? avatarFile;
+  final ValueChanged<File?> onImageChanged;
 
-  const _VerifiedBadge({required this.isVerified});
+  const _ProfileHeaderCard({
+    required this.displayName,
+    required this.username,
+    required this.accountType,
+    required this.isVerified,
+    required this.avatarFile,
+    required this.onImageChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.md,
-        vertical: AppSizes.xs,
-      ),
-      decoration: BoxDecoration(
-        color: (isVerified ? AppColors.primary : AppColors.textHint)
-            .withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-        border: Border.all(
-          color: (isVerified ? AppColors.primary : AppColors.textHint)
-              .withValues(alpha: 0.35),
+    const cardBg = Color(0xFF0D1E16);
+    const bannerH = 120.0;
+    const ringThickness = 3.0;
+    const avatarW = 104.0;
+    const containerW = avatarW + ringThickness * 4;
+    const overlap = containerW / 2;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppSizes.radiusLg),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardBg,
+          border: Border.all(color: AppColors.white.withValues(alpha: 0.08)),
         ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isVerified ? Icons.verified_rounded : Icons.info_outline_rounded,
-            size: AppSizes.iconSm,
-            color: isVerified ? AppColors.primary : AppColors.textHint,
-          ),
-          const SizedBox(width: AppSizes.xs),
-          MyText(
-            isVerified ? AppText.profileVerified : AppText.profileNotVerified,
-            font: AppFont.sourceSans,
-            size: AppSizes.caption,
-            color: isVerified ? AppColors.primary : AppColors.textHint,
-            weight: FontWeight.w600,
-          ),
-        ],
+        child: Column(
+          children: [
+            SizedBox(
+              height: bannerH + overlap,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Gradient banner
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: bannerH,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [Color(0xFF00573A), AppColors.primary],
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Decorative blobs
+                        Positioned(
+                          top: -28,
+                          right: -18,
+                          child: Container(
+                            width: 130,
+                            height: 130,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.white.withValues(alpha: 0.09),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: -22,
+                          left: -12,
+                          child: Container(
+                            width: 90,
+                            height: 90,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.white.withValues(alpha: 0.07),
+                            ),
+                          ),
+                        ),
+                        // Account type chip — top-left
+                        Positioned(
+                          top: 14,
+                          left: 14,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.white.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(
+                                AppSizes.radiusFull,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.business_rounded,
+                                  size: AppSizes.iconSm,
+                                  color: AppColors.white,
+                                ),
+                                const SizedBox(width: 4),
+                                MyText(
+                                  accountType,
+                                  font: AppFont.sourceSans,
+                                  size: AppSizes.caption,
+                                  color: AppColors.white,
+                                  weight: FontWeight.w600,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Avatar with gradient ring — centered at banner bottom
+                  Positioned(
+                    top: bannerH - overlap,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(ringThickness),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [AppColors.primary, AppColors.secondary],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.5),
+                              blurRadius: 22,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(ringThickness),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: cardBg,
+                          ),
+                          child: ProfileAvatar(
+                            initials: ProfileAvatar.initialsFromName(
+                              displayName,
+                              fallback: username.isNotEmpty
+                                  ? username[0].toUpperCase()
+                                  : '?',
+                            ),
+                            imageFile: avatarFile,
+                            onImageChanged: onImageChanged,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Name + username
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                context.w * 5,
+                context.h * 1.5,
+                context.w * 5,
+                context.h * 3,
+              ),
+              child: Column(
+                children: [
+                  // Name with inline verified checkmark (Facebook-style)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: MyText(
+                          displayName,
+                          font: AppFont.inter,
+                          size: AppSizes.title,
+                          color: AppColors.white,
+                          weight: FontWeight.w700,
+                          align: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isVerified) ...[
+                        const SizedBox(width: 3),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: const Icon(
+                            Icons.verified_rounded,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  SizedBox(height: context.h * 0.5),
+                  MyText(
+                    '@$username',
+                    font: AppFont.sourceSans,
+                    size: AppSizes.subtitle,
+                    color: AppColors.textHint,
+                    align: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
