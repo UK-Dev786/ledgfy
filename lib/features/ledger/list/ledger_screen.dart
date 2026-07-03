@@ -46,11 +46,9 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
     CreateLedgerSheet.show(
       context,
       onSubmit: (title, type, description) {
-        ref.read(ledgerControllerProvider).createLedger(
-              title: title,
-              description: description,
-              type: type,
-            );
+        ref
+            .read(ledgerControllerProvider)
+            .createLedger(title: title, description: description, type: type);
       },
     );
   }
@@ -60,7 +58,9 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
       context,
       ledger: ledger,
       onSubmit: (title, _, description) {
-        ref.read(ledgerControllerProvider).updateLedger(
+        ref
+            .read(ledgerControllerProvider)
+            .updateLedger(
               ledgerId: ledger.id,
               title: title,
               description: description,
@@ -82,8 +82,12 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
     return ThemedGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        floatingActionButton:
-            isStaff ? null : LedgerFab(onTap: _openCreateLedgerSheet),
+        floatingActionButton: isStaff
+            ? null
+            : Padding(
+                padding: const EdgeInsets.only(bottom: 70.0),
+                child: LedgerFab(onTap: _openCreateLedgerSheet),
+              ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         body: SafeArea(
           child: ledgersAsync.when(
@@ -147,8 +151,9 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
                           : LedgerListView(
                               ledgers: filtered,
                               onLedgerTap: _openLedgerDetail,
-                              onLedgerEdit:
-                                  isStaff ? null : _openEditLedgerSheet,
+                              onLedgerEdit: isStaff
+                                  ? null
+                                  : _openEditLedgerSheet,
                               onLedgerDelete: isStaff ? null : _deleteLedger,
                             )
                     else

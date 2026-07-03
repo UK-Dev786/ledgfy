@@ -21,11 +21,7 @@ class HomeScreen extends ConsumerWidget {
   final VoidCallback? onProfileTap;
   final VoidCallback? onLedgerTap;
 
-  const HomeScreen({
-    super.key,
-    this.onProfileTap,
-    this.onLedgerTap,
-  });
+  const HomeScreen({super.key, this.onProfileTap, this.onLedgerTap});
 
   String _userName(User? user) {
     if (user?.displayName?.trim().isNotEmpty == true) {
@@ -123,12 +119,13 @@ class HomeScreen extends ConsumerWidget {
                       },
                     )
                   else
-                    HomeEmptyState(
-                      onAddTap: isStaff ? null : onLedgerTap,
-                    ),
+                    HomeEmptyState(onAddTap: isStaff ? null : onLedgerTap),
                   if (dashboard.hasRecords) ...[
                     const SizedBox(height: AppSizes.xs),
-                    HomeTopLedgers(ledgerGroups: dashboard.topLedgers),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: HomeTopLedgers(ledgerGroups: dashboard.topLedgers),
+                    ),
                   ],
                 ],
               ),
